@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://yzhdentallab.com/sitemap.xml
