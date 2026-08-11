@@ -1,0 +1,8 @@
+node_modules/
+.next/
+.vercel/
+.edge-preview/
+.edge-preview-mobile/
+crm_work/node_modules/
+tsconfig.tsbuildinfo
+preview-home.png

@@ -2,5 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://yzhdentallab.com/</loc>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://yzhdentallab.com/implant-restorations</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://yzhdentallab.com/full-arch-all-on-x</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://yzhdentallab.com/cad-design</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://yzhdentallab.com/custom-abutments</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://yzhdentallab.com/overflow-production</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://yzhdentallab.com/contact</loc>
+    <priority>0.7</priority>
   </url>
 </urlset>
