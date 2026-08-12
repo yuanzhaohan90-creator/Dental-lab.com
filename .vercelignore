@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.vercel/
+.edge-preview/
+.edge-preview-mobile/
+crm_work/
+joydenta-extracted/
+.git/
+.gitstore/
+.git-template-empty/
+preview-*.png
+tsconfig.tsbuildinfo
+dns-and-launch-checklist.md
+secure-upload-architecture.md

@@ -10,3 +10,9 @@ preview-desktop.png
 preview-mobile.png
 joydenta-extracted/
 .gitstore/
+
+.vercel
+.env*
+processed-contact-sheet.jpg
+verify-*.png
+.edge-*/
