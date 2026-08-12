@@ -6,3 +6,7 @@ node_modules/
 crm_work/node_modules/
 tsconfig.tsbuildinfo
 preview-home.png
+preview-desktop.png
+preview-mobile.png
+joydenta-extracted/
+.gitstore/

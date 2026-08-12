@@ -119,6 +119,21 @@ h1,h2,h3,p{margin-top:0}
 .service h3{color:var(--ink);font-size:20px;margin-bottom:10px}
 .service ul{margin:0;padding-left:18px;color:#5b6f82}
 .service li{margin:5px 0}
+.solution-grid{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:28px}
+.solution-card{overflow:hidden}
+.solution-img{aspect-ratio:4/3;background:#eaf2f8}
+.solution-img img{width:100%;height:100%;object-fit:cover}
+.solution-body{padding:16px}
+.solution-body h3{color:var(--ink);font-size:18px;margin-bottom:6px}
+.solution-body p{color:#5f7285;font-size:14px;margin-bottom:0}
+.production-grid{grid-template-columns:1.1fr .9fr;align-items:center}
+.production-media{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.production-shot{overflow:hidden;border-radius:8px;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow)}
+.production-shot img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.library-grid{grid-template-columns:repeat(6,minmax(0,1fr));margin-top:24px}
+.library-item{overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:8px}
+.library-item img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.library-item span{display:block;padding:9px 10px;color:#3f566d;font-size:12px;font-weight:850}
 .proof-band{background:#102033;color:#fff}
 .proof-band .eyebrow{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.22);color:#dbeeff}
 .proof-band h2{color:#fff}
@@ -188,8 +203,9 @@ footer{padding:28px 0 92px;color:#697a8b}
 .floating{position:fixed;right:18px;bottom:18px;z-index:40}
 .floating .btn{border-radius:999px}
 @media (max-width:1040px){
-  .hero-grid,.intro-grid,.proof-grid,.buyer-grid,.contact-grid{grid-template-columns:1fr}
-  .services-grid,.case-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero-grid,.intro-grid,.proof-grid,.buyer-grid,.contact-grid,.production-grid{grid-template-columns:1fr}
+  .services-grid,.case-grid,.solution-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .library-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .team-grid,.info-grid,.faq-grid,.testimonial-grid{grid-template-columns:1fr}
   .workflow{grid-template-columns:repeat(2,minmax(0,1fr))}
   .hero-visual{min-height:440px}
@@ -203,7 +219,7 @@ footer{padding:28px 0 92px;color:#697a8b}
   .lead{font-size:1.02rem}
   .sublead{font-size:.95rem}
   .hero-card{left:12px;right:12px;bottom:12px;padding:14px}
-  .trust-strip,.metric-row,.feature-grid,.services-grid,.case-grid,.workflow,.form-grid{grid-template-columns:1fr}
+  .trust-strip,.metric-row,.feature-grid,.services-grid,.case-grid,.solution-grid,.production-media,.library-grid,.workflow,.form-grid{grid-template-columns:1fr}
   .case-row{grid-template-columns:1fr}
   .hero-visual{min-height:330px}
   .floating{left:18px;right:18px}
@@ -286,24 +302,24 @@ footer{padding:28px 0 92px;color:#697a8b}
       <div class="section-head">
         <p class="eyebrow">Technical Trust</p>
         <h2>A Real Technical Team Behind Every Case</h2>
-        <p class="copy">Implant and full-arch cases are reviewed by technicians who understand restorative components - not passed through a generic sales desk. These image positions are reserved for real YZH production photos and can be replaced as you provide more specific workstation, QC and shipping images.</p>
+        <p class="copy">Implant and full-arch cases are reviewed by technicians who understand restorative components - not passed through a generic sales desk. The photos below now use the usable case and production visuals extracted from your Joydenta site library.</p>
       </div>
       <div class="team-grid grid">
         <article class="panel team-card">
-          <div class="team-img"><picture><source srcset="assets/precision-work.webp" type="image/webp"><img src="assets/precision-work.jpg" alt="Technician reviewing dental restoration detail" loading="lazy"></picture></div>
-          <div class="team-body"><h3>CAD Design Workstation</h3><p>Reserved for real CAD desk photos. Design review focuses on margins, occlusion, screw access and restorative space.</p></div>
+          <div class="team-img"><img src="assets/joydenta/exocad-design.webp" alt="Dental CAD design workstation for implant and crown design" loading="lazy"></div>
+          <div class="team-body"><h3>CAD Design Workstation</h3><p>Design review focuses on margins, occlusion, screw access, restorative space and approval images.</p></div>
         </article>
         <article class="panel team-card">
-          <div class="team-img"><picture><source srcset="assets/equipment-line.webp" type="image/webp"><img src="assets/equipment-line.jpg" alt="Dental laboratory production equipment line" loading="lazy"></picture></div>
+          <div class="team-img"><img src="assets/joydenta/daily-cutting.webp" alt="Dental laboratory milling and production workflow" loading="lazy"></div>
           <div class="team-body"><h3>Implant / Full-Arch Production</h3><p>Production flow supports implant crowns, full-arch prosthetics, bars and repeat overflow work.</p></div>
         </article>
         <article class="panel team-card">
-          <div class="team-img"><picture><source srcset="assets/fine-grinding.webp" type="image/webp"><img src="assets/fine-grinding.jpg" alt="Fine dental restoration adjustment and inspection" loading="lazy"></picture></div>
+          <div class="team-img"><img src="assets/joydenta/oral-scanner.webp" alt="Digital dental scanning and case file verification" loading="lazy"></div>
           <div class="team-body"><h3>QC / Fit / Interface Inspection</h3><p>Fit, interface, shade, finish and case details can be checked before packing for selected cases.</p></div>
         </article>
         <article class="panel team-card">
-          <div class="team-img"><picture><source srcset="assets/full-arch-white.webp" type="image/webp"><img src="assets/full-arch-white.jpg" alt="Finished full arch prosthesis ready for case review" loading="lazy"></picture></div>
-          <div class="team-body"><h3>Finished Cases / Packing / Shipping</h3><p>Reserved for final packing photos. Final work can be documented so your lab knows what is leaving the bench.</p></div>
+          <div class="team-img"><img src="assets/joydenta/product-delivery.webp" alt="Finished dental restorations prepared for review and delivery" loading="lazy"></div>
+          <div class="team-body"><h3>Finished Cases / Packing / Shipping</h3><p>Final work can be documented so your lab knows what is leaving the bench.</p></div>
         </article>
       </div>
     </div>
@@ -321,6 +337,24 @@ footer{padding:28px 0 92px;color:#697a8b}
         <div class="panel service"><h3>Full Arch / All-on-X</h3><ul><li>PMMA prototype support</li><li>Zirconia full-arch cases</li><li>Titanium bar work</li><li>Hybrid prosthesis workflow</li></ul></div>
         <div class="panel service"><h3>CAD Design Backup</h3><ul><li>Exocad support</li><li>3Shape file intake</li><li>Full-arch design review</li><li>Implant library checks</li></ul></div>
         <div class="panel service"><h3>Overflow Production</h3><ul><li>Start with one case</li><li>Scale after review</li><li>Technical questions before production</li><li>Repeat lab-to-lab workflow</li></ul></div>
+      </div>
+      <div class="solution-grid grid">
+        <article class="panel solution-card">
+          <div class="solution-img"><img src="assets/joydenta/custom-abutments-hero.webp" alt="Custom implant abutments for dental laboratory outsourcing" loading="lazy"></div>
+          <div class="solution-body"><h3>Custom Abutments</h3><p>Designed around implant angulation, tissue contour, margin control and the final crown workflow.</p></div>
+        </article>
+        <article class="panel solution-card">
+          <div class="solution-img"><img src="assets/joydenta/screw-retained-crown.webp" alt="Screw-retained implant crown case" loading="lazy"></div>
+          <div class="solution-body"><h3>Screw-Retained Implant Crowns</h3><p>Retrievable implant restorations with screw access, occlusion and restorative space reviewed before production.</p></div>
+        </article>
+        <article class="panel solution-card">
+          <div class="solution-img"><img src="assets/joydenta/all-on-4-full-arch.webp" alt="All-on-4 full arch dental restoration" loading="lazy"></div>
+          <div class="solution-body"><h3>All-on-4 / Full Arch</h3><p>Support for implant-supported full-arch work, prototype review and final restorative production.</p></div>
+        </article>
+        <article class="panel solution-card">
+          <div class="solution-img"><img src="assets/joydenta/zirconia-restoration.webp" alt="Zirconia crown and bridge restoration" loading="lazy"></div>
+          <div class="solution-body"><h3>Zirconia Restorations</h3><p>Crown, bridge and implant restorative work for labs that need consistent digital production backup.</p></div>
+        </article>
       </div>
     </div>
   </section>
@@ -356,6 +390,28 @@ footer{padding:28px 0 92px;color:#697a8b}
         <div class="step"><span>03</span><strong>CAD design</strong><p>Exocad design for crown, implant, abutment, bar, or full arch cases.</p></div>
         <div class="step"><span>04</span><strong>Production & QC</strong><p>Milling, sintering, finishing, staining, polishing, fit check, and final inspection.</p></div>
         <div class="step"><span>05</span><strong>Ship & repeat</strong><p>Photos and dispatch details are shared so your team can manage customer expectations.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="production-proof" style="padding-top:0">
+    <div class="wrap production-grid grid">
+      <div>
+        <p class="eyebrow">Production Proof</p>
+        <h2>Digital files in, technician-led case control out.</h2>
+        <p class="copy">The usable Joydenta image library gives the site stronger proof for digital intake, CAD design, milling, finishing and delivery. This helps overseas lab owners see that YZH can support their own bench quietly in the background.</p>
+        <div class="feature-grid grid">
+          <div class="feature"><h3>Digital Intake</h3><p>STL, PLY, Rx, photos, implant system and deadline are checked before the case moves forward.</p></div>
+          <div class="feature"><h3>CAD Review</h3><p>Exocad design work can be reviewed for emergence profile, screw channel, clearance and margin position.</p></div>
+          <div class="feature"><h3>Production Capacity</h3><p>Milling and finishing images help support the message that YZH can handle repeat lab-to-lab workload.</p></div>
+          <div class="feature"><h3>Final Documentation</h3><p>Selected cases can receive approval or final photos so the buying lab can keep control of communication.</p></div>
+        </div>
+      </div>
+      <div class="production-media">
+        <div class="production-shot"><img src="assets/joydenta/digital-intake.webp" alt="Digital dental case intake and scan workflow" loading="lazy"></div>
+        <div class="production-shot"><img src="assets/joydenta/digital-milling.webp" alt="Dental laboratory digital milling workflow" loading="lazy"></div>
+        <div class="production-shot"><img src="assets/joydenta/factory-showcase.webp" alt="Dental laboratory production environment" loading="lazy"></div>
+        <div class="production-shot"><img src="assets/joydenta/outsourcing-lab.webp" alt="Dental lab outsourcing production and case support" loading="lazy"></div>
       </div>
     </div>
   </section>
@@ -426,6 +482,54 @@ footer{padding:28px 0 92px;color:#697a8b}
           </div>
         </article>
         <article class="panel case">
+          <div class="case-img"><img src="assets/joydenta/custom-abutments.webp" alt="Custom implant abutment case parts" loading="lazy"></div>
+          <div class="case-body">
+            <p class="eyebrow">Case 04</p>
+            <h3>Custom Abutment Workflow</h3>
+            <p>Useful case format for implant departments that need abutment design, emergence control and crown workflow coordination.</p>
+            <div class="case-meta">
+              <div class="case-row"><b>System</b><span>To be confirmed</span></div>
+              <div class="case-row"><b>Material</b><span>Titanium / zirconia / Ti-base - to be confirmed</span></div>
+              <div class="case-row"><b>Input</b><span>STL / scanbody / implant library / Rx - to be confirmed</span></div>
+              <div class="case-row"><b>Challenge</b><span>Angulation, margin depth, tissue contour or restorative clearance - to be confirmed</span></div>
+              <div class="case-row"><b>Workflow</b><span>File review - CAD proposal - lab approval - production - QC</span></div>
+            </div>
+            <div class="tag-row"><span class="tag">Custom Abutment</span><span class="tag">Implant CAD</span><span class="tag">Approval Review</span></div>
+          </div>
+        </article>
+        <article class="panel case">
+          <div class="case-img"><img src="assets/joydenta/implant-bridges-screw-retained.webp" alt="Screw-retained implant bridge case" loading="lazy"></div>
+          <div class="case-body">
+            <p class="eyebrow">Case 05</p>
+            <h3>Screw-Retained Implant Bridge</h3>
+            <p>Highlights a retrievable implant workflow where screw access, passivity, occlusion and component details need early review.</p>
+            <div class="case-meta">
+              <div class="case-row"><b>System</b><span>To be confirmed</span></div>
+              <div class="case-row"><b>Level</b><span>Implant / MUA level - to be confirmed</span></div>
+              <div class="case-row"><b>Input</b><span>STL / PLY / scanbody / photos - to be confirmed</span></div>
+              <div class="case-row"><b>Challenge</b><span>Screw access position, interocclusal space and prosthetic path - to be confirmed</span></div>
+              <div class="case-row"><b>Workflow</b><span>Technical review - CAD - approval - manufacture - final photo</span></div>
+            </div>
+            <div class="tag-row"><span class="tag">Screw-Retained</span><span class="tag">Implant Bridge</span><span class="tag">Retrievable</span></div>
+          </div>
+        </article>
+        <article class="panel case">
+          <div class="case-img"><img src="assets/joydenta/implant-case-a.webp" alt="Implant prosthetic case example" loading="lazy"></div>
+          <div class="case-body">
+            <p class="eyebrow">Case 06</p>
+            <h3>Implant Prosthetic Support</h3>
+            <p>Shows the type of implant restorative work that can be positioned for lab-to-lab overflow and complex case backup.</p>
+            <div class="case-meta">
+              <div class="case-row"><b>System</b><span>To be confirmed</span></div>
+              <div class="case-row"><b>Material</b><span>Zirconia / PMMA / titanium - to be confirmed</span></div>
+              <div class="case-row"><b>Input</b><span>Digital scan, Rx and implant component details - to be confirmed</span></div>
+              <div class="case-row"><b>Challenge</b><span>Restorative space, emergence profile or occlusal scheme - to be confirmed</span></div>
+              <div class="case-row"><b>Workflow</b><span>Lab-to-lab review - design - approval - production - documentation</span></div>
+            </div>
+            <div class="tag-row"><span class="tag">Implant Restorations</span><span class="tag">Overflow</span><span class="tag">Digital Workflow</span></div>
+          </div>
+        </article>
+        <article class="panel case">
           <div class="case-img"><picture><source srcset="assets/equipment-line.webp" type="image/webp"><img src="assets/equipment-line.jpg" alt="Dental laboratory equipment line" loading="lazy"></picture></div>
           <div class="case-body"><h3>Production Equipment</h3><p>Organized production environment supports repeat case flow, finishing, and scheduled delivery.</p><div class="tag-row"><span class="tag">Capacity</span><span class="tag">Production</span><span class="tag">Repeat Work</span></div></div>
         </article>
@@ -437,6 +541,30 @@ footer{padding:28px 0 92px;color:#697a8b}
           <div class="case-img"><picture><source srcset="assets/precision-work.webp" type="image/webp"><img src="assets/precision-work.jpg" alt="Precision work on dental model" loading="lazy"></picture></div>
           <div class="case-body"><h3>Technician Review</h3><p>Senior technician review is especially important for implant, custom abutment, and full arch cases.</p><div class="tag-row"><span class="tag">Technician-led</span><span class="tag">Implant</span><span class="tag">Review</span></div></div>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="visual-library" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Visual Case Library</p>
+        <h2>More usable service images for buyer confidence.</h2>
+        <p class="copy">These images strengthen the site without making unsupported claims. They can also be reused later for separate service pages, email outreach, and sales PDFs.</p>
+      </div>
+      <div class="library-grid grid">
+        <div class="library-item"><img src="assets/joydenta/fixed-prostheses.webp" alt="Fixed dental prostheses service image" loading="lazy"><span>Fixed Prostheses</span></div>
+        <div class="library-item"><img src="assets/joydenta/veneers.webp" alt="Dental veneers service image" loading="lazy"><span>Veneers</span></div>
+        <div class="library-item"><img src="assets/joydenta/implant-prosthetics.webp" alt="Implant prosthetics service image" loading="lazy"><span>Implant Prosthetics</span></div>
+        <div class="library-item"><img src="assets/joydenta/digital-lab-services.webp" alt="Digital dental lab services image" loading="lazy"><span>Digital Lab Services</span></div>
+        <div class="library-item"><img src="assets/joydenta/removable-dentures.webp" alt="Removable dentures service image" loading="lazy"><span>Removable Dentures</span></div>
+        <div class="library-item"><img src="assets/joydenta/crown-bridge-support.webp" alt="Crown and bridge dental lab support image" loading="lazy"><span>Crown & Bridge</span></div>
+        <div class="library-item"><img src="assets/joydenta/implant-case-b.webp" alt="Implant case library image" loading="lazy"><span>Implant Case</span></div>
+        <div class="library-item"><img src="assets/joydenta/implant-case-c.webp" alt="Implant restoration visual example" loading="lazy"><span>Implant Detail</span></div>
+        <div class="library-item"><img src="assets/joydenta/orthodontic-solutions.webp" alt="Orthodontic solutions service image" loading="lazy"><span>Ortho Visual</span></div>
+        <div class="library-item"><img src="assets/joydenta/digital-intake.webp" alt="Dental digital intake workflow image" loading="lazy"><span>Digital Intake</span></div>
+        <div class="library-item"><img src="assets/joydenta/digital-milling.webp" alt="Dental milling workflow image" loading="lazy"><span>Digital Milling</span></div>
+        <div class="library-item"><img src="assets/joydenta/product-delivery.webp" alt="Dental product delivery image" loading="lazy"><span>Final Delivery</span></div>
       </div>
     </div>
   </section>
