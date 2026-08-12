@@ -68,6 +68,7 @@ header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.95);backdro
 .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#e7f1fa;border:1px solid #cfe0ee;color:var(--blue);font-size:13px;font-weight:850}
 .h1{font-size:clamp(2.25rem,4.5vw,4.05rem);line-height:1.02;color:var(--ink);letter-spacing:0;margin:18px 0;max-width:13ch;overflow-wrap:break-word}
 .lead{font-size:clamp(1.08rem,1.55vw,1.24rem);color:#36516c;max-width:66ch;margin-bottom:16px}
+.mobile-lead{display:none}
 .sublead{color:#5a6d81;max-width:68ch;margin-bottom:0}
 .cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
 .hero-visual{position:relative;border-radius:8px;overflow:hidden;background:#0d1724;box-shadow:var(--shadow)}
@@ -169,7 +170,9 @@ footer a,footer p{display:block;color:#d8e2ea;font-size:14px;margin:0 0 8px}
   .section{padding:58px 0}
   .h1{max-width:100%;font-size:1.8rem;line-height:1.11}
   .eyebrow{display:flex;width:100%;max-width:100%;white-space:normal;overflow-wrap:anywhere}
-  .lead{font-size:1.02rem}
+  .lead{display:none}
+  .mobile-lead{display:grid;gap:8px;margin-bottom:16px}
+  .mobile-lead p{margin:0;color:#36516c;font-size:1rem}
   .lead,.sublead,.copy,p{width:100%;max-width:100%;overflow-wrap:anywhere}
   .sublead{font-size:.95rem}
   .hero-visual{display:none}
@@ -203,6 +206,11 @@ footer a,footer p{display:block;color:#d8e2ea;font-size:14px;margin:0 0 8px}
         <div class="eyebrow">Digital dental lab in China for overseas partners</div>
         <h1 class="h1">Digital Dental Lab for<br>Implant, Full-Arch &<br>CAD/CAM Restorations.</h1>
         <p class="lead">YZH Dental Lab provides implant restorations, full-arch solutions, crown & bridge, surgical guides and digital design support for dental laboratories and clinics worldwide.</p>
+        <div class="mobile-lead">
+          <p>Implant restorations and full-arch support.</p>
+          <p>Crown & bridge, surgical guides and CAD/CAM design.</p>
+          <p>For overseas dental labs and clinics.</p>
+        </div>
         <p class="sublead">Send one case first. We review the files, confirm technical details, quote clearly, and support production with lab-to-lab communication.</p>
         <div class="cta-row">
           <a class="btn btn-primary" href="#quote">Submit a Case</a>
