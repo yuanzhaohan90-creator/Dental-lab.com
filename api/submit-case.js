@@ -61,7 +61,7 @@ module.exports = async function handler(req, res) {
   try {
     const buffer = await readBody(req);
     const { fields, files } = parseMultipart(buffer, req.headers["content-type"]);
-    const required = ["name", "company", "email", "country", "case_type"];
+    const required = ["name", "email", "case_type"];
     const missing = required.filter((key) => !fields[key]);
     const invalidFiles = files.filter((file) => !file.allowed);
 

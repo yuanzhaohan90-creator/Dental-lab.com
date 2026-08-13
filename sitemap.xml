@@ -13,19 +13,27 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://yzhdentallab.com/cad-design</loc>
+    <loc>https://yzhdentallab.com/crown-bridge</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://yzhdentallab.com/custom-abutments</loc>
+    <loc>https://yzhdentallab.com/digital-dentistry</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://yzhdentallab.com/overflow-production</loc>
+    <loc>https://yzhdentallab.com/surgical-guides</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://yzhdentallab.com/contact</loc>
+    <loc>https://yzhdentallab.com/about</loc>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://yzhdentallab.com/submit-case</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://yzhdentallab.com/privacy-policy</loc>
+    <priority>0.4</priority>
   </url>
 </urlset>

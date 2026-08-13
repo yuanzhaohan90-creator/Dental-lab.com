@@ -41,27 +41,35 @@
   "rewrites": [
     {
       "source": "/implant-restorations",
-      "destination": "/index.html"
+      "destination": "/implant-restorations.html"
     },
     {
       "source": "/full-arch-all-on-x",
-      "destination": "/index.html"
+      "destination": "/full-arch-all-on-x.html"
     },
     {
-      "source": "/cad-design",
-      "destination": "/index.html"
+      "source": "/crown-bridge",
+      "destination": "/crown-bridge.html"
     },
     {
-      "source": "/custom-abutments",
-      "destination": "/index.html"
+      "source": "/digital-dentistry",
+      "destination": "/digital-dentistry.html"
     },
     {
-      "source": "/overflow-production",
-      "destination": "/index.html"
+      "source": "/surgical-guides",
+      "destination": "/surgical-guides.html"
     },
     {
-      "source": "/contact",
-      "destination": "/index.html"
+      "source": "/about",
+      "destination": "/about.html"
+    },
+    {
+      "source": "/submit-case",
+      "destination": "/submit-case.html"
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy-policy.html"
     }
   ]
 }
