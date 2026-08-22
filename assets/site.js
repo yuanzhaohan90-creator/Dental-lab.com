@@ -21,6 +21,10 @@ function setStatus(type, html) {
 if (form) {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (form.dataset.submitting === "true") return;
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton ? submitButton.textContent : "";
     const fileInput = form.querySelector('input[type="file"]');
     const files = fileInput ? [...fileInput.files] : [];
     const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
@@ -39,16 +43,26 @@ if (form) {
       return;
     }
 
-    setStatus("", "Submitting case details...");
+    form.dataset.submitting = "true";
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Uploading...";
+    }
+    setStatus("", "Uploading...");
     try {
       const response = await fetch(form.action, { method: "POST", body: new FormData(form) });
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.ok) throw new Error(data.error || "Submission failed");
-      setStatus("success", `<strong>Case received.</strong><br>Case ID: <b>${data.caseId}</b><br>${data.message}`);
+      setStatus("success", `<strong>Case received.</strong><br>Case ID: <b>${data.caseId}</b><br>Your files were uploaded successfully. Our technical team will review the submission and reply by email or WhatsApp.`);
       form.reset();
     } catch (error) {
-      const fallbackId = `YZH-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`;
-      setStatus("error", `<strong>The secure submission endpoint is not reachable from this environment.</strong><br>Temporary Case ID: <b>${fallbackId}</b><br>Please send the same files by WhatsApp or email.`);
+      setStatus("error", `<strong>We could not complete the upload.</strong><br>Your files were not submitted. Please try again, or send them by WhatsApp/email.<br>WhatsApp: <a href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">+86 137 1473 0109</a><br>Email: <a href="mailto:yzhdentallab@gmail.com">yzhdentallab@gmail.com</a>`);
+    } finally {
+      form.dataset.submitting = "false";
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
     }
   });
 }

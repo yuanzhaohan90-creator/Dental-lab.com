@@ -4,6 +4,11 @@
   "private": true,
   "scripts": {
     "start": "vercel dev",
-    "check": "node scripts/check-site.js"
+    "check": "node scripts/check-site.js",
+    "test:submit-case": "node scripts/test-submit-case.js"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.0",
+    "busboy": "^1.6.0"
   }
 }

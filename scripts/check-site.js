@@ -89,7 +89,7 @@ for (const required of [
   if (!combined.includes(required)) failures.push(`Missing required content: ${required}`);
 }
 
-for (const file of ["robots.txt", "sitemap.xml", "404.html", "favicon.svg", "api/submit-case.js"]) {
+for (const file of ["robots.txt", "sitemap.xml", "404.html", "favicon.svg", "api/submit-case.js", "api/download-case-file.js"]) {
   if (!fs.existsSync(path.join(root, file))) failures.push(`Missing file: ${file}`);
 }
 
