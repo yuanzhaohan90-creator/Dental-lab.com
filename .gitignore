@@ -16,3 +16,5 @@ joydenta-extracted/
 processed-contact-sheet.jpg
 verify-*.png
 .edge-*/
+
+.env*
