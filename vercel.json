@@ -60,6 +60,10 @@
       "destination": "/full-arch/immediate-load-pmma/index.html"
     },
     {
+      "source": "/full-arch/photogrammetry-workflow",
+      "destination": "/full-arch/photogrammetry-workflow/index.html"
+    },
+    {
       "source": "/crown-bridge",
       "destination": "/crown-bridge.html"
     },

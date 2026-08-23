@@ -81,8 +81,12 @@ h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .case-category{display:inline-flex;margin:0 0 10px;padding:6px 10px;border-radius:999px;background:#e5f0f8;border:1px solid #ccdeeb;color:var(--blue);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
 .text-link{display:inline-flex;margin-top:6px;color:var(--blue);font-weight:900}
 .portfolio-teaser{display:grid;grid-template-columns:1.16fr .84fr;gap:22px;align-items:stretch}
+.portfolio-teaser.quad{grid-template-columns:1.1fr .9fr .9fr}
 .portfolio-card{background:#fff;border:1px solid rgba(216,228,238,.9);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-rows:auto 1fr}
 .portfolio-card.featured{grid-row:span 2;background:#102033;color:#dce7f0;border-color:#102033}
+.portfolio-teaser.quad .portfolio-card.featured{grid-column:span 1}
+.portfolio-teaser.quad .portfolio-card:nth-child(4){grid-column:2 / span 2;display:grid;grid-template-columns:minmax(260px,.95fr) minmax(0,1.05fr)}
+.portfolio-teaser.quad .portfolio-card:nth-child(4) img{height:100%;aspect-ratio:auto}
 .portfolio-card img{width:100%;aspect-ratio:16/10;object-fit:contain;background:#eef5fa}
 .portfolio-card.featured img{aspect-ratio:16/9;background:#081725}
 .portfolio-card div{padding:22px}
@@ -117,6 +121,7 @@ h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .dark .split-feature img{border-color:rgba(255,255,255,.18)}
 .case-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 .qc-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.qc-list.offset{margin-top:18px}
 .qc-list span{display:flex;align-items:center;min-height:68px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;font-weight:850;color:#40566c;box-shadow:var(--shadow)}
 .implant-module-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
 .implant-module{display:grid;grid-template-columns:minmax(190px,.95fr) minmax(0,1.05fr);align-items:stretch;background:#fff;border:1px solid rgba(216,228,238,.9);border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
@@ -176,7 +181,9 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   .nav{flex-wrap:wrap}
   .navlinks{order:3;width:100%;justify-content:flex-start;overflow-x:auto;padding-bottom:10px}
   .hero-grid,.page-hero-grid,.two-col,.contact-grid{grid-template-columns:1fr}
-  .priority-case-grid,.portfolio-teaser,.case-study-grid,.workflow-intro,.split-feature,.split-feature.reverse,.implant-module-grid{grid-template-columns:1fr}
+  .priority-case-grid,.portfolio-teaser,.portfolio-teaser.quad,.case-study-grid,.workflow-intro,.split-feature,.split-feature.reverse,.implant-module-grid{grid-template-columns:1fr}
+  .portfolio-teaser.quad .portfolio-card:nth-child(4){grid-column:auto;display:grid;grid-template-columns:1fr}
+  .portfolio-teaser.quad .portfolio-card:nth-child(4) img{height:auto;aspect-ratio:16/10}
   .proof-strip,.service-grid,.lab-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
   .footer-grid{grid-template-columns:1fr 1fr}
