@@ -64,6 +64,14 @@
       "destination": "/full-arch/photogrammetry-workflow/index.html"
     },
     {
+      "source": "/full-arch/fp1-full-arch-zirconia",
+      "destination": "/full-arch/fp1-full-arch-zirconia/index.html"
+    },
+    {
+      "source": "/full-arch/complex-zygomatic-workflow",
+      "destination": "/full-arch/complex-zygomatic-workflow/index.html"
+    },
+    {
       "source": "/crown-bridge",
       "destination": "/crown-bridge.html"
     },
