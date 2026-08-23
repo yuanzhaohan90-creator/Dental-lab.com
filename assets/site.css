@@ -113,6 +113,7 @@ h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .process-card figcaption{padding:16px 17px;color:#53697d;font-size:14px}
 .process-card figcaption strong{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
 .workflow-intro{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(32px,5vw,70px);align-items:start}
+.workflow-intro .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
 .technical-points{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .technical-points span{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px;font-weight:800;color:#3c5369}
 .split-feature{display:grid;grid-template-columns:minmax(0,.9fr) minmax(340px,1.1fr);gap:clamp(36px,5vw,76px);align-items:center}
@@ -134,6 +135,9 @@ h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .lab-grid h3,.lab-grid p{padding-left:15px;padding-right:15px}
 .lab-grid h3{padding-top:15px;font-size:17px}
 .lab-grid p{padding-bottom:16px;margin-bottom:0}
+.lab-grid .photo-placeholder{min-height:260px;display:flex;flex-direction:column;justify-content:center;padding:22px;background:#f8fbfd;border-style:dashed}
+.lab-grid .photo-placeholder h3,.lab-grid .photo-placeholder p{padding-left:0;padding-right:0}
+.lab-grid .photo-placeholder h3{padding-top:0;font-size:15px}
 .workflow-block .section-head{margin-bottom:24px}
 .steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
 .steps article{padding:18px;min-height:174px}
@@ -236,3 +240,4 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   object-position:center;
   background:#f3f8fb;
 }
+.case-grid.three .case-card{grid-column:auto}
