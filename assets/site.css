@@ -110,6 +110,29 @@ h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .page-hero h1{max-width:17ch}
 .page-hero-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.78fr);gap:34px;align-items:center}
 .page-hero img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;box-shadow:var(--shadow)}
+.fullarch-hero{padding-bottom:36px}
+.fullarch-hero h1{max-width:15ch}
+.fullarch-proof{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:28px}
+.fullarch-proof span{min-height:58px;display:flex;align-items:center;background:rgba(255,255,255,.78);border:1px solid #d4e2ed;border-radius:8px;padding:12px 14px;font-size:13px;font-weight:850;color:#36516c}
+.source-note{align-items:start}
+.reference-panel{background:#fff;border:1px solid rgba(216,228,238,.9);border-radius:8px;box-shadow:var(--shadow);padding:24px}
+.reference-panel h3{margin-bottom:14px}
+.reference-panel a{display:block;padding:13px 0;border-top:1px solid var(--line);color:var(--blue);font-weight:850}
+.reference-panel a:first-of-type{border-top:0;padding-top:0}
+.fullarch-library{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.fullarch-card{display:grid;grid-template-columns:minmax(230px,.88fr) minmax(0,1.12fr);background:#fff;border:1px solid rgba(216,228,238,.9);border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
+.fullarch-card img{width:100%;height:100%;min-height:360px;object-fit:contain;background:#f3f8fb}
+.fullarch-card div{padding:24px;display:flex;flex-direction:column}
+.module-number{display:inline-flex;width:max-content;margin-bottom:12px;padding:6px 10px;border-radius:999px;background:#e5f0f8;border:1px solid #ccdeeb;color:var(--blue);font-size:12px;font-weight:900}
+.fullarch-card p{color:#5e7185;font-size:14px}
+.fullarch-card ul{display:grid;gap:8px;margin:6px 0 14px;padding:0;list-style:none}
+.fullarch-card li{padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#f8fbfd;color:#40566c;font-size:13px;font-weight:760}
+.visual-label{margin-top:auto;margin-bottom:0;padding-top:4px;font-size:12px!important;font-weight:850;color:#6b7d90!important}
+.verification-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.verification-grid article{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:18px}
+.verification-grid span{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-weight:900;margin-bottom:13px}
+.verification-grid p{margin-bottom:0;font-size:14px}
+.fullarch-submit .cta-panel p{font-weight:760}
 .content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
 .text-panel{padding:22px}
 .check-list{display:grid;gap:9px;margin:18px 0 0;padding:0;list-style:none}
@@ -146,7 +169,10 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   .navlinks{order:3;width:100%;justify-content:flex-start;overflow-x:auto;padding-bottom:10px}
   .hero-grid,.page-hero-grid,.two-col,.contact-grid{grid-template-columns:1fr}
   .priority-case-grid,.split-feature,.split-feature.reverse,.implant-module-grid{grid-template-columns:1fr}
+  .fullarch-library,.fullarch-card{grid-template-columns:1fr}
+  .fullarch-card img{height:auto;min-height:0;aspect-ratio:16/11}
   .proof-strip,.service-grid,.lab-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fullarch-proof{grid-template-columns:repeat(2,minmax(0,1fr))}
   .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
   .footer-grid{grid-template-columns:1fr 1fr}
 }
@@ -177,6 +203,8 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   .hero-visual img{aspect-ratio:16/11;object-fit:cover}
   .hero-visual figcaption{font-size:13px;padding:12px}
   .proof-strip,.service-feature-grid,.service-grid,.tick-list,.case-grid,.case-grid.three,.lab-grid,.steps,.content-grid,.form-grid,.footer-grid,.qc-list{grid-template-columns:1fr}
+  .fullarch-proof,.verification-grid{grid-template-columns:1fr}
+  .fullarch-card div,.reference-panel{padding:20px}
   .section{padding:56px 0}
   .priority-case.large{grid-row:auto}
   .priority-case img,.priority-case.large img,.split-feature img{aspect-ratio:16/11}
