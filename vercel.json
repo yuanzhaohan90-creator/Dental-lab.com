@@ -48,6 +48,18 @@
       "destination": "/full-arch-all-on-x.html"
     },
     {
+      "source": "/cases/dual-arch-all-on-x",
+      "destination": "/cases/dual-arch-all-on-x/index.html"
+    },
+    {
+      "source": "/full-arch/zirconia-titanium-workflow",
+      "destination": "/full-arch/zirconia-titanium-workflow/index.html"
+    },
+    {
+      "source": "/full-arch/immediate-load-pmma",
+      "destination": "/full-arch/immediate-load-pmma/index.html"
+    },
+    {
       "source": "/crown-bridge",
       "destination": "/crown-bridge.html"
     },
