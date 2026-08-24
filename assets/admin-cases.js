@@ -49,7 +49,7 @@ function renderCaseList() {
     adminCaseList.innerHTML = '<p class="admin-empty">No cases yet. Add the first draft case.</p>';
     return;
   }
-  adminCaseList.innerHTML = state.cases.map((item) => `<button type="button" data-id="${item.id}" class="${state.current?.id === item.id ? "active" : ""}">${item.images.find((image) => image.isCover) ? `<img src="${item.images.find((image) => image.isCover).url}" alt="">` : ""}<span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.category)} · ${item.status === "published" ? "Published" : "Draft"}${item.featured ? " · Featured" : ""}</small></span></button>`).join("");
+  adminCaseList.innerHTML = state.cases.map((item) => `<button type="button" data-id="${item.id}" class="${state.current?.id === item.id ? "active" : ""}">${item.images.find((image) => image.isCover) ? `<img src="${item.images.find((image) => image.isCover).url}" alt="">` : ""}<span><strong>${escapeHtml(item.title)}</strong><small>${item.contentType === "case_study" ? "Case Study" : "Quick Work"} · ${escapeHtml(item.category)} · ${item.status === "published" ? "Published" : "Draft"}${item.featured ? " · Homepage" : ""}</small></span></button>`).join("");
 }
 
 function optionMarkup(values, selected = "") {
@@ -83,18 +83,30 @@ function syncNewInputs() {
   });
 }
 
-function openEditor(item = null) {
+function updateTypeUI() {
+  const isCaseStudy = editor.elements.contentType.value === "case_study";
+  document.getElementById("caseStudyFields").hidden = !isCaseStudy;
+  document.getElementById("upgradeCaseButton").hidden = isCaseStudy;
+  document.getElementById("imageLimitNote").textContent = isCaseStudy
+    ? "Featured Case Studies support extended image sequences. Add only the stages available for this case."
+    : "Quick Work requires 1–6 additional images. Use the arrow controls to set display order.";
+}
+
+function openEditor(item = null, requestedType = "quick_work") {
   state.current = item;
   state.existing = item ? item.images.map((image) => ({ ...image })) : [];
   state.newFiles.forEach((entry) => URL.revokeObjectURL(entry.preview));
   state.newFiles = [];
   editor.reset();
   editor.hidden = false;
-  document.getElementById("editorMode").textContent = item ? "Edit Case" : "Add Case";
-  document.getElementById("editorTitle").textContent = item ? item.title : "New Case";
+  const contentType = item?.contentType === "case_study" || requestedType === "case_study" ? "case_study" : "quick_work";
+  document.getElementById("editorMode").textContent = item ? "Edit Work" : (contentType === "case_study" ? "Create Featured Case Study" : "Add Quick Work");
+  document.getElementById("editorTitle").textContent = item ? item.title : (contentType === "case_study" ? "New Featured Case Study" : "New Quick Work");
   editor.elements.category.innerHTML = '<option value="">Select category</option>' + optionMarkup(state.categories, item?.category);
-  const names = ["title", "category", "summary", "restorationType", "material", "implantSystem", "platform", "shade", "challenge", "technicalReview", "solution", "result", "status"];
+  const names = ["title", "category", "shortNote", "restorationType", "material", "implantSystem", "platform", "shade", "caseOverview", "challenge", "recordsReceived", "technicalReview", "cadDesign", "provisional", "framework", "finalRestoration", "qc", "technicalOutcome", "status"];
   names.forEach((name) => { editor.elements[name].value = item?.[name] || (name === "status" ? "draft" : ""); });
+  editor.elements.shortNote.value = item?.shortNote || item?.summary || "";
+  editor.elements.contentType.value = contentType;
   editor.elements.tags.value = item?.tags?.join(", ") || "";
   editor.elements.featured.checked = Boolean(item?.featured);
   editor.elements.coverCaption.value = item?.images?.find((image) => image.isCover)?.caption || "";
@@ -102,6 +114,7 @@ function openEditor(item = null) {
   document.getElementById("previewButton").disabled = !item;
   document.getElementById("deleteCaseButton").hidden = !item;
   document.getElementById("togglePublishButton").textContent = item?.status === "published" ? "Unpublish" : "Publish";
+  updateTypeUI();
   showMessage(editorMessage, "");
   renderImages();
   renderCaseList();
@@ -111,18 +124,25 @@ function openEditor(item = null) {
 function serializeCase(statusOverride) {
   return {
     id: state.current?.id,
+    contentType: editor.elements.contentType.value,
     title: editor.elements.title.value,
     category: editor.elements.category.value,
-    summary: editor.elements.summary.value,
+    shortNote: editor.elements.shortNote.value,
     restorationType: editor.elements.restorationType.value,
     material: editor.elements.material.value,
     implantSystem: editor.elements.implantSystem.value,
     platform: editor.elements.platform.value,
     shade: editor.elements.shade.value,
+    caseOverview: editor.elements.caseOverview.value,
     challenge: editor.elements.challenge.value,
+    recordsReceived: editor.elements.recordsReceived.value,
     technicalReview: editor.elements.technicalReview.value,
-    solution: editor.elements.solution.value,
-    result: editor.elements.result.value,
+    cadDesign: editor.elements.cadDesign.value,
+    provisional: editor.elements.provisional.value,
+    framework: editor.elements.framework.value,
+    finalRestoration: editor.elements.finalRestoration.value,
+    qc: editor.elements.qc.value,
+    technicalOutcome: editor.elements.technicalOutcome.value,
     tags: editor.elements.tags.value,
     status: statusOverride || editor.elements.status.value,
     featured: editor.elements.featured.checked,
@@ -135,6 +155,11 @@ async function saveCase(statusOverride) {
   const existingCover = state.existing.find((image) => image.isCover);
   if (existingCover) existingCover.caption = editor.elements.coverCaption.value;
   if (!editor.reportValidity()) return null;
+  const additionalCount = state.existing.filter((image) => !image.isCover).length + state.newFiles.length;
+  if (editor.elements.contentType.value === "quick_work" && (additionalCount < 1 || additionalCount > 6)) {
+    showMessage(editorMessage, "Quick Work requires 1–6 additional images.", "error");
+    return null;
+  }
   const formData = new FormData();
   formData.append("case", JSON.stringify(serializeCase(statusOverride)));
   formData.append("existingImages", JSON.stringify(state.existing.map(({ id, caption, imageType, sortOrder, isCover }) => ({ id, caption, imageType, sortOrder, isCover }))));
@@ -159,7 +184,10 @@ loginForm.addEventListener("submit", async (event) => {
 });
 
 logoutButton.addEventListener("click", async () => { await api("/api/admin-auth", { method: "DELETE" }); setAuthenticated(false); editor.hidden = true; });
-document.getElementById("addCaseButton").addEventListener("click", () => openEditor());
+document.getElementById("addQuickWorkButton").addEventListener("click", () => openEditor(null, "quick_work"));
+document.getElementById("addCaseStudyButton").addEventListener("click", () => openEditor(null, "case_study"));
+editor.elements.contentType.addEventListener("change", updateTypeUI);
+document.getElementById("upgradeCaseButton").addEventListener("click", () => { editor.elements.contentType.value = "case_study"; updateTypeUI(); document.getElementById("caseStudyFields").scrollIntoView({ behavior: "smooth", block: "start" }); });
 document.getElementById("closeEditor").addEventListener("click", () => { editor.hidden = true; state.current = null; renderCaseList(); });
 adminCaseList.addEventListener("click", (event) => { const button = event.target.closest("button[data-id]"); if (button) openEditor(state.cases.find((item) => item.id === button.dataset.id)); });
 

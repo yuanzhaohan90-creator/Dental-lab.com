@@ -253,9 +253,22 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
 .public-case-card a{display:block;height:100%;color:inherit;text-decoration:none}
 .public-case-card img{width:100%;aspect-ratio:16/11;object-fit:cover;background:#eef5fa}
 .public-case-card div{padding:20px}
-.public-case-card h2{font-size:1.35rem;margin:7px 0 9px}
+.public-case-card h2,.public-case-card h3{font-size:1.35rem;margin:7px 0 9px}
 .public-case-card p{color:#5e7185;font-size:14px;margin-bottom:12px}
 .public-case-card .case-material{color:var(--ink);font-weight:850;margin-bottom:6px}
+.case-technical-line{color:var(--ink)!important;font-weight:850}
+.case-library-group+.case-library-group{margin-top:54px}
+.case-library-heading{margin-bottom:20px}
+.case-library-heading h2{margin:6px 0 0}
+.featured-public-case-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.featured-public-case{background:#102033;border-radius:8px;overflow:hidden;color:#e5eef5}
+.featured-public-case a{display:grid;grid-template-columns:minmax(220px,.9fr) minmax(0,1.1fr);height:100%;color:inherit;text-decoration:none}
+.featured-public-case img{width:100%;height:100%;min-height:320px;object-fit:cover;background:#081725}
+.featured-public-case div{padding:26px}
+.featured-public-case h3{color:#fff;font-size:1.7rem;margin:10px 0}
+.featured-public-case p{color:#cbd8e3;font-size:14px}
+.featured-public-case .case-category{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff}
+.featured-public-case .text-link{color:#fff}
 .case-library-state{grid-column:1/-1;padding:34px;border:1px dashed #bfd2e1;border-radius:8px;color:#5e7185;text-align:center}
 .case-library-state.error{color:#9b2c2c;border-color:#e2b8b8}
 .case-library-hero{background:#102033;color:#dfeaf4;padding:60px 0}
@@ -291,6 +304,7 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
 .admin-login form{width:min(100%,460px);padding:30px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow)}
 .admin-login .btn{margin-top:18px}
 .admin-toolbar{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:24px}
+.admin-create-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 .admin-toolbar h1{margin:5px 0 0;font-size:2.3rem}
 .admin-layout{display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:24px;align-items:start}
 .admin-case-list{display:grid;gap:8px;position:sticky;top:20px}
@@ -304,11 +318,17 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
 .admin-editor-head{margin-bottom:20px}
 .admin-editor-head h2{font-size:1.8rem;margin:4px 0 0}
 .icon-command{width:38px;height:38px;border:1px solid var(--line);border-radius:7px;background:#fff;font-size:24px;cursor:pointer}
-.admin-status-row{justify-content:flex-start;padding:14px;background:#eef5fa;border-radius:7px;margin-bottom:18px}
+.admin-status-row{justify-content:flex-start;flex-wrap:wrap;padding:14px;background:#eef5fa;border-radius:7px;margin-bottom:12px}
 .admin-status-row label{font-weight:850}
 .admin-status-row select{margin-left:8px;padding:8px;border:1px solid #c8d7e4;border-radius:6px;background:#fff}
 .check-field{display:flex;align-items:center;gap:7px}
 .admin-editor>.field,.admin-image-section{margin-top:16px}
+.upgrade-case-button{width:auto;margin-bottom:10px}
+.case-study-fields{border-top:1px solid var(--line);padding-top:20px;margin-top:18px}
+.case-study-fields-head{display:flex;justify-content:space-between;gap:16px;margin-bottom:12px}
+.case-study-fields-head h3{margin-bottom:4px}
+.case-study-fields-head p{color:#65798b;font-size:14px}
+.case-study-fields>.field{margin-top:14px}
 .admin-image-section{border-top:1px solid var(--line);padding-top:20px}
 .admin-image-section h3{margin-bottom:5px}
 .admin-image-section>p{color:#65798b;font-size:14px}
@@ -334,11 +354,14 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
 
 @media (max-width:900px){
   .public-case-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .featured-public-case-grid{grid-template-columns:1fr}
   .case-library-hero-grid,.case-summary-layout,.admin-layout{grid-template-columns:1fr}
   .admin-case-list{position:static;grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:760px){
   .public-case-grid,.case-library-gallery,.case-specs,.admin-case-list{grid-template-columns:1fr}
+  .featured-public-case a{grid-template-columns:1fr}
+  .featured-public-case img{min-height:0;aspect-ratio:16/11}
   .case-filter{display:grid;grid-template-columns:1fr 1fr}
   .case-filter button{min-width:0;overflow-wrap:anywhere}
   .case-library-hero{padding:34px 0}
@@ -347,7 +370,9 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   .admin-header strong{order:3;width:100%;font-size:13px}
   .admin-logout{width:auto;margin-left:auto}
   .admin-toolbar{align-items:center}
-  .admin-toolbar .btn{width:auto}
+  .admin-toolbar{align-items:stretch;flex-direction:column}
+  .admin-create-actions{display:grid;grid-template-columns:1fr}
+  .admin-toolbar .btn{width:100%}
   .admin-editor{padding:18px}
   .admin-status-row{align-items:flex-start;flex-direction:column}
   .admin-image-row{grid-template-columns:76px minmax(0,1fr)}

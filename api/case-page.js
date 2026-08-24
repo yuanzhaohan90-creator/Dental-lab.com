@@ -38,11 +38,24 @@ function render(record, preview) {
   const item = publicRecord(record, true);
   const cover = item.coverImage;
   const canonical = `https://yzhdentallab.com/cases/${encodeURIComponent(item.slug)}`;
-  const description = item.summary.slice(0, 160);
+  const isCaseStudy = item.contentType === "case_study";
+  const description = (item.summary || `${item.title}, ${item.category} work by YZH Dental Lab.`).slice(0, 160);
   const gallery = item.images.filter((image) => !image.isCover);
   const title = `${item.title} | ${item.category} | YZH Dental Lab`;
   const previewBanner = preview ? `<div class="preview-banner">Private draft preview. This case is not public.</div>` : "";
-  const galleryHtml = gallery.length ? `<section class="section section-soft"><div class="wrap"><div class="section-head"><p class="eyebrow">Image Gallery</p><h2>Design, production and quality review.</h2></div><div class="case-library-gallery">${gallery.map((image) => `<figure><img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.caption || `${item.title} ${image.imageType}`)}" loading="lazy"><figcaption><span>${escapeHtml(image.imageType)}</span>${image.caption ? escapeHtml(image.caption) : ""}</figcaption></figure>`).join("")}</div></div></section>` : "";
+  const galleryHtml = gallery.length ? `<section class="section section-soft"><div class="wrap"><div class="section-head"><p class="eyebrow">Image Gallery</p><h2>${isCaseStudy ? "Design, production and quality review." : "Completed work and technical views."}</h2></div><div class="case-library-gallery">${gallery.map((image) => `<figure><img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.caption || `${item.title} ${image.imageType}`)}" loading="lazy"><figcaption><span>${escapeHtml(image.imageType)}</span>${image.caption ? escapeHtml(image.caption) : ""}</figcaption></figure>`).join("")}</div></div></section>` : "";
+  const detailedSections = isCaseStudy ? [
+    textSection("Case Overview", "Technical case overview.", item.caseOverview),
+    textSection("Challenge", "What required careful review.", item.challenge),
+    textSection("Records Received", "Records available for review.", item.recordsReceived),
+    textSection("Technical Review", "Checks completed before production.", item.technicalReview),
+    textSection("CAD / Design", "Digital design approach.", item.cadDesign),
+    textSection("Provisional", "Provisional stage.", item.provisional),
+    textSection("Framework / Ti-base", "Framework and component stage.", item.framework),
+    textSection("Final Restoration", "Final restorative stage.", item.finalRestoration),
+    textSection("QC", "Quality-control review.", item.qc),
+    textSection("Technical Outcome", "Final technical outcome.", item.technicalOutcome)
+  ].join("") : textSection("Work Note", "Basic technical information.", item.shortNote);
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${canonical}">
@@ -50,12 +63,9 @@ ${preview ? '<meta name="robots" content="noindex,nofollow">' : ""}<link rel="ic
 <meta property="og:title" content="${escapeHtml(item.title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:type" content="article"><meta property="og:url" content="${canonical}">${cover ? `<meta property="og:image" content="https://yzhdentallab.com${escapeHtml(cover.url)}">` : ""}
 <link rel="stylesheet" href="/assets/site.css"></head><body>${previewBanner}
 <header class="site-header"><div class="wrap nav"><a class="brand" href="/"><span class="brand-mark">Y</span><span>YZH Dental Lab</span></a><button class="menu-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button><nav class="navlinks" id="primaryNav"><a href="/">Home</a><a href="/implant-restorations">Implant</a><a href="/full-arch-all-on-x">Full Arch</a><a href="/cases">Cases</a><a href="/about">About</a><a href="/submit-case">Contact</a></nav><a class="btn btn-primary nav-cta" href="/submit-case">Send a Trial Case</a></div></header>
-<main><section class="case-library-hero"><div class="wrap case-library-hero-grid"><div><p class="eyebrow">${escapeHtml(item.category)}</p><h1>${escapeHtml(item.title)}</h1><p class="lead">${escapeHtml(item.summary)}</p></div>${cover ? `<figure><img src="${escapeHtml(cover.url)}" alt="${escapeHtml(item.title)}"><figcaption>${escapeHtml(cover.caption || "Final restoration")}</figcaption></figure>` : ""}</div></section>
-<section class="section"><div class="wrap case-summary-layout"><div><p class="eyebrow">Case Summary</p><h2>Technical case overview.</h2></div><dl class="case-specs">${metaItems(item)}</dl></div></section>
-${textSection("Case Challenge", "What required careful review.", item.challenge)}
-${textSection("Technical Review", "Checks completed before production.", item.technicalReview)}
-${textSection("Design / Production", "The selected technical approach.", item.solution)}
-${textSection("Final Restoration", "Technical outcome.", item.result)}
+<main><section class="case-library-hero"><div class="wrap case-library-hero-grid"><div><p class="eyebrow">${isCaseStudy ? "Featured Case Study" : "Recent Work"} · ${escapeHtml(item.category)}</p><h1>${escapeHtml(item.title)}</h1>${item.summary ? `<p class="lead">${escapeHtml(item.summary)}</p>` : ""}</div>${cover ? `<figure><img src="${escapeHtml(cover.url)}" alt="${escapeHtml(item.title)}"><figcaption>${escapeHtml(cover.caption || "Final restoration")}</figcaption></figure>` : ""}</div></section>
+<section class="section"><div class="wrap case-summary-layout"><div><p class="eyebrow">${isCaseStudy ? "Case Summary" : "Work Details"}</p><h2>${isCaseStudy ? "Technical case information." : "Key restorative information."}</h2></div><dl class="case-specs">${metaItems(item)}</dl></div></section>
+${detailedSections}
 ${galleryHtml}
 <section class="section trial"><div class="wrap two-col"><div><p class="eyebrow">Technical Case Review</p><h2>Send a Similar Case</h2><p class="copy">Share the available files and restoration requirements. Our technical team will review the records before production.</p></div><div class="cta-panel"><a class="btn btn-primary" href="/submit-case">Send a Similar Case</a><a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a></div></div></section></main>
 <footer class="site-footer"><div class="wrap footer-grid"><div><h3>YZH Dental Lab</h3><p>Digital dental laboratory in China for implant, full-arch and CAD/CAM restorative workflows.</p></div><div><h3>Services</h3><a href="/implant-restorations">Implant Restorations</a><a href="/full-arch-all-on-x">Full Arch / All-on-X</a><a href="/cases">Case Library</a></div><div><h3>Company</h3><a href="/about">About</a><a href="/submit-case">Submit a Case</a><a href="/privacy-policy">Privacy Policy</a></div><div><h3>Contact</h3><a href="mailto:yzhdentallab@gmail.com">yzhdentallab@gmail.com</a><a href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp: +86 137 1473 0109</a></div></div></footer><script src="/assets/site.js" defer></script></body></html>`;
