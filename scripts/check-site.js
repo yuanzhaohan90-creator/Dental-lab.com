@@ -6,6 +6,7 @@ const pages = [
   "index.html",
   "implant-restorations.html",
   "full-arch-all-on-x.html",
+  "cases.html",
   "cases/dual-arch-all-on-x/index.html",
   "full-arch/zirconia-titanium-workflow/index.html",
   "full-arch/immediate-load-pmma/index.html",
@@ -47,6 +48,7 @@ const routeTargets = {
   "/": "index.html",
   "/implant-restorations": "implant-restorations.html",
   "/full-arch-all-on-x": "full-arch-all-on-x.html",
+  "/cases": "cases.html",
   "/cases/dual-arch-all-on-x": "cases/dual-arch-all-on-x/index.html",
   "/full-arch/zirconia-titanium-workflow": "full-arch/zirconia-titanium-workflow/index.html",
   "/full-arch/immediate-load-pmma": "full-arch/immediate-load-pmma/index.html",
@@ -101,7 +103,7 @@ for (const required of [
   if (!combined.includes(required)) failures.push(`Missing required content: ${required}`);
 }
 
-for (const file of ["robots.txt", "sitemap.xml", "404.html", "favicon.svg", "api/submit-case.js", "api/download-case-file.js"]) {
+for (const file of ["robots.txt", "sitemap.xml", "404.html", "favicon.svg", "admin/cases.html", "api/submit-case.js", "api/download-case-file.js", "api/admin-auth.js", "api/admin-cases.js", "api/cases.js", "api/case-page.js", "api/case-image.js"]) {
   if (!fs.existsSync(path.join(root, file))) failures.push(`Missing file: ${file}`);
 }
 

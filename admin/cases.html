@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Case Manager | YZH Dental Lab</title><meta name="robots" content="noindex,nofollow"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/site.css"></head>
+<body class="admin-body">
+<header class="admin-header"><div class="wrap"><a class="brand" href="/"><span class="brand-mark">Y</span><span>YZH Dental Lab</span></a><strong>Private Case Manager</strong><button class="btn btn-secondary admin-logout" id="logoutButton" type="button" hidden>Log Out</button></div></header>
+<main class="admin-main wrap">
+  <section class="admin-login" id="loginPanel"><form id="loginForm"><p class="eyebrow">Private Access</p><h1>Case Manager</h1><p>Sign in to manage draft and published case studies.</p><label class="field">Admin Password<input type="password" name="password" autocomplete="current-password" required></label><button class="btn btn-primary" type="submit">Sign In</button><div class="admin-message" id="loginMessage" role="status"></div></form></section>
+  <section id="managerPanel" hidden>
+    <div class="admin-toolbar"><div><p class="eyebrow">Case Library</p><h1>Cases</h1></div><button class="btn btn-primary" id="addCaseButton" type="button">Add Case</button></div>
+    <div class="admin-layout"><aside class="admin-case-list" id="adminCaseList"></aside>
+      <form class="admin-editor" id="caseEditor" hidden>
+        <div class="admin-editor-head"><div><p class="eyebrow" id="editorMode">Add Case</p><h2 id="editorTitle">New Case</h2></div><button class="icon-command" id="closeEditor" type="button" aria-label="Close editor">×</button></div>
+        <div class="admin-status-row"><label>Status<select name="status"><option value="draft">Draft</option><option value="published">Published</option></select></label><label class="check-field"><input type="checkbox" name="featured"> Featured</label></div>
+        <div class="form-grid"><label class="field">Title *<input name="title" required maxlength="160"></label><label class="field">Category *<select name="category" required></select></label></div>
+        <label class="field">Short Summary *<textarea name="summary" required maxlength="500"></textarea></label>
+        <div class="form-grid"><label class="field">Restoration Type<input name="restorationType"></label><label class="field">Material<input name="material"></label><label class="field">Implant System<input name="implantSystem"></label><label class="field">Platform<input name="platform"></label><label class="field">Shade<input name="shade"></label><label class="field">Tags<input name="tags" placeholder="implant, zirconia, MUA"></label></div>
+        <label class="field">Case Challenge<textarea name="challenge"></textarea></label><label class="field">Technical Review<textarea name="technicalReview"></textarea></label><label class="field">Solution / Design & Production<textarea name="solution"></textarea></label><label class="field">Final Result / Technical Outcome<textarea name="result"></textarea></label>
+        <section class="admin-image-section"><h3>Cover Image *</h3><p>Required for every case. Uploading a new cover replaces the current cover.</p><div id="currentCover"></div><label class="upload-zone">Choose cover image<input type="file" name="coverImage" accept="image/jpeg,image/png,image/webp"></label><label class="field">Cover Caption<input name="coverCaption" maxlength="240"></label></section>
+        <section class="admin-image-section"><h3>Image Gallery</h3><p>Use the arrow controls to set display order. Uploaded filenames are never shown publicly.</p><div class="admin-image-list" id="existingImages"></div><label class="upload-zone">Add multiple gallery images<input type="file" name="galleryImages" accept="image/jpeg,image/png,image/webp" multiple></label><div class="admin-image-list" id="newImages"></div></section>
+        <p class="admin-privacy-warning"><strong>Privacy:</strong> Do not upload patient names, DOB, chart numbers, faces, or other identifying information unless you have appropriate authorization.</p>
+        <div class="admin-message" id="editorMessage" role="status"></div><div class="admin-actions"><button class="btn btn-primary" type="submit">Save Case</button><button class="btn btn-secondary" id="previewButton" type="button">Preview</button><button class="btn btn-secondary" id="togglePublishButton" type="button">Publish</button><button class="btn btn-danger" id="deleteCaseButton" type="button">Delete</button></div>
+      </form>
+    </div>
+  </section>
+</main><script src="/assets/admin-cases.js" defer></script></body></html>

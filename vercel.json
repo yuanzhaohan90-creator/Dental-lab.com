@@ -52,6 +52,18 @@
       "destination": "/cases/dual-arch-all-on-x/index.html"
     },
     {
+      "source": "/cases",
+      "destination": "/cases.html"
+    },
+    {
+      "source": "/cases/:slug",
+      "destination": "/api/case-page?slug=:slug"
+    },
+    {
+      "source": "/admin/cases",
+      "destination": "/admin/cases.html"
+    },
+    {
       "source": "/full-arch/zirconia-titanium-workflow",
       "destination": "/full-arch/zirconia-titanium-workflow/index.html"
     },
