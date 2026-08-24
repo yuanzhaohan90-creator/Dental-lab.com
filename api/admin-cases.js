@@ -4,7 +4,9 @@ const {
   CATEGORIES,
   IMAGE_TYPES,
   deletePaths,
+  deleteUnreferencedPaths,
   deleteRecord,
+  duplicateRecordData,
   getRecord,
   listRecords,
   makeId,
@@ -135,8 +137,23 @@ async function writeCase(req, isUpdate) {
 
   if (current) {
     const removed = current.images.filter((image) => !keepIds.has(image.id) || (coverFile && image.isCover)).map((image) => image.pathname);
-    await deletePaths(removed);
+    await deleteUnreferencedPaths(removed);
   }
+  return record;
+}
+
+async function duplicateCase(id) {
+  const source = await getRecord(id);
+  if (!source) throw Object.assign(new Error("Case not found."), { statusCode: 404 });
+  const newId = makeId("CASE");
+  const now = new Date().toISOString();
+  const title = `Copy of ${source.title}`.slice(0, 160);
+  const record = duplicateRecordData(source, {
+    id: newId,
+    slug: await uniqueSlug(title, newId),
+    now
+  });
+  await saveRecord(record);
   return record;
 }
 
@@ -152,6 +169,10 @@ module.exports = async function handler(req, res) {
       }
       const records = await listRecords();
       return reply(res, 200, { ok: true, cases: records.map(adminRecord), categories: CATEGORIES, imageTypes: IMAGE_TYPES });
+    }
+    if (req.method === "POST" && query(req, "action") === "duplicate") {
+      const record = await duplicateCase(query(req, "id"));
+      return reply(res, 201, { ok: true, case: adminRecord(record) });
     }
     if (req.method === "POST" || req.method === "PUT") {
       const record = await writeCase(req, req.method === "PUT");

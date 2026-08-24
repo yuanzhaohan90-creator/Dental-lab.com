@@ -1,7 +1,7 @@
 const assert = require("assert");
 const crypto = require("crypto");
 const { createSession, verifyPassword, verifySession } = require("../lib/case-auth");
-const { CATEGORIES, IMAGE_TYPES, normalizeFields, validateRecord } = require("../lib/case-store");
+const { CATEGORIES, IMAGE_TYPES, duplicateRecordData, normalizeFields, validateRecord } = require("../lib/case-store");
 
 const password = "test-admin-password";
 const salt = "unit-test-salt";
@@ -42,5 +42,34 @@ assert.doesNotThrow(() => validateRecord({
 assert.throws(() => validateRecord({ ...normalized, images: [{ isCover: true }] }), /additional image/);
 const study = normalizeFields({ title: "Featured", category: CATEGORIES[1], contentType: "case_study" });
 assert.doesNotThrow(() => validateRecord({ ...study, images: [{ isCover: true }] }));
+
+const source = {
+  ...study,
+  id: "CASE-ORIGINAL",
+  slug: "featured",
+  title: "Featured",
+  status: "published",
+  featured: true,
+  material: "Zirconia",
+  implantSystem: "Test system",
+  caseOverview: "Overview",
+  images: [{ id: "IMG-ORIGINAL", pathname: "case-library/images/shared.webp", caption: "Final", imageType: "Final", sortOrder: -1, isCover: true }],
+  createdAt: "2026-01-01T00:00:00.000Z",
+  updatedAt: "2026-01-01T00:00:00.000Z",
+  publishedAt: "2026-01-01T00:00:00.000Z"
+};
+const duplicate = duplicateRecordData(source, { id: "CASE-COPY", slug: "copy-of-featured", now: "2026-02-01T00:00:00.000Z" });
+assert.equal(duplicate.id, "CASE-COPY");
+assert.equal(duplicate.slug, "copy-of-featured");
+assert.equal(duplicate.title, "Copy of Featured");
+assert.equal(duplicate.status, "draft");
+assert.equal(duplicate.featured, false);
+assert.equal(duplicate.publishedAt, null);
+assert.equal(duplicate.material, source.material);
+assert.equal(duplicate.implantSystem, source.implantSystem);
+assert.equal(duplicate.caseOverview, source.caseOverview);
+assert.equal(duplicate.images[0].pathname, source.images[0].pathname);
+assert.equal(duplicate.images[0].caption, source.images[0].caption);
+assert.notEqual(duplicate.images[0].id, source.images[0].id);
 
 console.log("case-library unit tests passed");

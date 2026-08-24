@@ -112,6 +112,7 @@ function openEditor(item = null, requestedType = "quick_work") {
   editor.elements.coverCaption.value = item?.images?.find((image) => image.isCover)?.caption || "";
   editor.elements.coverImage.required = !item?.images?.some((image) => image.isCover);
   document.getElementById("previewButton").disabled = !item;
+  document.getElementById("duplicateCaseButton").hidden = !item;
   document.getElementById("deleteCaseButton").hidden = !item;
   document.getElementById("togglePublishButton").textContent = item?.status === "published" ? "Unpublish" : "Publish";
   updateTypeUI();
@@ -218,6 +219,16 @@ newImages.addEventListener("click", (event) => {
 editor.addEventListener("submit", async (event) => { event.preventDefault(); try { await saveCase(); } catch (error) { showMessage(editorMessage, error.message, "error"); } });
 document.getElementById("previewButton").addEventListener("click", () => { if (state.current) window.open(`/cases/${encodeURIComponent(state.current.slug)}?preview=1`, "_blank", "noopener"); });
 document.getElementById("togglePublishButton").addEventListener("click", async () => { try { await saveCase(state.current?.status === "published" ? "draft" : "published"); } catch (error) { showMessage(editorMessage, error.message, "error"); } });
+document.getElementById("duplicateCaseButton").addEventListener("click", async () => {
+  if (!state.current) return;
+  showMessage(editorMessage, "Creating draft copy...");
+  try {
+    const data = await api(`/api/admin-cases?action=duplicate&id=${encodeURIComponent(state.current.id)}`, { method: "POST" });
+    await loadCases();
+    openEditor(state.cases.find((item) => item.id === data.case.id));
+    showMessage(editorMessage, "Draft copy created. Review the title and images before publishing.", "success");
+  } catch (error) { showMessage(editorMessage, error.message, "error"); }
+});
 document.getElementById("deleteCaseButton").addEventListener("click", async () => {
   if (!state.current || !confirm(`Delete “${state.current.title}” and its uploaded images?`)) return;
   try { await api(`/api/admin-cases?id=${encodeURIComponent(state.current.id)}`, { method: "DELETE" }); state.current = null; editor.hidden = true; await loadCases(); }
