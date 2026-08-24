@@ -34,7 +34,7 @@ module.exports = async function handler(req, res) {
     res.setHeader("Content-Type", image.contentType || result.blob.contentType || "application/octet-stream");
     res.setHeader("Content-Disposition", "inline");
     res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("Cache-Control", record.status === "published" ? "public, max-age=86400, s-maxage=31536000, immutable" : "private, no-store");
+    res.setHeader("Cache-Control", "no-store");
     Readable.fromWeb(result.stream).pipe(res);
   } catch (error) {
     console.error("case_image_error", error);

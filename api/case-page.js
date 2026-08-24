@@ -77,7 +77,7 @@ module.exports = async function handler(req, res) {
     }
     res.statusCode = 200;
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.setHeader("Cache-Control", preview ? "private, no-store" : "public, max-age=0, s-maxage=60, stale-while-revalidate=300");
+    res.setHeader("Cache-Control", "no-store");
     return res.end(render(record, preview));
   } catch (error) {
     console.error("case_page_error", error);
