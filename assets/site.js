@@ -64,20 +64,20 @@ async function loadPublicSiteData() {
     const data = await response.json();
     if (!response.ok || !data.ok) throw new Error(data.error || "Homepage preview unavailable.");
     const draft = structuredClone(data.config.draft);
-    if (draft.hero.imageMediaId) draft.hero.imageUrl = `/api/media-image?id=${encodeURIComponent(draft.hero.imageMediaId)}`;
+    if (draft.hero.imageMediaId) draft.hero.imageUrl = `/api/admin?module=media-image&id=${encodeURIComponent(draft.hero.imageMediaId)}`;
     return { homepage: draft, settings: null, selectedCases: data.publishedCases.filter((item) => draft.selectedWork.caseIds.includes(item.id)).sort((a, b) => draft.selectedWork.caseIds.indexOf(a.id) - draft.selectedWork.caseIds.indexOf(b.id)), preview: "homepage" };
   }
   if (preview === "settings") {
-    const [siteResponse, settingsResponse] = await Promise.all([fetch("/api/public-site", { cache: "no-store" }), fetch("/api/admin-settings", { cache: "no-store" })]);
+    const [siteResponse, settingsResponse] = await Promise.all([fetch("/api/admin?module=public-site", { cache: "no-store" }), fetch("/api/admin?module=settings", { cache: "no-store" })]);
     const siteData = await siteResponse.json();
     const settingsData = await settingsResponse.json();
     if (!siteResponse.ok || !siteData.ok) throw new Error(siteData.error || "Site content unavailable.");
     if (!settingsResponse.ok || !settingsData.ok) throw new Error(settingsData.error || "Settings preview unavailable.");
     const draftSettings = structuredClone(settingsData.settings.draft);
-    if (draftSettings.defaultOgMediaId) draftSettings.defaultOgImageUrl = `/api/media-image?id=${encodeURIComponent(draftSettings.defaultOgMediaId)}`;
+    if (draftSettings.defaultOgMediaId) draftSettings.defaultOgImageUrl = `/api/admin?module=media-image&id=${encodeURIComponent(draftSettings.defaultOgMediaId)}`;
     return { ...siteData, settings: draftSettings, preview: "settings" };
   }
-  const response = await fetch("/api/public-site", { cache: "no-store" });
+  const response = await fetch("/api/admin?module=public-site", { cache: "no-store" });
   const data = await response.json();
   if (!response.ok || !data.ok) throw new Error(data.error || "Site content unavailable.");
   return data;

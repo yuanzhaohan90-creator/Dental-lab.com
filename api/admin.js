@@ -1,0 +1,326 @@
+const Busboy = require("busboy");
+const { isAdmin } = require("../lib/case-auth");
+const { protect, query, readJson, reply } = require("../lib/admin-http");
+const {
+  DEFAULT_HOMEPAGE,
+  DEFAULT_SETTINGS,
+  MEDIA_CATEGORIES,
+  deleteMedia,
+  getConfig,
+  getMedia,
+  getSubmission,
+  listMedia,
+  listSubmissions,
+  mediaUsage,
+  normalizeHomepage,
+  normalizeSettings,
+  publishConfig,
+  restoreConfig,
+  saveConfigDraft,
+  saveMedia,
+  saveSubmissionStatus,
+  storeMediaFile
+} = require("../lib/admin-store");
+const { listRecords, publicRecord, saveRecord } = require("../lib/case-store");
+
+function route(req) {
+  return query(req, "module") || "";
+}
+
+function parseUpload(req) {
+  return new Promise((resolve, reject) => {
+    if (!String(req.headers["content-type"] || "").includes("multipart/form-data")) return reject(Object.assign(new Error("Multipart form data is required."), { statusCode: 400 }));
+    const fields = {};
+    let file = null;
+    const busboy = Busboy({ headers: req.headers, limits: { files: 1, fields: 10, fileSize: 10 * 1024 * 1024 } });
+    busboy.on("field", (name, value) => { fields[name] = value; });
+    busboy.on("file", (field, stream, info) => {
+      if (!info.filename) return stream.resume();
+      const chunks = [];
+      let limited = false;
+      stream.on("limit", () => { limited = true; });
+      stream.on("data", (chunk) => chunks.push(chunk));
+      stream.on("end", () => {
+        if (limited) return reject(Object.assign(new Error("Image must be 10MB or smaller."), { statusCode: 413 }));
+        file = { filename: info.filename, contentType: String(info.mimeType || "").toLowerCase(), buffer: Buffer.concat(chunks) };
+      });
+    });
+    busboy.on("error", reject);
+    busboy.on("finish", () => file ? resolve({ fields, file }) : reject(Object.assign(new Error("Choose an image to upload."), { statusCode: 400 })));
+    req.pipe(busboy);
+  });
+}
+
+function adminSubmission(item, detail = false) {
+  const base = {
+    caseId: item.caseId,
+    submittedAt: item.submittedAt,
+    status: item.status,
+    fields: item.fields || {},
+    fileCount: item.files?.length || 0
+  };
+  if (!detail) return base;
+  return {
+    ...base,
+    files: (item.files || []).map((file, index) => ({
+      index,
+      originalName: file.originalName,
+      filename: file.filename,
+      size: file.size,
+      contentType: file.contentType,
+      downloadUrl: `/api/admin?module=submission-file&caseId=${encodeURIComponent(item.caseId)}&file=${index}`
+    }))
+  };
+}
+
+function safeDownloadName(value) {
+  return String(value || "download").replace(/[\r\n"\\/]+/g, "-").slice(0, 160);
+}
+
+async function adminMedia(record) {
+  const usedIn = await mediaUsage(record.id);
+  return { ...record, pathname: undefined, url: `/api/admin?module=media-image&id=${encodeURIComponent(record.id)}`, usedIn };
+}
+
+async function validateSelection(value) {
+  const ids = value?.selectedWork?.caseIds || [];
+  if (!Array.isArray(ids)) throw Object.assign(new Error("Selected cases must be a list."), { statusCode: 400 });
+  if (ids.length > 3) throw Object.assign(new Error("Select no more than three homepage cases."), { statusCode: 400 });
+  const cases = await listRecords();
+  const published = new Set(cases.filter((item) => item.status === "published").map((item) => item.id));
+  if (ids.some((id) => !published.has(id))) throw Object.assign(new Error("Homepage work must use published cases."), { statusCode: 400 });
+}
+
+async function syncFeaturedCases(ids) {
+  const selected = new Set(ids);
+  const cases = await listRecords();
+  for (const item of cases.filter((record) => record.featured && !selected.has(record.id))) {
+    await saveRecord({ ...item, featured: false, updatedAt: new Date().toISOString() });
+  }
+  for (const id of ids) {
+    const item = cases.find((record) => record.id === id);
+    if (item && !item.featured) await saveRecord({ ...item, featured: true, updatedAt: new Date().toISOString() });
+  }
+}
+
+async function homepageData(config) {
+  const cases = await listRecords();
+  return { config, publishedCases: cases.filter((item) => item.status === "published").map((item) => publicRecord(item)) };
+}
+
+async function mediaUrl(id, fallback) {
+  if (!id) return fallback;
+  const record = await getMedia(id);
+  return record ? `/api/admin?module=media-image&id=${encodeURIComponent(id)}` : fallback;
+}
+
+async function handleDashboard(req, res) {
+  if (req.method !== "GET") return reply(res, 405, { ok: false, error: "Method not allowed." });
+  const [cases, submissions] = await Promise.all([listRecords(), listSubmissions()]);
+  const published = cases.filter((item) => item.status === "published");
+  const drafts = cases.filter((item) => item.status !== "published");
+  const fresh = submissions.filter((item) => item.status === "New");
+  return reply(res, 200, {
+    ok: true,
+    counts: { publishedCases: published.length, draftCases: drafts.length, newSubmissions: fresh.length },
+    recentSubmissions: submissions.slice(0, 5).map((item) => ({ caseId: item.caseId, submittedAt: item.submittedAt, name: item.fields?.name || "", company: item.fields?.company || "", caseType: item.fields?.case_type || "", status: item.status })),
+    recentPublished: published.slice(0, 5).map((item) => ({ id: item.id, title: item.title, category: item.category, publishedAt: item.publishedAt }))
+  });
+}
+
+async function handleSubmissions(req, res) {
+  if (req.method === "GET") {
+    const id = query(req, "id");
+    if (id) {
+      const item = await getSubmission(id);
+      return item ? reply(res, 200, { ok: true, submission: adminSubmission(item, true) }) : reply(res, 404, { ok: false, error: "Submission not found." });
+    }
+    const items = await listSubmissions();
+    return reply(res, 200, { ok: true, submissions: items.map((item) => adminSubmission(item)) });
+  }
+  if (req.method === "PUT") {
+    const body = await readJson(req);
+    await saveSubmissionStatus(body.caseId, body.status);
+    const item = await getSubmission(body.caseId);
+    return reply(res, 200, { ok: true, submission: adminSubmission(item, true) });
+  }
+  return reply(res, 405, { ok: false, error: "Method not allowed." });
+}
+
+async function handleSubmissionFile(req, res) {
+  if (req.method !== "GET") {
+    res.statusCode = 405;
+    return res.end("GET required");
+  }
+  const submission = await getSubmission(query(req, "caseId"));
+  const index = Number(query(req, "file"));
+  const file = submission?.files?.[index];
+  if (!file || !file.pathname) {
+    res.statusCode = 404;
+    return res.end("File not found");
+  }
+  const { get } = await import("@vercel/blob");
+  const result = await get(file.pathname, { access: "private", useCache: false });
+  if (!result || result.statusCode !== 200 || !result.stream) {
+    res.statusCode = 404;
+    return res.end("File not found");
+  }
+  res.statusCode = 200;
+  res.setHeader("Content-Type", file.contentType || "application/octet-stream");
+  res.setHeader("Content-Length", String(file.size || result.blob.size));
+  res.setHeader("Content-Disposition", `attachment; filename="${safeDownloadName(file.filename || file.originalName)}"`);
+  res.setHeader("Cache-Control", "private, no-store");
+  const reader = result.stream.getReader();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    res.write(Buffer.from(value));
+  }
+  return res.end();
+}
+
+async function handleMedia(req, res) {
+  if (req.method === "GET") {
+    const records = await listMedia();
+    return reply(res, 200, { ok: true, media: await Promise.all(records.map(adminMedia)), categories: MEDIA_CATEGORIES });
+  }
+  if (req.method === "POST") {
+    const { fields, file } = await parseUpload(req);
+    const record = await storeMediaFile(file, fields);
+    return reply(res, 201, { ok: true, media: await adminMedia(record) });
+  }
+  if (req.method === "PUT") {
+    const body = await readJson(req);
+    const record = await getMedia(body.id);
+    if (!record) return reply(res, 404, { ok: false, error: "Media item not found." });
+    const saved = await saveMedia({ ...record, displayName: body.displayName, altText: body.altText, category: body.category });
+    return reply(res, 200, { ok: true, media: await adminMedia(saved) });
+  }
+  if (req.method === "DELETE") {
+    const record = await getMedia(query(req, "id"));
+    if (!record) return reply(res, 404, { ok: false, error: "Media item not found." });
+    const usedIn = await mediaUsage(record.id);
+    if (usedIn.length) return reply(res, 409, { ok: false, error: "This image is currently in use.", usedIn });
+    await deleteMedia(record);
+    return reply(res, 200, { ok: true });
+  }
+  return reply(res, 405, { ok: false, error: "Method not allowed." });
+}
+
+async function handleMediaImage(req, res) {
+  if (req.method !== "GET") {
+    res.statusCode = 405;
+    return res.end("GET required");
+  }
+  const record = await getMedia(query(req, "id"));
+  if (!record) {
+    res.statusCode = 404;
+    return res.end("Image not found");
+  }
+  const { get } = await import("@vercel/blob");
+  const result = await get(record.pathname, { access: "private" });
+  if (!result || result.statusCode !== 200 || !result.stream) {
+    res.statusCode = 404;
+    return res.end("Image not found");
+  }
+  res.statusCode = 200;
+  res.setHeader("Content-Type", record.contentType);
+  res.setHeader("Content-Length", String(record.size));
+  res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+  const reader = result.stream.getReader();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    res.write(Buffer.from(value));
+  }
+  return res.end();
+}
+
+async function handleHomepage(req, res) {
+  if (req.method === "GET") return reply(res, 200, { ok: true, ...(await homepageData(await getConfig("homepage", DEFAULT_HOMEPAGE))) });
+  if (req.method === "PUT") {
+    const body = await readJson(req);
+    await validateSelection(body);
+    const saved = await saveConfigDraft("homepage", DEFAULT_HOMEPAGE, body, normalizeHomepage);
+    return reply(res, 200, { ok: true, ...(await homepageData(saved)) });
+  }
+  if (req.method === "POST") {
+    const action = query(req, "action");
+    const current = await getConfig("homepage", DEFAULT_HOMEPAGE);
+    const target = action === "restore" ? current.previous : current.draft;
+    if (!target) throw Object.assign(new Error("No previous published version is available."), { statusCode: 400 });
+    await validateSelection(target);
+    await syncFeaturedCases(target.selectedWork.caseIds);
+    const saved = action === "restore" ? await restoreConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage) : await publishConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage);
+    return reply(res, 200, { ok: true, ...(await homepageData(saved)) });
+  }
+  return reply(res, 405, { ok: false, error: "Method not allowed." });
+}
+
+async function handleSettings(req, res) {
+  if (req.method === "GET") return reply(res, 200, { ok: true, settings: await getConfig("settings", DEFAULT_SETTINGS) });
+  if (req.method === "PUT") {
+    const saved = await saveConfigDraft("settings", DEFAULT_SETTINGS, await readJson(req), normalizeSettings);
+    return reply(res, 200, { ok: true, settings: saved });
+  }
+  if (req.method === "POST") {
+    const action = query(req, "action");
+    const saved = action === "restore" ? await restoreConfig("settings", DEFAULT_SETTINGS, normalizeSettings) : await publishConfig("settings", DEFAULT_SETTINGS, normalizeSettings);
+    return reply(res, 200, { ok: true, settings: saved });
+  }
+  return reply(res, 405, { ok: false, error: "Method not allowed." });
+}
+
+async function handlePublicSite(req, res) {
+  if (req.method !== "GET") {
+    res.statusCode = 405;
+    return res.end("GET required");
+  }
+  const [homepageConfig, settingsConfig, cases] = await Promise.all([
+    getConfig("homepage", DEFAULT_HOMEPAGE),
+    getConfig("settings", DEFAULT_SETTINGS),
+    listRecords()
+  ]);
+  const homepage = structuredClone(homepageConfig.published || DEFAULT_HOMEPAGE);
+  const settings = structuredClone(settingsConfig.published || DEFAULT_SETTINGS);
+  homepage.hero.imageUrl = await mediaUrl(homepage.hero.imageMediaId, homepage.hero.imagePath);
+  settings.defaultOgImageUrl = await mediaUrl(settings.defaultOgMediaId, settings.defaultOgImagePath);
+  const orderedIds = homepage.selectedWork.caseIds || [];
+  const featured = cases.filter((item) => item.status === "published" && item.featured).sort((a, b) => {
+    const left = orderedIds.indexOf(a.id);
+    const right = orderedIds.indexOf(b.id);
+    return (left === -1 ? 999 : left) - (right === -1 ? 999 : right);
+  });
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader("Cache-Control", "no-store");
+  return res.end(JSON.stringify({ ok: true, homepage, settings, selectedCases: featured.slice(0, 3).map((item) => publicRecord(item)) }));
+}
+
+module.exports = async function handler(req, res) {
+  const moduleName = route(req);
+  const publicModules = new Set(["public-site", "media-image"]);
+  if (!publicModules.has(moduleName) && !protect(req, res)) return;
+  if (moduleName === "submission-file" && !isAdmin(req)) {
+    res.statusCode = 401;
+    return res.end("Authentication required");
+  }
+  try {
+    if (moduleName === "dashboard") return handleDashboard(req, res);
+    if (moduleName === "submissions") return handleSubmissions(req, res);
+    if (moduleName === "submission-file") return handleSubmissionFile(req, res);
+    if (moduleName === "media") return handleMedia(req, res);
+    if (moduleName === "media-image") return handleMediaImage(req, res);
+    if (moduleName === "homepage") return handleHomepage(req, res);
+    if (moduleName === "settings") return handleSettings(req, res);
+    if (moduleName === "public-site") return handlePublicSite(req, res);
+    return reply(res, 404, { ok: false, error: "Admin module not found." });
+  } catch (error) {
+    console.error("admin_v1_error", moduleName, error);
+    if (moduleName === "media-image" || moduleName === "submission-file") {
+      res.statusCode = error.statusCode || 500;
+      return res.end(error.statusCode ? error.message : "Request failed");
+    }
+    return reply(res, error.statusCode || 500, { ok: false, error: error.statusCode ? error.message : "Admin request failed." });
+  }
+};

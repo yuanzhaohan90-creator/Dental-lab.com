@@ -90,7 +90,7 @@ navToggle.addEventListener("click", () => {
 async function loadDashboard() {
   const stats = document.getElementById("dashboardStats");
   try {
-    const data = await api("/api/admin-dashboard");
+    const data = await api("/api/admin?module=dashboard");
     stats.innerHTML = `<div class="admin-stat"><strong>${data.counts.publishedCases}</strong><span>Published Cases</span></div><div class="admin-stat"><strong>${data.counts.draftCases}</strong><span>Draft Cases</span></div><div class="admin-stat"><strong>${data.counts.newSubmissions}</strong><span>New Case Submissions</span></div>`;
     document.getElementById("dashboardSubmissions").innerHTML = data.recentSubmissions.length ? data.recentSubmissions.map((item) => `<a href="/admin/submissions?case=${encodeURIComponent(item.caseId)}"><span><strong>${escapeHtml(item.caseId)}</strong><small>${escapeHtml(item.name || item.company || "Customer submission")}</small></span><small>${formatDate(item.submittedAt)}</small></a>`).join("") : '<p class="admin-empty">No submissions yet.</p>';
     document.getElementById("dashboardPublished").innerHTML = data.recentPublished.length ? data.recentPublished.map((item) => `<a href="/admin/cases?case=${encodeURIComponent(item.id)}"><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.category)}</small></span><small>${formatDate(item.publishedAt)}</small></a>`).join("") : '<p class="admin-empty">No published work yet.</p>';
@@ -117,7 +117,7 @@ let currentSubmissionId = "";
 async function loadSubmissions() {
   const list = document.getElementById("submissionList");
   try {
-    const data = await api("/api/admin-submissions");
+    const data = await api("/api/admin?module=submissions");
     submissions = data.submissions;
     renderSubmissions();
     const requested = new URLSearchParams(location.search).get("case");
@@ -151,13 +151,13 @@ async function openSubmission(id) {
   const detail = document.getElementById("submissionDetail");
   detail.innerHTML = '<p class="admin-loading">Loading...</p>';
   try {
-    const { submission } = await api(`/api/admin-submissions?id=${encodeURIComponent(id)}`);
+    const { submission } = await api(`/api/admin?module=submissions&id=${encodeURIComponent(id)}`);
     const fields = submission.fields || {};
     const detailItems = [["Customer Name", fields.name], ["Company", fields.company], ["Email", fields.email], ["WhatsApp", fields.whatsapp], ["Country", fields.country], ["Case Type", fields.case_type], ["Implant Brand", fields.implant_brand], ["Implant System", fields.implant_system], ["Platform", fields.platform], ["Restoration Type", fields.restoration_type], ["Material", fields.material], ["Shade", fields.shade], ["Quantity", fields.quantity], ["Due Date", fields.due_date], ["Submitted", formatDate(submission.submittedAt)]];
     detail.innerHTML = `<div class="admin-detail-head"><div><p class="eyebrow">Customer Submission</p><h2>${escapeHtml(submission.caseId)}</h2></div><select id="submissionStatus"><option ${submission.status === "New" ? "selected" : ""}>New</option><option ${submission.status === "Reviewed" ? "selected" : ""}>Reviewed</option><option ${submission.status === "Archived" ? "selected" : ""}>Archived</option></select></div><dl class="admin-detail-grid">${detailItems.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(value || "-")}</dd></div>`).join("")}</dl><div class="admin-instructions"><strong>Case Instructions</strong><br>${escapeHtml(fields.instructions || "No instructions provided.")}</div><h3>Uploaded Files</h3><div class="admin-file-list">${submission.files.length ? submission.files.map((file) => `<div class="admin-file"><span><strong>${escapeHtml(file.originalName || file.filename)}</strong><br><small>${formatBytes(file.size)} · ${escapeHtml(file.contentType)}</small></span><a class="btn btn-secondary" href="${file.downloadUrl}">Download</a></div>`).join("") : '<p class="admin-empty">No files uploaded.</p>'}</div><div class="admin-copy-actions"><button class="btn btn-secondary" type="button" data-copy-value="${escapeHtml(fields.email)}">Copy Customer Email</button><button class="btn btn-secondary" type="button" data-copy-value="${escapeHtml(fields.whatsapp)}">Copy WhatsApp Number</button></div><div class="admin-message" id="submissionMessage" role="status"></div>`;
     document.getElementById("submissionStatus").addEventListener("change", async (event) => {
       try {
-        await api("/api/admin-submissions", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ caseId: id, status: event.target.value }) });
+        await api("/api/admin?module=submissions", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ caseId: id, status: event.target.value }) });
         const item = submissions.find((entry) => entry.caseId === id); if (item) item.status = event.target.value; renderSubmissions(); showMessage(document.getElementById("submissionMessage"), "Status updated.", "success");
       } catch (error) { showMessage(document.getElementById("submissionMessage"), error.message, "error"); }
     });
@@ -171,7 +171,7 @@ let mediaItems = [];
 
 async function loadMedia() {
   try {
-    const data = await api("/api/admin-media");
+    const data = await api("/api/admin?module=media");
     mediaItems = data.media;
     renderMedia();
   } catch (error) {
@@ -194,7 +194,7 @@ document.getElementById("mediaUploadForm").addEventListener("submit", async (eve
     data.append("category", form.elements.category.value);
     data.append("displayName", form.elements.displayName.value || form.elements.image.files[0].name.replace(/\.[^.]+$/, ""));
     data.append("altText", form.elements.altText.value);
-    await api("/api/admin-media", { method: "POST", body: data });
+    await api("/api/admin?module=media", { method: "POST", body: data });
     form.reset(); showMessage(message, "Media uploaded.", "success"); await loadMedia();
   } catch (error) { showMessage(message, error.message, "error"); }
 });
@@ -206,12 +206,12 @@ document.getElementById("mediaList").addEventListener("click", async (event) => 
     if (event.target.closest("[data-media-save]")) {
       const body = { id: card.dataset.mediaId };
       card.querySelectorAll("[data-media-key]").forEach((field) => { body[field.dataset.mediaKey] = field.value; });
-      await api("/api/admin-media", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      await api("/api/admin?module=media", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       showMessage(message, "Media details saved.", "success"); await loadMedia();
     }
     if (event.target.closest("[data-media-delete]")) {
       if (!confirm("Delete this unused public media item?")) return;
-      await api(`/api/admin-media?id=${encodeURIComponent(card.dataset.mediaId)}`, { method: "DELETE" });
+      await api(`/api/admin?module=media&id=${encodeURIComponent(card.dataset.mediaId)}`, { method: "DELETE" });
       await loadMedia();
     }
   } catch (error) {
@@ -231,7 +231,7 @@ let homepageData;
 async function loadHomepage() {
   const form = document.getElementById("homepageForm");
   try {
-    const [home, media] = await Promise.all([api("/api/admin-homepage"), api("/api/admin-media")]);
+    const [home, media] = await Promise.all([api("/api/admin?module=homepage"), api("/api/admin?module=media")]);
     homepageData = home;
     const draft = home.config.draft;
     form.elements.heroEyebrow.value = draft.hero.eyebrow;
@@ -259,7 +259,7 @@ function homepagePayload() {
 }
 
 async function saveHomepageDraft() {
-  const data = await api("/api/admin-homepage", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(homepagePayload()) });
+  const data = await api("/api/admin?module=homepage", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(homepagePayload()) });
   homepageData = data;
   showMessage(document.getElementById("homepageMessage"), "Homepage draft saved.", "success");
   return data;
@@ -267,14 +267,14 @@ async function saveHomepageDraft() {
 
 document.getElementById("homepageForm").addEventListener("submit", async (event) => { event.preventDefault(); try { await saveHomepageDraft(); } catch (error) { showMessage(document.getElementById("homepageMessage"), error.message, "error"); } });
 document.getElementById("previewHomepage").addEventListener("click", async () => { try { await saveHomepageDraft(); window.open("/?adminPreview=homepage", "_blank", "noopener"); } catch (error) { showMessage(document.getElementById("homepageMessage"), error.message, "error"); } });
-document.getElementById("publishHomepage").addEventListener("click", async () => { if (!confirm("Publish this homepage draft to the live website?")) return; try { await saveHomepageDraft(); await api("/api/admin-homepage?action=publish", { method: "POST" }); showMessage(document.getElementById("homepageMessage"), "Homepage published.", "success"); await loadHomepage(); } catch (error) { showMessage(document.getElementById("homepageMessage"), error.message, "error"); } });
-document.getElementById("restoreHomepage").addEventListener("click", async () => { if (!confirm("Restore the immediately previous published homepage version?")) return; try { await api("/api/admin-homepage?action=restore", { method: "POST" }); showMessage(document.getElementById("homepageMessage"), "Previous homepage version restored.", "success"); await loadHomepage(); } catch (error) { showMessage(document.getElementById("homepageMessage"), error.message, "error"); } });
+document.getElementById("publishHomepage").addEventListener("click", async () => { if (!confirm("Publish this homepage draft to the live website?")) return; try { await saveHomepageDraft(); await api("/api/admin?module=homepage&action=publish", { method: "POST" }); showMessage(document.getElementById("homepageMessage"), "Homepage published.", "success"); await loadHomepage(); } catch (error) { showMessage(document.getElementById("homepageMessage"), error.message, "error"); } });
+document.getElementById("restoreHomepage").addEventListener("click", async () => { if (!confirm("Restore the immediately previous published homepage version?")) return; try { await api("/api/admin?module=homepage&action=restore", { method: "POST" }); showMessage(document.getElementById("homepageMessage"), "Previous homepage version restored.", "success"); await loadHomepage(); } catch (error) { showMessage(document.getElementById("homepageMessage"), error.message, "error"); } });
 
 let settingsData;
 async function loadSettings() {
   const form = document.getElementById("settingsForm");
   try {
-    const [settings, media] = await Promise.all([api("/api/admin-settings"), api("/api/admin-media")]);
+    const [settings, media] = await Promise.all([api("/api/admin?module=settings"), api("/api/admin?module=media")]);
     settingsData = settings;
     const draft = settings.settings.draft;
     ["companyName", "publicEmail", "whatsapp", "whatsappUrl", "phone", "location", "defaultSeoTitle", "defaultSeoDescription"].forEach((name) => { form.elements[name].value = draft[name]; });
@@ -292,12 +292,12 @@ function settingsPayload() {
 }
 
 async function saveSettingsDraft() {
-  settingsData = await api("/api/admin-settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(settingsPayload()) });
+  settingsData = await api("/api/admin?module=settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(settingsPayload()) });
   showMessage(document.getElementById("settingsMessage"), "Settings draft saved.", "success");
 }
 
 document.getElementById("settingsForm").addEventListener("submit", async (event) => { event.preventDefault(); try { await saveSettingsDraft(); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
 document.getElementById("previewSettings").addEventListener("click", async () => { try { await saveSettingsDraft(); window.open("/?adminPreview=settings", "_blank", "noopener"); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
-document.getElementById("publishSettings").addEventListener("click", async () => { if (!confirm("Publish these public settings?")) return; try { await saveSettingsDraft(); await api("/api/admin-settings?action=publish", { method: "POST" }); showMessage(document.getElementById("settingsMessage"), "Settings published.", "success"); await loadSettings(); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
+document.getElementById("publishSettings").addEventListener("click", async () => { if (!confirm("Publish these public settings?")) return; try { await saveSettingsDraft(); await api("/api/admin?module=settings&action=publish", { method: "POST" }); showMessage(document.getElementById("settingsMessage"), "Settings published.", "success"); await loadSettings(); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
 
 initialize();
