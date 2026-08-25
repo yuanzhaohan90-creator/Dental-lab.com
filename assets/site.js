@@ -60,7 +60,7 @@ async function loadPublicSiteData() {
   const params = new URLSearchParams(window.location.search);
   const preview = params.get("adminPreview");
   if (preview === "homepage") {
-    const response = await fetch("/api/admin-homepage", { cache: "no-store" });
+    const response = await fetch("/api/admin?module=homepage", { cache: "no-store" });
     const data = await response.json();
     if (!response.ok || !data.ok) throw new Error(data.error || "Homepage preview unavailable.");
     const draft = structuredClone(data.config.draft);
