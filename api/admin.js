@@ -313,14 +313,14 @@ module.exports = async function handler(req, res) {
     return res.end("Authentication required");
   }
   try {
-    if (moduleName === "dashboard") return handleDashboard(req, res);
-    if (moduleName === "submissions") return handleSubmissions(req, res);
-    if (moduleName === "submission-file") return handleSubmissionFile(req, res);
-    if (moduleName === "media") return handleMedia(req, res);
-    if (moduleName === "media-image") return handleMediaImage(req, res);
-    if (moduleName === "homepage") return handleHomepage(req, res);
-    if (moduleName === "settings") return handleSettings(req, res);
-    if (moduleName === "public-site") return handlePublicSite(req, res);
+    if (moduleName === "dashboard") return await handleDashboard(req, res);
+    if (moduleName === "submissions") return await handleSubmissions(req, res);
+    if (moduleName === "submission-file") return await handleSubmissionFile(req, res);
+    if (moduleName === "media") return await handleMedia(req, res);
+    if (moduleName === "media-image") return await handleMediaImage(req, res);
+    if (moduleName === "homepage") return await handleHomepage(req, res);
+    if (moduleName === "settings") return await handleSettings(req, res);
+    if (moduleName === "public-site") return await handlePublicSite(req, res);
     return reply(res, 404, { ok: false, error: "Admin module not found." });
   } catch (error) {
     console.error("admin_v1_error", moduleName, error);
