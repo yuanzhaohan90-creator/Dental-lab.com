@@ -11,6 +11,8 @@ const existingImages = document.getElementById("existingImages");
 const newImages = document.getElementById("newImages");
 
 const state = { cases: [], current: null, categories: [], imageTypes: [], existing: [], newFiles: [] };
+const nextPath = new URLSearchParams(window.location.search).get("next");
+const publishPrivacyText = "Confirm that this content contains no unauthorized patient-identifying information.\n\nDo not publish patient names, DOB, chart numbers, faces, prescriptions containing identifying information, or other patient-identifying data without appropriate authorization.";
 
 function escapeHtml(value) {
   const element = document.createElement("div");
@@ -89,7 +91,7 @@ function updateTypeUI() {
   document.getElementById("upgradeCaseButton").hidden = isCaseStudy;
   document.getElementById("imageLimitNote").textContent = isCaseStudy
     ? "Featured Case Studies support extended image sequences. Add only the stages available for this case."
-    : "Quick Work requires 1–6 additional images. Use the arrow controls to set display order.";
+    : "Quick Work supports 0–6 additional images. Use the arrow controls to set display order.";
 }
 
 function openEditor(item = null, requestedType = "quick_work") {
@@ -157,8 +159,14 @@ async function saveCase(statusOverride) {
   if (existingCover) existingCover.caption = editor.elements.coverCaption.value;
   if (!editor.reportValidity()) return null;
   const additionalCount = state.existing.filter((image) => !image.isCover).length + state.newFiles.length;
-  if (editor.elements.contentType.value === "quick_work" && (additionalCount < 1 || additionalCount > 6)) {
-    showMessage(editorMessage, "Quick Work requires 1–6 additional images.", "error");
+  if (editor.elements.contentType.value === "quick_work" && additionalCount > 6) {
+    showMessage(editorMessage, "Quick Work supports up to 6 additional images.", "error");
+    return null;
+  }
+  const nextStatus = statusOverride || editor.elements.status.value;
+  const isPublishing = nextStatus === "published" && state.current?.status !== "published";
+  if (isPublishing && !confirm(publishPrivacyText)) {
+    showMessage(editorMessage, "Publishing cancelled. Review privacy details before publishing.", "error");
     return null;
   }
   const formData = new FormData();
@@ -180,11 +188,11 @@ loginForm.addEventListener("submit", async (event) => {
   event.preventDefault(); showMessage(loginMessage, "Signing in...");
   try {
     await api("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: loginForm.elements.password.value }) });
-    loginForm.reset(); setAuthenticated(true); await loadCases();
+    loginForm.reset(); setAuthenticated(true); await loadCases(); handleInitialAction();
   } catch (error) { showMessage(loginMessage, error.message, "error"); }
 });
 
-logoutButton.addEventListener("click", async () => { await api("/api/admin-auth", { method: "DELETE" }); setAuthenticated(false); editor.hidden = true; });
+logoutButton.addEventListener("click", async () => { await api("/api/admin-auth", { method: "DELETE" }); setAuthenticated(false); editor.hidden = true; window.location.href = "/admin"; });
 document.getElementById("addQuickWorkButton").addEventListener("click", () => openEditor(null, "quick_work"));
 document.getElementById("addCaseStudyButton").addEventListener("click", () => openEditor(null, "case_study"));
 editor.elements.contentType.addEventListener("change", updateTypeUI);
@@ -235,4 +243,28 @@ document.getElementById("deleteCaseButton").addEventListener("click", async () =
   catch (error) { showMessage(editorMessage, error.message, "error"); }
 });
 
-api("/api/admin-auth").then(async (data) => { setAuthenticated(data.authenticated); if (data.authenticated) await loadCases(); }).catch(() => setAuthenticated(false));
+function handleInitialAction() {
+  const params = new URLSearchParams(window.location.search);
+  const action = params.get("action");
+  const caseId = params.get("case");
+  if (caseId) {
+    const item = state.cases.find((candidate) => candidate.id === caseId);
+    if (item) openEditor(item);
+    return;
+  }
+  if (action === "quick") openEditor(null, "quick_work");
+  if (action === "featured") openEditor(null, "case_study");
+}
+
+api("/api/admin-auth").then(async (data) => {
+  setAuthenticated(data.authenticated);
+  if (data.authenticated) {
+    await loadCases();
+    handleInitialAction();
+    return;
+  }
+  const returnPath = `${window.location.pathname}${window.location.search}`;
+  if (window.location.pathname === "/admin/cases" && !nextPath) {
+    window.location.href = `/admin?next=${encodeURIComponent(returnPath)}`;
+  }
+}).catch(() => setAuthenticated(false));

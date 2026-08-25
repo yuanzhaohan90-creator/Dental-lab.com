@@ -6,7 +6,8 @@
     "start": "vercel dev",
     "check": "node scripts/check-site.js",
     "test:submit-case": "node scripts/test-submit-case.js",
-    "test:case-library": "node scripts/test-case-library.js"
+    "test:case-library": "node scripts/test-case-library.js",
+    "test:admin": "node scripts/test-admin-v1.js"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

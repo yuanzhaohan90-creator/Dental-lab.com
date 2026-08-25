@@ -39,7 +39,8 @@ assert.doesNotThrow(() => validateRecord({
   ...normalized,
   images: [{ isCover: true }, { isCover: false }]
 }));
-assert.throws(() => validateRecord({ ...normalized, images: [{ isCover: true }] }), /additional image/);
+assert.doesNotThrow(() => validateRecord({ ...normalized, images: [{ isCover: true }] }));
+assert.throws(() => validateRecord({ ...normalized, images: [{ isCover: true }, ...Array.from({ length: 7 }, () => ({ isCover: false }))] }), /up to 6/);
 const study = normalizeFields({ title: "Featured", category: CATEGORIES[1], contentType: "case_study" });
 assert.doesNotThrow(() => validateRecord({ ...study, images: [{ isCover: true }] }));
 

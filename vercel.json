@@ -60,8 +60,28 @@
       "destination": "/api/case-page?slug=:slug"
     },
     {
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    },
+    {
       "source": "/admin/cases",
       "destination": "/admin/cases.html"
+    },
+    {
+      "source": "/admin/submissions",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin/media",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin/homepage",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin/settings",
+      "destination": "/admin/index.html"
     },
     {
       "source": "/full-arch/zirconia-titanium-workflow",
