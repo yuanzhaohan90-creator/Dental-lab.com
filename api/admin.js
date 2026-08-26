@@ -3,6 +3,7 @@ const { isAdmin } = require("../lib/case-auth");
 const { protect, query, readJson, reply } = require("../lib/admin-http");
 const {
   DEFAULT_HOMEPAGE,
+  DEFAULT_PAGE_CONFIGS,
   DEFAULT_SETTINGS,
   MEDIA_CATEGORIES,
   deleteMedia,
@@ -13,12 +14,14 @@ const {
   listSubmissions,
   mediaUsage,
   normalizeHomepage,
+  normalizePageConfig,
   normalizeSettings,
   publishConfig,
   restoreConfig,
   saveConfigDraft,
   saveMedia,
   saveSubmissionStatus,
+  storeClientMedia,
   storeMediaFile
 } = require("../lib/admin-store");
 const { listRecords, publicRecord, saveRecord } = require("../lib/case-store");
@@ -79,7 +82,7 @@ function safeDownloadName(value) {
 
 async function adminMedia(record) {
   const usedIn = await mediaUsage(record.id);
-  return { ...record, pathname: undefined, url: `/api/admin?module=media-image&id=${encodeURIComponent(record.id)}`, usedIn };
+  return { ...record, pathname: undefined, mediaType: record.contentType === "video/mp4" ? "video" : "image", url: `/api/admin?module=media-image&id=${encodeURIComponent(record.id)}`, usedIn };
 }
 
 async function validateSelection(value) {
@@ -92,6 +95,28 @@ async function validateSelection(value) {
   const cases = await listRecords();
   const published = new Set(cases.filter((item) => item.status === "published").map((item) => item.id));
   if (cleanIds.some((id) => !published.has(id))) throw Object.assign(new Error("Homepage work must use published cases."), { statusCode: 400 });
+}
+
+function pageConfig(page) {
+  const defaults = DEFAULT_PAGE_CONFIGS[page];
+  if (!defaults) throw Object.assign(new Error("Page editor not found."), { statusCode: 404 });
+  return { defaults, name: `page-${page}`, normalize: (value) => normalizePageConfig(page, value) };
+}
+
+async function validatePageCases(page, value) {
+  const ids = [];
+  if (page === "implant" && value?.featuredWork?.caseId) ids.push([value.featuredWork.caseId, false]);
+  if (page === "fullArch") {
+    if (value?.featuredCase?.caseId) ids.push([value.featuredCase.caseId, true]);
+    for (const option of value?.restorationOptions || []) if (option.caseId) ids.push([option.caseId, false]);
+  }
+  if (!ids.length) return;
+  const records = await listRecords();
+  for (const [id, caseStudyRequired] of ids) {
+    const record = records.find((item) => item.id === id && item.status === "published");
+    if (!record) throw Object.assign(new Error("Featured work must use a Published case."), { statusCode: 400 });
+    if (caseStudyRequired && record.contentType !== "case_study") throw Object.assign(new Error("Featured Full-Arch Case must use a Published Case Study."), { statusCode: 400 });
+  }
 }
 
 async function syncFeaturedCases(ids) {
@@ -115,6 +140,22 @@ async function mediaUrl(id, fallback) {
   if (!id) return fallback;
   const record = await getMedia(id);
   return record ? `/api/admin?module=media-image&id=${encodeURIComponent(id)}` : fallback;
+}
+
+async function resolveMedia(slot = {}) {
+  return {
+    ...slot,
+    url: await mediaUrl(slot.mediaId, slot.fallbackPath),
+    posterUrl: await mediaUrl(slot.posterMediaId, "")
+  };
+}
+
+async function resolvePageMedia(value) {
+  if (Array.isArray(value)) return Promise.all(value.map(resolvePageMedia));
+  if (!value || typeof value !== "object") return value;
+  if (Object.hasOwn(value, "mediaId") && Object.hasOwn(value, "fallbackPath")) return resolveMedia(value);
+  const entries = await Promise.all(Object.entries(value).map(async ([key, child]) => [key, await resolvePageMedia(child)]));
+  return Object.fromEntries(entries);
 }
 
 async function handleDashboard(req, res) {
@@ -210,6 +251,44 @@ async function handleMedia(req, res) {
   return reply(res, 405, { ok: false, error: "Method not allowed." });
 }
 
+async function handleMediaUpload(req, res) {
+  if (req.method !== "POST") return reply(res, 405, { ok: false, error: "Method not allowed." });
+  const body = await readJson(req);
+  const { handleUpload } = require("@vercel/blob/client");
+  const result = await handleUpload({
+    request: req,
+    body,
+    onBeforeGenerateToken: async (pathname, clientPayload) => {
+      if (!isAdmin(req)) throw Object.assign(new Error("Authentication required."), { statusCode: 401 });
+      if (!String(pathname || "").startsWith("admin/media/files/")) throw Object.assign(new Error("Invalid media path."), { statusCode: 400 });
+      let metadata = {};
+      try { metadata = JSON.parse(clientPayload || "{}"); } catch { metadata = {}; }
+      const size = Number(metadata.size) || 0;
+      if (size > 100 * 1024 * 1024) throw Object.assign(new Error("Media must be 100MB or smaller."), { statusCode: 413 });
+      return {
+        allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "video/mp4"],
+        maximumSizeInBytes: 100 * 1024 * 1024,
+        addRandomSuffix: true,
+        allowOverwrite: false,
+        cacheControlMaxAge: 31536000
+      };
+    }
+  });
+  return reply(res, 200, result);
+}
+
+async function handleMediaFinalize(req, res) {
+  if (req.method !== "POST") return reply(res, 405, { ok: false, error: "Method not allowed." });
+  const body = await readJson(req);
+  const { get } = await import("@vercel/blob");
+  const pathname = String(body?.blob?.pathname || "");
+  if (!pathname.startsWith("admin/media/files/")) throw Object.assign(new Error("Uploaded media is not valid."), { statusCode: 400 });
+  const stored = await get(pathname, { access: "private", useCache: false });
+  if (!stored || stored.statusCode !== 200) throw Object.assign(new Error("Uploaded media could not be verified."), { statusCode: 400 });
+  const record = await storeClientMedia(body.blob, body.metadata || {});
+  return reply(res, 201, { ok: true, media: await adminMedia(record) });
+}
+
 async function handleMediaImage(req, res) {
   if (req.method !== "GET") {
     res.statusCode = 405;
@@ -218,17 +297,18 @@ async function handleMediaImage(req, res) {
   const record = await getMedia(query(req, "id"));
   if (!record) {
     res.statusCode = 404;
-    return res.end("Image not found");
+    return res.end("Media not found");
   }
   const { get } = await import("@vercel/blob");
   const result = await get(record.pathname, { access: "private" });
   if (!result || result.statusCode !== 200 || !result.stream) {
     res.statusCode = 404;
-    return res.end("Image not found");
+    return res.end("Media not found");
   }
   res.statusCode = 200;
   res.setHeader("Content-Type", record.contentType);
-  res.setHeader("Content-Length", String(record.size));
+  if (record.size) res.setHeader("Content-Length", String(record.size));
+  res.setHeader("Content-Disposition", "inline");
   res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
   const reader = result.stream.getReader();
   while (true) {
@@ -240,7 +320,11 @@ async function handleMediaImage(req, res) {
 }
 
 async function handleHomepage(req, res) {
-  if (req.method === "GET") return reply(res, 200, { ok: true, ...(await homepageData(await getConfig("homepage", DEFAULT_HOMEPAGE))) });
+  if (req.method === "GET") {
+    const current = await getConfig("homepage", DEFAULT_HOMEPAGE);
+    const config = { ...current, draft: normalizeHomepage(current.draft), published: normalizeHomepage(current.published), previous: current.previous ? normalizeHomepage(current.previous) : null };
+    return reply(res, 200, { ok: true, ...(await homepageData(config)), preview: await resolvePageMedia(config.draft) });
+  }
   if (req.method === "PUT") {
     const body = await readJson(req);
     await validateSelection(body);
@@ -264,6 +348,34 @@ async function handleHomepage(req, res) {
   return reply(res, 405, { ok: false, error: "Method not allowed." });
 }
 
+async function handlePageEditor(req, res) {
+  const page = query(req, "page");
+  if (page === "home") return handleHomepage(req, res);
+  const { defaults, name, normalize } = pageConfig(page);
+  if (req.method === "GET") {
+    const current = await getConfig(name, defaults);
+    const config = { ...current, draft: normalize(current.draft), published: normalize(current.published), previous: current.previous ? normalize(current.previous) : null };
+    const cases = (await listRecords()).filter((item) => item.status === "published").map((item) => publicRecord(item));
+    return reply(res, 200, { ok: true, page, config, preview: await resolvePageMedia(config.draft), publishedCases: cases });
+  }
+  if (req.method === "PUT") {
+    const body = await readJson(req);
+    await validatePageCases(page, body);
+    const saved = await saveConfigDraft(name, defaults, body, normalize);
+    return reply(res, 200, { ok: true, page, config: saved });
+  }
+  if (req.method === "POST") {
+    const action = query(req, "action");
+    const current = await getConfig(name, defaults);
+    const target = action === "restore" ? current.previous : current.draft;
+    if (!target) throw Object.assign(new Error("No previous published version is available."), { statusCode: 400 });
+    await validatePageCases(page, target);
+    const saved = action === "restore" ? await restoreConfig(name, defaults, normalize) : await publishConfig(name, defaults, normalize);
+    return reply(res, 200, { ok: true, page, config: saved });
+  }
+  return reply(res, 405, { ok: false, error: "Method not allowed." });
+}
+
 async function handleSettings(req, res) {
   if (req.method === "GET") return reply(res, 200, { ok: true, settings: await getConfig("settings", DEFAULT_SETTINGS) });
   if (req.method === "PUT") {
@@ -283,14 +395,23 @@ async function handlePublicSite(req, res) {
     res.statusCode = 405;
     return res.end("GET required");
   }
-  const [homepageConfig, settingsConfig, cases] = await Promise.all([
+  const [homepageConfig, implantConfig, fullArchConfig, aboutConfig, settingsConfig, cases] = await Promise.all([
     getConfig("homepage", DEFAULT_HOMEPAGE),
+    getConfig("page-implant", DEFAULT_PAGE_CONFIGS.implant),
+    getConfig("page-fullArch", DEFAULT_PAGE_CONFIGS.fullArch),
+    getConfig("page-about", DEFAULT_PAGE_CONFIGS.about),
     getConfig("settings", DEFAULT_SETTINGS),
     listRecords()
   ]);
-  const homepage = structuredClone(homepageConfig.published || DEFAULT_HOMEPAGE);
+  const homepage = normalizeHomepage(homepageConfig.published || DEFAULT_HOMEPAGE);
+  const pages = {
+    implant: normalizePageConfig("implant", implantConfig.published || DEFAULT_PAGE_CONFIGS.implant),
+    fullArch: normalizePageConfig("fullArch", fullArchConfig.published || DEFAULT_PAGE_CONFIGS.fullArch),
+    about: normalizePageConfig("about", aboutConfig.published || DEFAULT_PAGE_CONFIGS.about)
+  };
   const settings = structuredClone(settingsConfig.published || DEFAULT_SETTINGS);
-  homepage.hero.imageUrl = await mediaUrl(homepage.hero.imageMediaId, homepage.hero.imagePath);
+  const resolvedHomepage = await resolvePageMedia(homepage);
+  const resolvedPages = await resolvePageMedia(pages);
   settings.defaultOgImageUrl = await mediaUrl(settings.defaultOgMediaId, settings.defaultOgImagePath);
   const orderedIds = homepage.selectedWork.caseIds || [];
   const featured = cases.filter((item) => item.status === "published" && item.featured).sort((a, b) => {
@@ -301,7 +422,7 @@ async function handlePublicSite(req, res) {
   res.statusCode = 200;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");
-  return res.end(JSON.stringify({ ok: true, homepage, settings, selectedCases: featured.slice(0, 3).map((item) => publicRecord(item)) }));
+  return res.end(JSON.stringify({ ok: true, homepage: resolvedHomepage, pages: resolvedPages, settings, selectedCases: featured.slice(0, 3).map((item) => publicRecord(item)), publishedCases: cases.filter((item) => item.status === "published").map((item) => publicRecord(item)) }));
 }
 
 module.exports = async function handler(req, res) {
@@ -317,8 +438,11 @@ module.exports = async function handler(req, res) {
     if (moduleName === "submissions") return await handleSubmissions(req, res);
     if (moduleName === "submission-file") return await handleSubmissionFile(req, res);
     if (moduleName === "media") return await handleMedia(req, res);
+    if (moduleName === "media-upload") return await handleMediaUpload(req, res);
+    if (moduleName === "media-finalize") return await handleMediaFinalize(req, res);
     if (moduleName === "media-image") return await handleMediaImage(req, res);
     if (moduleName === "homepage") return await handleHomepage(req, res);
+    if (moduleName === "page-editor") return await handlePageEditor(req, res);
     if (moduleName === "settings") return await handleSettings(req, res);
     if (moduleName === "public-site") return await handlePublicSite(req, res);
     return reply(res, 404, { ok: false, error: "Admin module not found." });

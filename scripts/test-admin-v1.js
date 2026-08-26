@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { DEFAULT_HOMEPAGE, DEFAULT_SETTINGS, normalizeHomepage, normalizeSettings } = require("../lib/admin-store");
+const { DEFAULT_HOMEPAGE, DEFAULT_PAGE_CONFIGS, DEFAULT_SETTINGS, normalizeHomepage, normalizePageConfig, normalizeSettings } = require("../lib/admin-store");
 
 const long = "x".repeat(1000);
 const homepage = normalizeHomepage({
@@ -25,11 +25,28 @@ const homepage = normalizeHomepage({
 assert.equal(homepage.hero.eyebrow.length, 160);
 assert.equal(homepage.hero.heading, "Preview Heading");
 assert.equal(homepage.hero.description.length, 500);
+assert.equal(homepage.hero.media.mediaId, "MEDIA-ABC");
 assert.deepEqual(homepage.selectedWork.caseIds, ["CASE-1", "CASE-2", "CASE-3"]);
+assert.equal(homepage.workflow.items.length, 4);
 
 const fallbackHomepage = normalizeHomepage({});
 assert.equal(fallbackHomepage.hero.heading, DEFAULT_HOMEPAGE.hero.heading);
 assert.equal(fallbackHomepage.selectedWork.caseIds.length, 0);
+assert.equal(fallbackHomepage.hero.media.fallbackPath, DEFAULT_HOMEPAGE.hero.media.fallbackPath);
+
+const implant = normalizePageConfig("implant", { hero: { heading: "Implant Editor", media: { mediaId: "MEDIA-IMPLANT" } }, featuredWork: { caseId: "CASE-1" } });
+assert.equal(implant.hero.heading, "Implant Editor");
+assert.equal(implant.hero.media.mediaId, "MEDIA-IMPLANT");
+assert.equal(implant.featuredWork.caseId, "CASE-1");
+
+const fullArch = normalizePageConfig("fullArch", { restorationOptions: [{ heading: "PMMA Updated", media: { mediaType: "video", mediaId: "MEDIA-VIDEO" } }] });
+assert.equal(fullArch.restorationOptions.length, 3);
+assert.equal(fullArch.restorationOptions[0].heading, "PMMA Updated");
+assert.equal(fullArch.restorationOptions[0].media.mediaType, "video");
+assert.equal(fullArch.hero.heading, DEFAULT_PAGE_CONFIGS.fullArch.hero.heading);
+
+const about = normalizePageConfig("about", { packing: { media: { mediaId: "MEDIA-PACKING" } } });
+assert.equal(about.packing.media.mediaId, "MEDIA-PACKING");
 
 const settings = normalizeSettings({
   companyName: "  YZH Lab  ",

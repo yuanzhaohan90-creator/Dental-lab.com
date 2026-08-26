@@ -27,10 +27,9 @@
       <a href="/">Home</a>
       <a href="/implant-restorations">Implant</a>
       <a href="/full-arch-all-on-x">Full Arch</a>
-      <a href="/crown-bridge">Crown & Bridge</a>
-      <a href="/digital-dentistry">Digital Workflow</a>
+      <a href="/cases">Cases</a>
       <a href="/about">About</a>
-      <a href="/submit-case">Contact</a>
+      <a href="/submit-case">Submit Case</a>
     </nav>
     <a class="btn btn-primary nav-cta" href="/submit-case">Send a Trial Case</a>
   </div>
@@ -40,15 +39,15 @@
   <section class="hero">
     <div class="wrap hero-grid">
       <div class="hero-copy">
-        <p class="eyebrow">Digital dental lab in China for overseas partners</p>
-        <h1>Complex Implant Cases. Solved.</h1>
-        <p class="lead">Implant restorations, full-arch and CAD/CAM support for overseas dental laboratories and clinics.</p>
+        <p class="eyebrow" data-manager-text="hero.eyebrow">Digital dental lab in China for overseas partners</p>
+        <h1 data-manager-text="hero.heading">Complex Implant Cases. Solved.</h1>
+        <p class="lead" data-manager-text="hero.description">Implant restorations, full-arch and CAD/CAM support for overseas dental laboratories and clinics.</p>
         <div class="cta-row">
-          <a class="btn btn-primary" href="/submit-case">Send a Trial Case</a>
-          <a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a>
+          <a class="btn btn-primary" href="/submit-case" data-manager-text="hero.primaryLabel" data-manager-href="hero.primaryDestination">Send a Trial Case</a>
+          <a class="btn btn-green" href="https://wa.me/8613714730109" data-manager-text="hero.secondaryLabel" data-manager-href="hero.secondaryDestination" target="_blank" rel="noreferrer">WhatsApp Technical Team</a>
         </div>
       </div>
-      <figure class="hero-visual">
+      <figure class="hero-visual" data-manager-media="hero.media">
         <img src="/assets/real/hero-full-arch-premium-01.jpg" alt="Full arch implant restoration by YZH Dental Lab" width="900" height="675" fetchpriority="high">
         <figcaption>Full-arch, implant and CAD/CAM restorative support for lab-to-lab outsourcing.</figcaption>
       </figure>
@@ -101,26 +100,13 @@
     </div>
   </section>
 
-  <section class="section trial compact-section">
-    <div class="wrap two-col">
-      <div>
-        <p class="eyebrow">Start With One Trial Case</p>
-        <h2>You do not need to move your full workload at once.</h2>
-        <p class="copy">Send one implant, full-arch or restorative case first. Our technical team will review the files, confirm the case details and communicate before production.</p>
-      </div>
-      <div class="cta-panel">
-        <a class="btn btn-primary" href="/submit-case">Send a Trial Case</a>
-        <a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a>
-      </div>
-    </div>
-  </section>
-
   <section class="section dark">
     <div class="wrap workflow-intro">
       <div>
-        <p class="eyebrow">Technical Review</p>
-        <h2>Complex Cases Need More Than Manufacturing</h2>
-        <p class="copy">Before production, the case should be checked for the details that most often create remakes or delays.</p>
+        <p class="eyebrow" data-manager-text="technicalProof.eyebrow">Technical Review</p>
+        <h2 data-manager-text="technicalProof.heading">Complex Cases Need More Than Manufacturing</h2>
+        <p class="copy" data-manager-text="technicalProof.description">Before production, the case should be checked for the details that most often create remakes or delays.</p>
+        <div class="managed-section-media" data-manager-media="technicalProof.media" data-hide-when-empty hidden></div>
         <div class="tick-list">
           <span>Implant system / platform</span>
           <span>Scanbody / component matching</span>
@@ -129,11 +115,23 @@
         </div>
       </div>
       <div class="steps">
-        <article><span>01</span><h3>Send Case</h3><p>Send files, prescription, implant details, photos and due date.</p></article>
-        <article><span>02</span><h3>Review</h3><p>We check missing information and technical risk points.</p></article>
-        <article><span>03</span><h3>Design & Production</h3><p>CAD design and production move forward after required details are clear.</p></article>
-        <article><span>04</span><h3>QC & Dispatch</h3><p>Fit, contacts, occlusion, finish and case details are checked before shipment.</p></article>
+        <div class="managed-workflow-head"><p class="eyebrow" data-manager-text="workflow.eyebrow">Digital Workflow</p><h3 data-manager-text="workflow.heading">From files to final QC.</h3><p data-manager-text="workflow.description">Files, design, production and QC are coordinated through one technical workflow.</p></div>
+        <article><div class="workflow-step-media" data-manager-media="workflow.items.0.media" data-hide-when-empty hidden></div><span>01</span><h3 data-manager-text="workflow.items.0.label">Files</h3><p>Send files, prescription, implant details, photos and due date.</p></article>
+        <article><div class="workflow-step-media" data-manager-media="workflow.items.1.media" data-hide-when-empty hidden></div><span>02</span><h3 data-manager-text="workflow.items.1.label">CAD / Design</h3><p>We check missing information and technical risk points.</p></article>
+        <article><div class="workflow-step-media" data-manager-media="workflow.items.2.media" data-hide-when-empty hidden></div><span>03</span><h3 data-manager-text="workflow.items.2.label">Production</h3><p>CAD design and production move forward after required details are clear.</p></article>
+        <article><div class="workflow-step-media" data-manager-media="workflow.items.3.media" data-hide-when-empty hidden></div><span>04</span><h3 data-manager-text="workflow.items.3.label">QC</h3><p>Fit, contacts, occlusion, finish and case details are checked before shipment.</p></article>
       </div>
+    </div>
+  </section>
+
+  <section class="section trial compact-section">
+    <div class="wrap two-col">
+      <div>
+        <p class="eyebrow" data-manager-text="finalCta.eyebrow">Start With One Trial Case</p>
+        <h2 data-manager-text="finalCta.heading">You do not need to move your full workload at once.</h2>
+        <p class="copy" data-manager-text="finalCta.description">Send one implant, full-arch or restorative case first. Our technical team will review the files, confirm the case details and communicate before production.</p>
+      </div>
+      <div><div class="managed-cta-media" data-manager-media="finalCta.media" data-hide-when-empty hidden></div><div class="cta-panel"><a class="btn btn-primary" href="/submit-case" data-manager-text="finalCta.primaryLabel" data-manager-href="finalCta.primaryDestination">Send a Trial Case</a><a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a></div></div>
     </div>
   </section>
 </main>

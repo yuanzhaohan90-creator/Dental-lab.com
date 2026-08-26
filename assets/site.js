@@ -1,6 +1,7 @@
 const menuButton = document.querySelector(".menu-toggle");
 const nav = document.getElementById("primaryNav");
 if (menuButton && nav) {
+  nav.innerHTML = '<a href="/">Home</a><a href="/implant-restorations">Implant</a><a href="/full-arch-all-on-x">Full Arch</a><a href="/cases">Cases</a><a href="/about">About</a><a href="/submit-case">Submit Case</a>';
   menuButton.addEventListener("click", () => {
     const open = nav.classList.toggle("open");
     menuButton.setAttribute("aria-expanded", open ? "true" : "false");
@@ -27,14 +28,14 @@ function setMeta(selector, value) {
 function makeCaseCard(item, index) {
   const cover = item.coverImage?.url || "/assets/real/full-arch-titanium-framework-10.jpg";
   const lines = [item.material, item.implantSystem, item.restorationType].filter(Boolean).slice(0, 2).join(" · ");
-  const url = item.contentType === "case_study" ? `/cases/${encodeURIComponent(item.slug)}` : "/cases";
+  const url = `/cases/${encodeURIComponent(item.slug)}`;
   return `<article class="priority-case ${index === 0 ? "large" : ""}">
     <img src="${cover}" alt="${escapeAttr(item.coverImage?.caption || item.title)}">
     <div>
       <p class="case-category">${escapeHtml(item.category)}</p>
       <h3>${escapeHtml(item.title)}</h3>
       <p>${escapeHtml(lines || item.shortNote || item.summary || "Completed dental work with technical review before production.")}</p>
-      <a class="text-link" href="${url}">${item.contentType === "case_study" ? "View Case Study" : "View Recent Work"}</a>
+      <a class="text-link" href="${url}">${item.contentType === "case_study" ? "View Case Study" : "View Work"}</a>
     </div>
   </article>`;
 }
@@ -59,36 +60,100 @@ function showPreviewBanner(kind) {
 async function loadPublicSiteData() {
   const params = new URLSearchParams(window.location.search);
   const preview = params.get("adminPreview");
-  if (preview === "homepage") {
-    const response = await fetch("/api/admin?module=homepage", { cache: "no-store" });
-    const data = await response.json();
-    if (!response.ok || !data.ok) throw new Error(data.error || "Homepage preview unavailable.");
-    const draft = structuredClone(data.config.draft);
-    if (draft.hero.imageMediaId) draft.hero.imageUrl = `/api/admin?module=media-image&id=${encodeURIComponent(draft.hero.imageMediaId)}`;
-    return { homepage: draft, settings: null, selectedCases: data.publishedCases.filter((item) => draft.selectedWork.caseIds.includes(item.id)).sort((a, b) => draft.selectedWork.caseIds.indexOf(a.id) - draft.selectedWork.caseIds.indexOf(b.id)), preview: "homepage" };
-  }
-  if (preview === "settings") {
-    const [siteResponse, settingsResponse] = await Promise.all([fetch("/api/admin?module=public-site", { cache: "no-store" }), fetch("/api/admin?module=settings", { cache: "no-store" })]);
-    const siteData = await siteResponse.json();
-    const settingsData = await settingsResponse.json();
-    if (!siteResponse.ok || !siteData.ok) throw new Error(siteData.error || "Site content unavailable.");
-    if (!settingsResponse.ok || !settingsData.ok) throw new Error(settingsData.error || "Settings preview unavailable.");
-    const draftSettings = structuredClone(settingsData.settings.draft);
-    if (draftSettings.defaultOgMediaId) draftSettings.defaultOgImageUrl = `/api/admin?module=media-image&id=${encodeURIComponent(draftSettings.defaultOgMediaId)}`;
-    return { ...siteData, settings: draftSettings, preview: "settings" };
-  }
   const response = await fetch("/api/admin?module=public-site", { cache: "no-store" });
   const data = await response.json();
   if (!response.ok || !data.ok) throw new Error(data.error || "Site content unavailable.");
+  if (["home", "homepage", "implant", "fullArch", "about"].includes(preview)) {
+    const page = preview === "homepage" ? "home" : preview;
+    const pageResponse = await fetch(`/api/admin?module=page-editor&page=${encodeURIComponent(page)}`, { cache: "no-store" });
+    const pageData = await pageResponse.json();
+    if (!pageResponse.ok || !pageData.ok) throw new Error(pageData.error || "Page preview unavailable.");
+    if (page === "home") {
+      data.homepage = pageData.preview;
+      const ids = pageData.preview.selectedWork.caseIds || [];
+      data.selectedCases = pageData.publishedCases.filter((item) => ids.includes(item.id)).sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+    } else data.pages[page] = pageData.preview;
+    data.preview = page;
+  }
+  if (preview === "settings") {
+    const settingsResponse = await fetch("/api/admin?module=settings", { cache: "no-store" });
+    const settingsData = await settingsResponse.json();
+    if (!settingsResponse.ok || !settingsData.ok) throw new Error(settingsData.error || "Settings preview unavailable.");
+    data.settings = settingsData.settings.draft;
+    if (data.settings.defaultOgMediaId) data.settings.defaultOgImageUrl = `/api/admin?module=media-image&id=${encodeURIComponent(data.settings.defaultOgMediaId)}`;
+    data.preview = "settings";
+  }
   return data;
 }
 
+function valueAt(object, path) {
+  return String(path || "").split(".").reduce((value, key) => value?.[key], object);
+}
+
+function renderManagedMedia(element, slot) {
+  if (!element || !slot) return;
+  const url = slot.url || slot.fallbackPath;
+  const hideTarget = element.closest("[data-hide-when-empty]");
+  if (!url) {
+    if (hideTarget) hideTarget.hidden = true;
+    return;
+  }
+  if (hideTarget) hideTarget.hidden = false;
+  const tag = slot.mediaType === "video" ? "video" : "img";
+  let media = element.matches("img,video") ? element : element.querySelector("img,video");
+  if (!media || media.tagName.toLowerCase() !== tag) {
+    const replacement = document.createElement(tag);
+    if (media) replacement.className = media.className;
+    if (media?.hasAttribute("fetchpriority")) replacement.setAttribute("fetchpriority", media.getAttribute("fetchpriority"));
+    if (media) media.replaceWith(replacement); else element.replaceChildren(replacement);
+    media = replacement;
+  }
+  if (tag === "video") {
+    media.src = url;
+    media.poster = slot.posterUrl || "";
+    media.autoplay = Boolean(slot.autoplay);
+    media.muted = true;
+    media.loop = Boolean(slot.loop);
+    media.playsInline = true;
+    media.preload = "metadata";
+    if (!slot.autoplay) media.controls = true;
+  } else {
+    media.src = url;
+    media.alt = slot.altText || media.alt || "YZH Dental Lab work";
+    if (!media.hasAttribute("loading") && !media.hasAttribute("fetchpriority")) media.loading = "lazy";
+  }
+}
+
+function applyManagedPage(page) {
+  if (!page) return;
+  document.querySelectorAll("[data-manager-text]").forEach((element) => {
+    const value = valueAt(page, element.dataset.managerText);
+    if (value) element.textContent = value;
+  });
+  document.querySelectorAll("[data-manager-href]").forEach((element) => {
+    const value = valueAt(page, element.dataset.managerHref);
+    if (value) element.href = value;
+  });
+  document.querySelectorAll("[data-manager-media]").forEach((element) => renderManagedMedia(element, valueAt(page, element.dataset.managerMedia)));
+}
+
+function applyFeaturedCase(container, section, cases, label) {
+  if (!container || !section?.caseId) return;
+  const item = cases?.find((entry) => entry.id === section.caseId);
+  if (!item?.coverImage) return;
+  container.hidden = false;
+  const card = `<div class="section-head"><p class="eyebrow">${escapeHtml(label)}</p><h2>${escapeHtml(section.heading || label)}</h2>${section.description ? `<p class="copy">${escapeHtml(section.description)}</p>` : ""}</div><a class="managed-featured-case" href="/cases/${encodeURIComponent(item.slug)}"><img src="${escapeAttr(item.coverImage.url)}" alt="${escapeAttr(item.title)}"><div><p class="case-category">${escapeHtml(item.category)}</p><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.summary || item.shortNote || "View technical case details.")}</p><span class="text-link">View Case</span></div></a>`;
+  container.innerHTML = container.matches("section") ? `<div class="wrap">${card}</div>` : card;
+  const fallbackKey = label.includes("Full-Arch") ? "fullArch" : "implant";
+  const fallback = document.querySelector(`[data-featured-fallback='${fallbackKey}']`);
+  if (fallback) fallback.hidden = true;
+}
+
 async function applyPublicSiteData() {
-  if (location.pathname !== "/" && location.pathname !== "") return;
   try {
     const data = await loadPublicSiteData();
     if (data.preview) showPreviewBanner(data.preview);
-    const { homepage, settings, selectedCases } = data;
+    const { homepage, settings, selectedCases, publishedCases, pages } = data;
     if (settings) {
       document.title = settings.defaultSeoTitle || document.title;
       setMeta('meta[name="description"]', settings.defaultSeoDescription);
@@ -99,20 +164,28 @@ async function applyPublicSiteData() {
       document.querySelectorAll('a[href^="mailto:"]').forEach((link) => { link.href = `mailto:${settings.publicEmail}`; link.textContent = settings.publicEmail; });
       document.querySelectorAll('a[href*="wa.me"]').forEach((link) => { link.href = settings.whatsappUrl; if (link.textContent.includes("WhatsApp")) link.textContent = link.classList.contains("floating") ? "WhatsApp Technical Team" : "WhatsApp Technical Team"; });
     }
-    if (homepage) {
-      applyText(".hero .eyebrow", homepage.hero.eyebrow);
-      applyText(".hero h1", homepage.hero.heading);
-      applyText(".hero .lead", homepage.hero.description);
-      applyHref(".hero .cta-row .btn-primary", homepage.hero.primaryDestination, homepage.hero.primaryLabel);
-      applyHref(".hero .cta-row .btn-green", homepage.hero.secondaryDestination, homepage.hero.secondaryLabel);
-      const heroImage = document.querySelector(".hero-visual img");
-      if (heroImage && (homepage.hero.imageUrl || homepage.hero.imagePath)) heroImage.src = homepage.hero.imageUrl || homepage.hero.imagePath;
+    if ((location.pathname === "/" || location.pathname === "") && homepage) {
+      applyManagedPage(homepage);
       applyText("#featured-cases .section-head .eyebrow", homepage.selectedWork.eyebrow);
       applyText("#featured-cases .section-head h2", homepage.selectedWork.heading);
       applyText("#featured-cases .section-head .copy", homepage.selectedWork.description);
       const grid = document.querySelector("#featured-cases .priority-case-grid");
       if (grid && selectedCases?.length) grid.innerHTML = selectedCases.slice(0, 3).map(makeCaseCard).join("");
     }
+    if (location.pathname === "/implant-restorations") {
+      applyManagedPage(pages?.implant);
+      applyFeaturedCase(document.querySelector("[data-featured-case='implant']"), pages?.implant?.featuredWork, publishedCases, "Featured Implant Work");
+    }
+    if (location.pathname === "/full-arch-all-on-x") {
+      applyManagedPage(pages?.fullArch);
+      applyFeaturedCase(document.querySelector("[data-featured-case='fullArch']"), pages?.fullArch?.featuredCase, publishedCases, "Featured Full-Arch Case");
+      pages?.fullArch?.restorationOptions?.forEach((option, index) => {
+        const link = document.querySelector(`[data-option-case='${index}']`);
+        const item = publishedCases?.find((entry) => entry.id === option.caseId);
+        if (link && item) { link.href = `/cases/${encodeURIComponent(item.slug)}`; link.hidden = false; }
+      });
+    }
+    if (location.pathname === "/about") applyManagedPage(pages?.about);
   } catch (error) {
     console.warn("public_site_data_skipped", error);
   }

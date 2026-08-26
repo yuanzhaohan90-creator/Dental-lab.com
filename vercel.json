@@ -68,6 +68,22 @@
       "destination": "/admin/cases.html"
     },
     {
+      "source": "/admin/home",
+      "destination": "/admin/home.html"
+    },
+    {
+      "source": "/admin/implant",
+      "destination": "/admin/implant.html"
+    },
+    {
+      "source": "/admin/full-arch",
+      "destination": "/admin/full-arch.html"
+    },
+    {
+      "source": "/admin/about",
+      "destination": "/admin/about.html"
+    },
+    {
       "source": "/admin/submissions",
       "destination": "/admin/index.html"
     },

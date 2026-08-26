@@ -15,24 +15,24 @@
 <link rel="stylesheet" href="/assets/site.css">
 </head>
 <body>
-<header class="site-header"><div class="wrap nav"><a class="brand" href="/"><span class="brand-mark">Y</span><span>YZH Dental Lab</span></a><button class="menu-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button><nav class="navlinks" id="primaryNav"><a href="/">Home</a><a href="/implant-restorations">Implant</a><a href="/full-arch-all-on-x">Full Arch</a><a href="/crown-bridge">Crown & Bridge</a><a href="/digital-dentistry">Digital Workflow</a><a href="/about">About</a><a href="/submit-case">Contact</a></nav><a class="btn btn-primary nav-cta" href="/submit-case">Send a Trial Case</a></div></header>
+<header class="site-header"><div class="wrap nav"><a class="brand" href="/"><span class="brand-mark">Y</span><span>YZH Dental Lab</span></a><button class="menu-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button><nav class="navlinks" id="primaryNav"><a href="/">Home</a><a href="/implant-restorations">Implant</a><a href="/full-arch-all-on-x">Full Arch</a><a href="/cases">Cases</a><a href="/about">About</a><a href="/submit-case">Submit Case</a></nav><a class="btn btn-primary nav-cta" href="/submit-case">Send a Trial Case</a></div></header>
 <main>
   <section class="page-hero">
     <div class="wrap page-hero-grid">
       <div>
-        <p class="eyebrow">Full-Arch Technical Support</p>
-        <h1>Full-Arch & All-on-X Restorations</h1>
-        <p class="lead">Digital laboratory support for provisional and definitive full-arch restorations, including zirconia, PMMA and titanium-supported workflows.</p>
+        <p class="eyebrow" data-manager-text="hero.eyebrow">Full-Arch Technical Support</p>
+        <h1 data-manager-text="hero.heading">Full-Arch & All-on-X Restorations</h1>
+        <p class="lead" data-manager-text="hero.description">Digital laboratory support for provisional and definitive full-arch restorations, including zirconia, PMMA and titanium-supported workflows.</p>
         <div class="cta-row">
-          <a class="btn btn-primary" href="/submit-case">Send a Full-Arch Case</a>
+          <a class="btn btn-primary" href="/submit-case" data-manager-text="hero.primaryLabel" data-manager-href="hero.primaryDestination">Send a Full-Arch Case</a>
           <a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a>
         </div>
       </div>
-      <img src="/assets/real/full-arch-titanium-framework-10.jpg" alt="Full arch titanium-supported restoration framework" fetchpriority="high">
+      <img src="/assets/real/full-arch-titanium-framework-10.jpg" alt="Full arch titanium-supported restoration framework" fetchpriority="high" data-manager-media="hero.media">
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" data-featured-fallback="fullArch">
     <div class="wrap split-feature">
       <div>
         <p class="eyebrow">Restoration Example</p>
@@ -48,6 +48,7 @@
       <img src="/assets/real/full-arch-final-comparison-12.jpg" alt="Full arch restoration example for technical review">
     </div>
   </section>
+  <section class="section managed-featured-section" data-featured-case="fullArch" hidden></section>
 
   <section class="section soft">
     <div class="wrap">
@@ -56,19 +57,25 @@
         <h2>Three practical full-arch paths.</h2>
       </div>
       <div class="case-grid three">
-        <article class="case-card"><img src="/assets/real/full-arch-premium-final-11.jpg" alt="PMMA provisional full arch restoration support"><h3>PMMA Provisional</h3><p>For immediate-load or staged cases that need a controlled provisional before final production.</p></article>
-        <article class="case-card"><img src="/assets/real/hero-full-arch-premium-02.jpg" alt="Monolithic zirconia full arch restoration option"><h3>Monolithic Zirconia Full-Arch</h3><p>For definitive full-arch restorations when records, restorative space and material choice are confirmed.</p></article>
-        <article class="case-card"><img src="/assets/real/full-arch-titanium-framework-10.jpg" alt="Zirconia on titanium framework or bar workflow"><h3>Zirconia on Titanium Framework / Bar</h3><p>For demanding cases that require reinforced support and careful interface review.</p></article>
+        <article class="case-card"><img src="/assets/real/full-arch-premium-final-11.jpg" alt="PMMA provisional full arch restoration support" data-manager-media="restorationOptions.0.media"><h3 data-manager-text="restorationOptions.0.heading">PMMA Provisional</h3><p data-manager-text="restorationOptions.0.description">For immediate-load or staged cases that need a controlled provisional before final production.</p><a class="text-link" data-option-case="0" href="/cases" hidden>View Case</a></article>
+        <article class="case-card"><img src="/assets/real/hero-full-arch-premium-02.jpg" alt="Monolithic zirconia full arch restoration option" data-manager-media="restorationOptions.1.media"><h3 data-manager-text="restorationOptions.1.heading">Monolithic Zirconia Full-Arch</h3><p data-manager-text="restorationOptions.1.description">For definitive full-arch restorations when records, restorative space and material choice are confirmed.</p><a class="text-link" data-option-case="1" href="/cases" hidden>View Case</a></article>
+        <article class="case-card"><img src="/assets/real/full-arch-titanium-framework-10.jpg" alt="Zirconia on titanium framework or bar workflow" data-manager-media="restorationOptions.2.media"><h3 data-manager-text="restorationOptions.2.heading">Zirconia on Titanium Framework / Bar</h3><p data-manager-text="restorationOptions.2.description">For demanding cases that require reinforced support and careful interface review.</p><a class="text-link" data-option-case="2" href="/cases" hidden>View Case</a></article>
       </div>
     </div>
+  </section>
+
+  <section class="section managed-media-section">
+    <div class="wrap split-feature"><div><p class="eyebrow">Framework</p><h2 data-manager-text="framework.heading">Titanium Framework / Bar</h2><p class="copy" data-manager-text="framework.description">Show a real titanium bar, framework or manufacturing view.</p></div><div class="managed-large-media" data-manager-media="framework.media"></div></div>
   </section>
 
   <section class="section">
     <div class="wrap workflow-block">
       <div class="section-head">
         <p class="eyebrow">Workflow</p>
-        <h2>From records to final QC.</h2>
+        <h2 data-manager-text="workflow.heading">From records to final QC.</h2>
+        <p class="copy" data-manager-text="workflow.description">Records, technical review, design approval, final restoration and QC.</p>
       </div>
+      <div class="managed-wide-media" data-manager-media="workflow.media" data-hide-when-empty hidden></div>
       <div class="steps">
         <article><span>1</span><h3>Records</h3><p>Scans, bite, prescription, implant system and reference information are received.</p></article>
         <article><span>2</span><h3>Technical Review</h3><p>Platform, scanbody, MUA, screw access and space are checked before production.</p></article>
@@ -83,8 +90,9 @@
     <div class="wrap two-col">
       <div>
         <p class="eyebrow">Technical Review</p>
-        <h2>Complex full-arch cases are checked before manufacturing.</h2>
-        <p class="copy">The goal is to identify missing or risky information early, not after a restoration has already been made.</p>
+        <h2 data-manager-text="qc.heading">Complex full-arch cases are checked before manufacturing.</h2>
+        <p class="copy" data-manager-text="qc.description">The goal is to identify missing or risky information early, not after a restoration has already been made.</p>
+        <div class="managed-section-media" data-manager-media="qc.media"></div>
       </div>
       <div class="proof-list">
         <article><h3>Implant system and platform</h3><p>Brand, connection and platform information are matched against the submitted files.</p></article>
@@ -116,11 +124,11 @@
   <section class="section trial">
     <div class="wrap two-col">
       <div>
-        <p class="eyebrow">Trial Case First</p>
-        <h2>Send One Full-Arch Case for Review</h2>
-        <p class="copy">Start with one controlled case. We will review the files, confirm what is clear and identify what needs confirmation before production.</p>
+        <p class="eyebrow" data-manager-text="cta.eyebrow">Trial Case First</p>
+        <h2 data-manager-text="cta.heading">Send One Full-Arch Case for Review</h2>
+        <p class="copy" data-manager-text="cta.description">Start with one controlled case. We will review the files, confirm what is clear and identify what needs confirmation before production.</p>
       </div>
-      <div class="cta-panel"><a class="btn btn-primary" href="/submit-case">Send One Full-Arch Case for Review</a><a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a></div>
+      <div><div class="managed-cta-media" data-manager-media="cta.media" data-hide-when-empty hidden></div><div class="cta-panel"><a class="btn btn-primary" href="/submit-case" data-manager-text="cta.primaryLabel" data-manager-href="cta.primaryDestination">Send One Full-Arch Case for Review</a><a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a></div></div>
     </div>
   </section>
 </main>

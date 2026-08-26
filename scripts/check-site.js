@@ -71,7 +71,7 @@ for (const page of pages) {
   }
   const html = fs.readFileSync(pagePath, "utf8");
 
-  for (const match of html.matchAll(/(?:src|href)=["']([^"']+)["']/g)) {
+  for (const match of html.matchAll(/(?:^|\s)(?:src|href)=["']([^"']+)["']/g)) {
     const value = match[1];
     if (/^(https?:|mailto:|tel:|#|\/api\/)/.test(value)) continue;
     if (routeTargets[value]) {
