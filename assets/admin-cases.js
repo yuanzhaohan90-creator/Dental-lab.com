@@ -12,7 +12,11 @@ const newImages = document.getElementById("newImages");
 
 const state = { cases: [], current: null, categories: [], imageTypes: [], existing: [], newFiles: [] };
 const nextPath = new URLSearchParams(window.location.search).get("next");
-const publishPrivacyText = "Confirm that this content contains no unauthorized patient-identifying information.\n\nDo not publish patient names, DOB, chart numbers, faces, prescriptions containing identifying information, or other patient-identifying data without appropriate authorization.";
+const publishPrivacyText = "请确认此内容不包含未经授权的患者身份信息。\n\n未经适当授权，不得发布患者姓名、出生日期、病历号、正脸、含身份信息的处方或其他可识别患者的信息。";
+const categoryLabels = { "Full-Arch / All-on-X": "全口 / All-on-X", "Implant Bridge": "种植桥", "Custom Abutment": "个性化基台", "Crown & Bridge": "冠桥", "Surgical Guide": "手术导板" };
+const imageTypeLabels = { CAD: "CAD", Model: "模型", Framework: "支架", "Ti-base": "Ti-base", PMMA: "PMMA", "Try-in": "试戴", Final: "最终修复体", QC: "质量检查", Other: "其他" };
+function categoryLabel(value) { return categoryLabels[value] || value; }
+function imageTypeLabel(value) { return imageTypeLabels[value] || value; }
 
 function escapeHtml(value) {
   const element = document.createElement("div");
@@ -25,10 +29,23 @@ function showMessage(element, message, type = "") {
   element.textContent = message;
 }
 
+function adminErrorMessage(message) {
+  const translations = {
+    "Invalid password.": "密码错误，请重新输入。",
+    "Authentication required.": "请先登录管理员后台。",
+    "Authentication is temporarily unavailable.": "登录服务暂时不可用，请稍后重试。",
+    "Invalid request origin.": "请求来源无效，请刷新页面后重试。",
+    "Request failed.": "请求失败，请稍后重试。",
+    "Case not found.": "未找到该案例。",
+    "Method not allowed.": "当前操作不受支持。"
+  };
+  return translations[message] || message;
+}
+
 async function api(url, options = {}) {
   const response = await fetch(url, options);
   const data = await response.json().catch(() => ({}));
-  if (!response.ok || data.ok === false) throw new Error(data.error || "Request failed.");
+  if (!response.ok || data.ok === false) throw new Error(adminErrorMessage(data.error || "Request failed."));
   return data;
 }
 
@@ -48,22 +65,22 @@ async function loadCases() {
 
 function renderCaseList() {
   if (!state.cases.length) {
-    adminCaseList.innerHTML = '<p class="admin-empty">No cases yet. Add the first draft case.</p>';
+    adminCaseList.innerHTML = '<p class="admin-empty">暂无案例，请先添加一个草稿案例。</p>';
     return;
   }
-  adminCaseList.innerHTML = state.cases.map((item) => `<button type="button" data-id="${item.id}" class="${state.current?.id === item.id ? "active" : ""}">${item.images.find((image) => image.isCover) ? `<img src="${item.images.find((image) => image.isCover).url}" alt="">` : ""}<span><strong>${escapeHtml(item.title)}</strong><small>${item.contentType === "case_study" ? "Case Study" : "Quick Work"} · ${escapeHtml(item.category)} · ${item.status === "published" ? "Published" : "Draft"}${item.featured ? " · Homepage" : ""}</small></span></button>`).join("");
+  adminCaseList.innerHTML = state.cases.map((item) => `<button type="button" data-id="${item.id}" class="${state.current?.id === item.id ? "active" : ""}">${item.images.find((image) => image.isCover) ? `<img src="${item.images.find((image) => image.isCover).url}" alt="">` : ""}<span><strong>${escapeHtml(item.title)}</strong><small>${item.contentType === "case_study" ? "重点案例研究" : "快速作品"} · ${escapeHtml(categoryLabel(item.category))} · ${item.status === "published" ? "已发布" : "草稿"}${item.featured ? " · 首页展示" : ""}</small></span></button>`).join("");
 }
 
-function optionMarkup(values, selected = "") {
-  return values.map((value) => `<option value="${escapeHtml(value)}" ${value === selected ? "selected" : ""}>${escapeHtml(value)}</option>`).join("");
+function optionMarkup(values, selected = "", labeler = (value) => value) {
+  return values.map((value) => `<option value="${escapeHtml(value)}" ${value === selected ? "selected" : ""}>${escapeHtml(labeler(value))}</option>`).join("");
 }
 
 function renderImages() {
   const cover = state.existing.find((image) => image.isCover);
-  currentCover.innerHTML = cover ? `<figure class="admin-current-cover"><img src="${cover.url}" alt=""><figcaption>Current cover</figcaption></figure>` : '<p class="admin-empty">No cover uploaded.</p>';
+  currentCover.innerHTML = cover ? `<figure class="admin-current-cover"><img src="${cover.url}" alt=""><figcaption>当前封面</figcaption></figure>` : '<p class="admin-empty">尚未上传封面。</p>';
   const gallery = state.existing.filter((image) => !image.isCover).sort((a, b) => a.sortOrder - b.sortOrder);
-  existingImages.innerHTML = gallery.map((image, index) => `<div class="admin-image-row" data-existing-id="${image.id}"><img src="${image.url}" alt=""><div><label>Caption<input data-key="caption" value="${escapeHtml(image.caption)}" maxlength="240"></label><label>Type<select data-key="imageType">${optionMarkup(state.imageTypes, image.imageType)}</select></label></div><div class="admin-image-controls"><button type="button" data-move="up" aria-label="Move image up">↑</button><button type="button" data-move="down" aria-label="Move image down">↓</button><button type="button" data-remove aria-label="Remove image">×</button></div></div>`).join("");
-  newImages.innerHTML = state.newFiles.map((item, index) => `<div class="admin-image-row" data-new-index="${index}"><img src="${item.preview}" alt=""><div><label>Caption<input data-key="caption" value="${escapeHtml(item.caption)}" maxlength="240"></label><label>Type<select data-key="imageType">${optionMarkup(state.imageTypes, item.imageType)}</select></label></div><div class="admin-image-controls"><button type="button" data-new-move="up" aria-label="Move image up">↑</button><button type="button" data-new-move="down" aria-label="Move image down">↓</button><button type="button" data-new-remove aria-label="Remove image">×</button></div></div>`).join("");
+  existingImages.innerHTML = gallery.map((image, index) => `<div class="admin-image-row" data-existing-id="${image.id}"><img src="${image.url}" alt=""><div><label>图片说明<input data-key="caption" value="${escapeHtml(image.caption)}" maxlength="240"></label><label>阶段类型<select data-key="imageType">${optionMarkup(state.imageTypes, image.imageType, imageTypeLabel)}</select></label></div><div class="admin-image-controls"><button type="button" data-move="up" aria-label="图片上移">↑</button><button type="button" data-move="down" aria-label="图片下移">↓</button><button type="button" data-remove aria-label="移除图片">×</button></div></div>`).join("");
+  newImages.innerHTML = state.newFiles.map((item, index) => `<div class="admin-image-row" data-new-index="${index}"><img src="${item.preview}" alt=""><div><label>图片说明<input data-key="caption" value="${escapeHtml(item.caption)}" maxlength="240"></label><label>阶段类型<select data-key="imageType">${optionMarkup(state.imageTypes, item.imageType, imageTypeLabel)}</select></label></div><div class="admin-image-controls"><button type="button" data-new-move="up" aria-label="图片上移">↑</button><button type="button" data-new-move="down" aria-label="图片下移">↓</button><button type="button" data-new-remove aria-label="移除图片">×</button></div></div>`).join("");
 }
 
 function syncExistingInputs() {
@@ -90,8 +107,8 @@ function updateTypeUI() {
   document.getElementById("caseStudyFields").hidden = !isCaseStudy;
   document.getElementById("upgradeCaseButton").hidden = isCaseStudy;
   document.getElementById("imageLimitNote").textContent = isCaseStudy
-    ? "Featured Case Studies support extended image sequences. Add only the stages available for this case."
-    : "Quick Work supports 0–6 additional images. Use the arrow controls to set display order.";
+    ? "重点案例研究支持较长的图片序列，只添加这个案例真实具备的阶段。"
+    : "快速作品支持 0–6 张其他图片，可用箭头调整展示顺序。";
 }
 
 function openEditor(item = null, requestedType = "quick_work") {
@@ -102,9 +119,9 @@ function openEditor(item = null, requestedType = "quick_work") {
   editor.reset();
   editor.hidden = false;
   const contentType = item?.contentType === "case_study" || requestedType === "case_study" ? "case_study" : "quick_work";
-  document.getElementById("editorMode").textContent = item ? "Edit Work" : (contentType === "case_study" ? "Create Featured Case Study" : "Add Quick Work");
-  document.getElementById("editorTitle").textContent = item ? item.title : (contentType === "case_study" ? "New Featured Case Study" : "New Quick Work");
-  editor.elements.category.innerHTML = '<option value="">Select category</option>' + optionMarkup(state.categories, item?.category);
+  document.getElementById("editorMode").textContent = item ? "编辑作品" : (contentType === "case_study" ? "创建重点案例研究" : "添加快速作品");
+  document.getElementById("editorTitle").textContent = item ? item.title : (contentType === "case_study" ? "新重点案例研究" : "新快速作品");
+  editor.elements.category.innerHTML = '<option value="">请选择分类</option>' + optionMarkup(state.categories, item?.category, categoryLabel);
   const names = ["title", "category", "shortNote", "restorationType", "material", "implantSystem", "platform", "shade", "caseOverview", "challenge", "recordsReceived", "technicalReview", "cadDesign", "provisional", "framework", "finalRestoration", "qc", "technicalOutcome", "status"];
   names.forEach((name) => { editor.elements[name].value = item?.[name] || (name === "status" ? "draft" : ""); });
   editor.elements.shortNote.value = item?.shortNote || item?.summary || "";
@@ -116,7 +133,7 @@ function openEditor(item = null, requestedType = "quick_work") {
   document.getElementById("previewButton").disabled = !item;
   document.getElementById("duplicateCaseButton").hidden = !item;
   document.getElementById("deleteCaseButton").hidden = !item;
-  document.getElementById("togglePublishButton").textContent = item?.status === "published" ? "Unpublish" : "Publish";
+  document.getElementById("togglePublishButton").textContent = item?.status === "published" ? "取消发布" : "发布";
   updateTypeUI();
   showMessage(editorMessage, "");
   renderImages();
@@ -160,13 +177,13 @@ async function saveCase(statusOverride) {
   if (!editor.reportValidity()) return null;
   const additionalCount = state.existing.filter((image) => !image.isCover).length + state.newFiles.length;
   if (editor.elements.contentType.value === "quick_work" && additionalCount > 6) {
-    showMessage(editorMessage, "Quick Work supports up to 6 additional images.", "error");
+    showMessage(editorMessage, "快速作品最多支持 6 张其他图片。", "error");
     return null;
   }
   const nextStatus = statusOverride || editor.elements.status.value;
   const isPublishing = nextStatus === "published" && state.current?.status !== "published";
   if (isPublishing && !confirm(publishPrivacyText)) {
-    showMessage(editorMessage, "Publishing cancelled. Review privacy details before publishing.", "error");
+    showMessage(editorMessage, "已取消发布，请检查隐私内容后再发布。", "error");
     return null;
   }
   const formData = new FormData();
@@ -175,17 +192,17 @@ async function saveCase(statusOverride) {
   formData.append("newImageMeta", JSON.stringify(state.newFiles.map((item, index) => ({ caption: item.caption, imageType: item.imageType, sortOrder: state.existing.length + index }))));
   if (editor.elements.coverImage.files[0]) formData.append("coverImage", editor.elements.coverImage.files[0]);
   state.newFiles.forEach((item) => formData.append("galleryImages", item.file));
-  showMessage(editorMessage, "Saving...");
+  showMessage(editorMessage, "正在保存...");
   const data = await api("/api/admin-cases", { method: state.current ? "PUT" : "POST", body: formData });
   state.current = data.case;
   await loadCases();
   openEditor(state.cases.find((item) => item.id === data.case.id));
-  showMessage(editorMessage, data.case.status === "published" ? "Case saved and published." : "Draft saved.", "success");
+  showMessage(editorMessage, data.case.status === "published" ? "案例已保存并发布。" : "草稿已保存。", "success");
   return data.case;
 }
 
 loginForm.addEventListener("submit", async (event) => {
-  event.preventDefault(); showMessage(loginMessage, "Signing in...");
+  event.preventDefault(); showMessage(loginMessage, "正在登录...");
   try {
     await api("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: loginForm.elements.password.value }) });
     loginForm.reset(); setAuthenticated(true); await loadCases(); handleInitialAction();
@@ -229,16 +246,16 @@ document.getElementById("previewButton").addEventListener("click", () => { if (s
 document.getElementById("togglePublishButton").addEventListener("click", async () => { try { await saveCase(state.current?.status === "published" ? "draft" : "published"); } catch (error) { showMessage(editorMessage, error.message, "error"); } });
 document.getElementById("duplicateCaseButton").addEventListener("click", async () => {
   if (!state.current) return;
-  showMessage(editorMessage, "Creating draft copy...");
+  showMessage(editorMessage, "正在创建草稿副本...");
   try {
     const data = await api(`/api/admin-cases?action=duplicate&id=${encodeURIComponent(state.current.id)}`, { method: "POST" });
     await loadCases();
     openEditor(state.cases.find((item) => item.id === data.case.id));
-    showMessage(editorMessage, "Draft copy created. Review the title and images before publishing.", "success");
+    showMessage(editorMessage, "草稿副本已创建，发布前请检查标题和图片。", "success");
   } catch (error) { showMessage(editorMessage, error.message, "error"); }
 });
 document.getElementById("deleteCaseButton").addEventListener("click", async () => {
-  if (!state.current || !confirm(`Delete “${state.current.title}” and its uploaded images?`)) return;
+  if (!state.current || !confirm(`确定删除“${state.current.title}”及其已上传图片吗？`)) return;
   try { await api(`/api/admin-cases?id=${encodeURIComponent(state.current.id)}`, { method: "DELETE" }); state.current = null; editor.hidden = true; await loadCases(); }
   catch (error) { showMessage(editorMessage, error.message, "error"); }
 });

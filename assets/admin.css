@@ -1,3 +1,4 @@
+.admin-v1-body [hidden],.admin-body [hidden]{display:none!important}
 .admin-v1-body{background:#f4f7f9;color:#273d53;min-height:100vh}
 .admin-v1-login{min-height:100vh;display:grid;place-items:center;padding:24px}
 .admin-v1-login form{width:min(100%,440px);background:#fff;border:1px solid #d8e4ee;border-radius:8px;padding:32px;box-shadow:0 14px 34px rgba(16,32,51,.08)}
