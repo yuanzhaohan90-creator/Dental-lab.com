@@ -1,6 +1,7 @@
 const Busboy = require("busboy");
 const { isAdmin } = require("../lib/case-auth");
 const { protect, query, readJson, reply } = require("../lib/admin-http");
+const { MAX_MEDIA_BYTES } = require("../lib/media-validation");
 const {
   DEFAULT_HOMEPAGE,
   DEFAULT_PAGE_CONFIGS,
@@ -82,7 +83,9 @@ function safeDownloadName(value) {
 
 async function adminMedia(record) {
   const usedIn = await mediaUsage(record.id);
-  return { ...record, pathname: undefined, mediaType: record.contentType === "video/mp4" ? "video" : "image", url: `/api/admin?module=media-image&id=${encodeURIComponent(record.id)}`, usedIn };
+  const mediaType = String(record.contentType || "").startsWith("video/") ? "video" : "image";
+  const posterUrl = record.posterMediaId ? `/api/admin?module=media-image&id=${encodeURIComponent(record.posterMediaId)}` : "";
+  return { ...record, pathname: undefined, originalPathname: undefined, playbackPathname: undefined, mediaType, url: `/api/admin?module=media-image&id=${encodeURIComponent(record.id)}`, posterUrl, processingStatus: record.processingStatus || "ready", usedIn };
 }
 
 async function validateSelection(value) {
@@ -139,14 +142,23 @@ async function homepageData(config) {
 async function mediaUrl(id, fallback) {
   if (!id) return fallback;
   const record = await getMedia(id);
-  return record ? `/api/admin?module=media-image&id=${encodeURIComponent(id)}` : fallback;
+  if (!record) return fallback;
+  if (String(record.contentType || "").startsWith("video/") && (record.processingStatus || "ready") !== "ready") return fallback;
+  return `/api/admin?module=media-image&id=${encodeURIComponent(id)}`;
 }
 
 async function resolveMedia(slot = {}) {
+  const record = slot.mediaId ? await getMedia(slot.mediaId) : null;
+  const videoReady = record && String(record.contentType || "").startsWith("video/") && (record.processingStatus || "ready") === "ready";
+  const posterId = slot.posterMediaId || record?.posterMediaId;
+  const posterUrl = await mediaUrl(posterId, "");
+  const mediaUrlValue = await mediaUrl(slot.mediaId, slot.fallbackPath);
   return {
     ...slot,
-    url: await mediaUrl(slot.mediaId, slot.fallbackPath),
-    posterUrl: await mediaUrl(slot.posterMediaId, "")
+    url: record && String(record.contentType || "").startsWith("video/") && !videoReady ? (posterUrl || slot.fallbackPath) : mediaUrlValue,
+    mediaType: record && String(record.contentType || "").startsWith("video/") ? (videoReady ? "video" : "image") : slot.mediaType,
+    posterUrl,
+    processingStatus: record?.processingStatus || "ready"
   };
 }
 
@@ -237,7 +249,7 @@ async function handleMedia(req, res) {
     const body = await readJson(req);
     const record = await getMedia(body.id);
     if (!record) return reply(res, 404, { ok: false, error: "Media item not found." });
-    const saved = await saveMedia({ ...record, displayName: body.displayName, altText: body.altText, category: body.category });
+    const saved = await saveMedia({ ...record, displayName: body.displayName, altText: body.altText, category: body.category, posterMediaId: body.posterMediaId });
     return reply(res, 200, { ok: true, media: await adminMedia(saved) });
   }
   if (req.method === "DELETE") {
@@ -264,10 +276,10 @@ async function handleMediaUpload(req, res) {
       let metadata = {};
       try { metadata = JSON.parse(clientPayload || "{}"); } catch { metadata = {}; }
       const size = Number(metadata.size) || 0;
-      if (size > 100 * 1024 * 1024) throw Object.assign(new Error("Media must be 100MB or smaller."), { statusCode: 413 });
+      if (size > MAX_MEDIA_BYTES) throw Object.assign(new Error("Video is larger than 100 MB."), { statusCode: 413 });
       return {
-        allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "video/mp4"],
-        maximumSizeInBytes: 100 * 1024 * 1024,
+        allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "video/mp4", "video/quicktime", "video/x-m4v", "application/octet-stream"],
+        maximumSizeInBytes: MAX_MEDIA_BYTES,
         addRandomSuffix: true,
         allowOverwrite: false,
         cacheControlMaxAge: 31536000
@@ -285,8 +297,26 @@ async function handleMediaFinalize(req, res) {
   if (!pathname.startsWith("admin/media/files/")) throw Object.assign(new Error("Uploaded media is not valid."), { statusCode: 400 });
   const stored = await get(pathname, { access: "private", useCache: false });
   if (!stored || stored.statusCode !== 200) throw Object.assign(new Error("Uploaded media could not be verified."), { statusCode: 400 });
-  const record = await storeClientMedia(body.blob, body.metadata || {});
-  return reply(res, 201, { ok: true, media: await adminMedia(record) });
+  const reader = stored.stream.getReader();
+  const chunks = [];
+  let total = 0;
+  while (total < 1024 * 1024) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const remaining = 1024 * 1024 - total;
+    const chunk = value.length > remaining ? value.subarray(0, remaining) : value;
+    chunks.push(Buffer.from(chunk));
+    total += chunk.length;
+  }
+  await reader.cancel().catch(() => {});
+  try {
+    const record = await storeClientMedia(body.blob, body.metadata || {}, { bytes: Buffer.concat(chunks), size: stored.blob.size, contentType: stored.blob.contentType });
+    return reply(res, 201, { ok: true, media: await adminMedia(record) });
+  } catch (error) {
+    const { del } = await import("@vercel/blob");
+    await del(pathname).catch(() => {});
+    throw error;
+  }
 }
 
 async function handleMediaImage(req, res) {
@@ -299,8 +329,15 @@ async function handleMediaImage(req, res) {
     res.statusCode = 404;
     return res.end("Media not found");
   }
+  const isVideo = String(record.contentType || "").startsWith("video/");
+  const isReady = (record.processingStatus || "ready") === "ready";
+  if (isVideo && !isReady && !isAdmin(req)) {
+    res.statusCode = 425;
+    return res.end("Video is still being prepared for web playback");
+  }
+  const pathname = isVideo ? (record.playbackPathname || (isReady ? record.pathname : record.originalPathname || record.pathname)) : record.pathname;
   const { get } = await import("@vercel/blob");
-  const result = await get(record.pathname, { access: "private" });
+  const result = await get(pathname, { access: "private" });
   if (!result || result.statusCode !== 200 || !result.stream) {
     res.statusCode = 404;
     return res.end("Media not found");
