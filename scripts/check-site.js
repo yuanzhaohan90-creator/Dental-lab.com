@@ -73,12 +73,13 @@ for (const page of pages) {
 
   for (const match of html.matchAll(/(?:^|\s)(?:src|href)=["']([^"']+)["']/g)) {
     const value = match[1];
+    const localValue = value.split(/[?#]/, 1)[0];
     if (/^(https?:|mailto:|tel:|#|\/api\/)/.test(value)) continue;
-    if (routeTargets[value]) {
-      if (!fs.existsSync(path.join(root, routeTargets[value]))) failures.push(`Missing route target: ${value}`);
+    if (routeTargets[localValue]) {
+      if (!fs.existsSync(path.join(root, routeTargets[localValue]))) failures.push(`Missing route target: ${value}`);
       continue;
     }
-    const target = path.join(root, value.replace(/^\//, ""));
+    const target = path.join(root, localValue.replace(/^\//, ""));
     if (!fs.existsSync(target)) failures.push(`Missing asset in ${page}: ${value}`);
   }
 
