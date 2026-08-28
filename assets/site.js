@@ -122,6 +122,11 @@ function renderManagedMedia(element, slot) {
     media.alt = slot.altText || media.alt || "YZH Dental Lab work";
     if (!media.hasAttribute("loading") && !media.hasAttribute("fetchpriority")) media.loading = "lazy";
   }
+  const focus = { center: "center center", top: "center top", bottom: "center bottom", left: "left center", right: "right center" }[slot.focalPosition] || "center center";
+  media.style.objectFit = slot.fit === "contain" ? "contain" : "cover";
+  media.style.objectPosition = focus;
+  media.dataset.mediaFit = slot.fit === "contain" ? "contain" : "cover";
+  media.dataset.mediaFocus = slot.focalPosition || "center";
 }
 
 function applyManagedPage(page) {
