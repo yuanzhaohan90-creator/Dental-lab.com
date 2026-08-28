@@ -40,32 +40,6 @@ function makeCaseCard(item, index) {
   </a>`;
 }
 
-function enableLinkedCards(root = document) {
-  root.querySelectorAll("[data-card-href]").forEach((card) => {
-    if (card.dataset.cardLinkReady === "true") return;
-    const href = card.dataset.cardHref;
-    if (!href) return;
-    card.dataset.cardLinkReady = "true";
-    card.tabIndex = 0;
-    card.setAttribute("role", "link");
-    if (!card.hasAttribute("aria-label")) {
-      const heading = card.querySelector("h2,h3");
-      if (heading) card.setAttribute("aria-label", heading.textContent.trim());
-    }
-    card.addEventListener("click", (event) => {
-      if (event.target.closest("a,button,input,select,textarea")) return;
-      window.location.href = href;
-    });
-    card.addEventListener("keydown", (event) => {
-      if (event.key !== "Enter" || event.target.closest("a,button,input,select,textarea")) return;
-      event.preventDefault();
-      window.location.href = href;
-    });
-  });
-}
-
-enableLinkedCards();
-
 function escapeHtml(value) {
   const element = document.createElement("div");
   element.textContent = value || "";

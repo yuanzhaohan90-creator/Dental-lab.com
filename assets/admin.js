@@ -453,26 +453,27 @@ const PAGE_META = {
 const PAGE_SECTIONS = {
   home: [
     { key: "hero", label: "01 首屏主视觉", hint: "建议使用最有说服力的真实全口修复成品。", media: true, video: true, eyebrow: true, cta: true, secondaryCta: true },
-    { key: "selectedWork", label: "02 精选作品", hint: "最多选择 3 个已发布案例，客户点击图片可进入案例详情。", selectedCases: true, eyebrow: true },
-    { key: "technicalProof", label: "03 技术证明", hint: "建议使用真实 CAD、支架、模型就位或质检照片。", media: true, video: true, eyebrow: true },
-    { key: "workflow", label: "04 工作流程", hint: "可分别为文件、CAD / 设计、生产和质检添加图片。", workflow: true, eyebrow: true },
-    { key: "finalCta", label: "05 最终行动区", hint: "使用相关背景图或短 MP4 视频。", media: true, video: true, eyebrow: true, cta: true }
+    { key: "capabilities", label: "02 核心能力导航", hint: "客户可以点击整块能力卡进入对应页面或技术区段。", capabilityLinks: true },
+    { key: "selectedWork", label: "03 精选作品", hint: "最多选择 3 个已发布案例，客户点击图片可进入案例详情。", selectedCases: true, eyebrow: true },
+    { key: "technicalProof", label: "04 技术证明", hint: "建议使用真实 CAD、支架、模型就位或质检照片。", media: true, video: true, eyebrow: true, technicalTopics: true },
+    { key: "workflow", label: "05 工作流程", hint: "可分别为文件、CAD / 设计、生产和质检添加图片与链接目标。", workflow: true, eyebrow: true },
+    { key: "finalCta", label: "06 最终行动区", hint: "使用相关背景图或短 MP4 视频。", media: true, video: true, eyebrow: true, cta: true }
   ],
   implant: [
     { key: "hero", label: "01 首屏主视觉", hint: "建议使用最强的螺丝固位种植桥或种植修复作品。", media: true, eyebrow: true, cta: true },
     { key: "featuredWork", label: "02 精选种植作品", hint: "从真实的已发布案例中选择。", featuredCase: true },
-    { key: "customAbutments", label: "03 个性化基台", hint: "建议使用真实个性化基台 / 牙冠组合照片。", media: true },
-    { key: "implantBridge", label: "04 螺丝固位 / 种植桥", hint: "建议使用真实螺丝固位桥、接口或组装照片。", media: true },
-    { key: "qc", label: "05 质量检查", hint: "建议使用接口、模型就位、螺丝通道或检查照片。", media: true },
+    { key: "customAbutments", label: "03 个性化基台", hint: "建议使用真实个性化基台 / 牙冠组合照片。", media: true, linkable: true },
+    { key: "implantBridge", label: "04 螺丝固位 / 种植桥", hint: "建议使用真实螺丝固位桥、接口或组装照片。", media: true, linkable: true },
+    { key: "qc", label: "05 质量检查", hint: "建议使用接口、模型就位、螺丝通道或检查照片。", media: true, linkable: true },
     { key: "cta", label: "06 行动按钮", hint: "最终按钮跳转到提交案例页面。", media: true, eyebrow: true, cta: true }
   ],
   fullArch: [
     { key: "hero", label: "01 首屏主视觉", hint: "建议使用最强的真实全口最终修复成品。", media: true, video: true, eyebrow: true, cta: true },
     { key: "featuredCase", label: "02 精选全口案例", hint: "从已发布的重点案例研究中选择。", featuredCase: true, caseStudyOnly: true },
     { key: "restorationOptions", label: "03 修复方案", hint: "PMMA、整块氧化锆及钛杆氧化锆方案。", restorationOptions: true },
-    { key: "framework", label: "04 钛支架 / 钛杆", hint: "建议使用真实钛杆、支架照片或加工视频。", media: true, video: true },
-    { key: "workflow", label: "05 工作流程", hint: "使用真实全口制作流程图片或短 MP4。", media: true, video: true },
-    { key: "qc", label: "06 质量检查", hint: "建议展示接口、适合度、模型就位或最终检查。", media: true },
+    { key: "framework", label: "04 钛支架 / 钛杆", hint: "建议使用真实钛杆、支架照片或加工视频。", media: true, video: true, linkable: true },
+    { key: "workflow", label: "05 工作流程", hint: "使用真实全口制作流程图片或短 MP4。", media: true, video: true, linkable: true },
+    { key: "qc", label: "06 质量检查", hint: "建议展示接口、适合度、模型就位或最终检查。", media: true, linkable: true },
     { key: "cta", label: "07 行动按钮", hint: "最终按钮跳转到提交案例页面。", media: true, eyebrow: true, cta: true }
   ],
   about: [
@@ -497,6 +498,33 @@ function mediaOptions(selected, type = "") {
 function caseOptions(selected, caseStudyOnly = false) {
   const cases = (pageData?.publishedCases || []).filter((item) => !caseStudyOnly || item.contentType === "case_study");
   return `<option value="">不选择案例</option>${cases.map((item) => `<option value="${item.id}" ${item.id === selected ? "selected" : ""}>${escapeHtml(item.title)} · ${escapeHtml(categoryLabel(item.category))}</option>`).join("")}`;
+}
+
+function linkDestinationOptions(selected = "") {
+  const option = (value, label) => `<option value="${escapeHtml(value)}" ${value === selected ? "selected" : ""}>${escapeHtml(label)}</option>`;
+  const cases = (pageData?.publishedCases || []).map((item) => option(`/cases/${item.slug}`, item.title)).join("");
+  return `${option("", "No Link / 不设置链接")}
+    <optgroup label="Page / 页面">
+      ${option("/", "首页")}${option("/implant-restorations", "种植修复")}${option("/full-arch-all-on-x", "全口修复 / All-on-X")}${option("/cases", "案例库")}${option("/digital-dentistry", "数字化工作流程")}${option("/crown-bridge", "牙冠与牙桥")}${option("/surgical-guides", "种植导板")}${option("/about", "关于我们")}
+    </optgroup>
+    <optgroup label="Section / 页面区段">
+      ${option("/#technical-review", "首页：技术审核")}${option("/#workflow", "首页：工作流程")}${option("/implant-restorations#implant-case-information", "种植页：案例资料要求")}${option("/implant-restorations#implant-quality-control", "种植页：适合度与质检")}${option("/about#production", "关于我们：生产")}
+    </optgroup>
+    <optgroup label="Submit Case / 提交案例">${option("/submit-case", "提交案例")}</optgroup>
+    ${cases ? `<optgroup label="Case / 已发布案例">${cases}</optgroup>` : ""}
+    <optgroup label="External URL / 外部链接">${option("https://wa.me/8613714730109", "WhatsApp 技术团队")}</optgroup>`;
+}
+
+function linkDestinationEditor(path, value) {
+  return `<label class="field">链接目标 (Link Destination)<select data-path="${path}">${linkDestinationOptions(value || "")}</select></label>`;
+}
+
+function capabilityLinksEditor(value) {
+  return `<div class="workflow-media-grid">${(value || []).map((item, index) => `<div><label class="field">能力名称<input data-path="capabilities.${index}.label" maxlength="80" value="${escapeHtml(item.label)}"></label>${linkDestinationEditor(`capabilities.${index}.destination`, item.destination)}</div>`).join("")}</div>`;
+}
+
+function technicalTopicsEditor(value) {
+  return `<div class="workflow-media-grid">${(value.items || []).map((item, index) => `<div><label class="field">技术主题<input data-path="technicalProof.items.${index}.label" maxlength="100" value="${escapeHtml(item.label)}"></label>${linkDestinationEditor(`technicalProof.items.${index}.destination`, item.destination)}</div>`).join("")}</div>`;
 }
 
 function currentMedia(slot) {
@@ -525,11 +553,11 @@ function selectedWorkEditor(value) {
 }
 
 function workflowEditor(value, section) {
-  return `${textFields("workflow", value, section)}<div class="workflow-media-grid">${(value.items || []).map((item, index) => `<div><label class="field">流程阶段<input data-path="workflow.items.${index}.label" value="${escapeHtml(item.label)}"></label>${renderMediaEditor(`workflow.items.${index}.media`, item.media, false, `${item.label} 阶段可选图片。`)}</div>`).join("")}</div>`;
+  return `${textFields("workflow", value, section)}<div class="workflow-media-grid">${(value.items || []).map((item, index) => `<div><label class="field">流程阶段<input data-path="workflow.items.${index}.label" value="${escapeHtml(item.label)}"></label>${linkDestinationEditor(`workflow.items.${index}.destination`, item.destination)}${renderMediaEditor(`workflow.items.${index}.media`, item.media, false, `${item.label} 阶段可选图片。`)}</div>`).join("")}</div>`;
 }
 
 function restorationOptionsEditor(value) {
-  return `<div class="restoration-option-editor">${value.map((option, index) => `<div class="restoration-option"><h3>方案 ${index + 1}</h3>${textFields(`restorationOptions.${index}`, option, {})}${renderMediaEditor(`restorationOptions.${index}.media`, option.media, false, "使用真实修复体图片。")}<label class="field">关联案例（可选）<select data-path="restorationOptions.${index}.caseId">${caseOptions(option.caseId)}</select></label></div>`).join("")}</div>`;
+  return `<div class="restoration-option-editor">${value.map((option, index) => `<div class="restoration-option"><h3>方案 ${index + 1}</h3>${textFields(`restorationOptions.${index}`, option, {})}${renderMediaEditor(`restorationOptions.${index}.media`, option.media, false, "使用真实修复体图片。")}<label class="field">链接目标 (Link Destination)：已发布案例（可选）<select data-path="restorationOptions.${index}.caseId">${caseOptions(option.caseId)}</select></label></div>`).join("")}</div>`;
 }
 
 function renderPageEditor() {
@@ -538,11 +566,12 @@ function renderPageEditor() {
   document.getElementById("pageSections").innerHTML = sections.map((section) => {
     const value = draft[section.key];
     let content = "";
-    if (section.selectedCases) content = `${textFields(section.key, value, section)}${selectedWorkEditor(value)}`;
+    if (section.capabilityLinks) content = capabilityLinksEditor(value);
+    else if (section.selectedCases) content = `${textFields(section.key, value, section)}${selectedWorkEditor(value)}`;
     else if (section.workflow) content = workflowEditor(value, section);
     else if (section.restorationOptions) content = restorationOptionsEditor(value);
     else if (section.featuredCase) content = `${textFields(section.key, value, section)}<label class="field">选择精选案例<select data-path="${section.key}.caseId">${caseOptions(value.caseId, section.caseStudyOnly)}</select></label>`;
-    else content = `${textFields(section.key, value, section)}${section.media ? renderMediaEditor(`${section.key}.media`, value.media, section.video, section.hint) : ""}`;
+    else content = `${textFields(section.key, value, section)}${section.technicalTopics ? technicalTopicsEditor(value) : ""}${section.linkable ? linkDestinationEditor(`${section.key}.destination`, value.destination) : ""}${section.media ? renderMediaEditor(`${section.key}.media`, value.media, section.video, section.hint) : ""}`;
     return `<section class="page-section-editor" id="${escapeHtml(section.key)}"><div class="page-section-heading"><span>${escapeHtml(section.label.split(" ")[0])}</span><div><h2>${escapeHtml(section.label.replace(/^\d+\s/, ""))}</h2><p>${escapeHtml(section.hint)}</p></div></div>${content}</section>`;
   }).join("");
   const target = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;

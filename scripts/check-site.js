@@ -75,6 +75,7 @@ for (const page of pages) {
     const value = match[1];
     const localValue = value.split(/[?#]/, 1)[0];
     if (/^(https?:|mailto:|tel:|#|\/api\/)/.test(value)) continue;
+    if (/^\/cases\/[^/]+$/.test(localValue)) continue;
     if (routeTargets[localValue]) {
       if (!fs.existsSync(path.join(root, routeTargets[localValue]))) failures.push(`Missing route target: ${value}`);
       continue;
