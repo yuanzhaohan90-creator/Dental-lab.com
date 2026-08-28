@@ -1,6 +1,6 @@
 const assert = require("assert");
 const crypto = require("crypto");
-const { createSession, verifyPassword, verifySession } = require("../lib/case-auth");
+const { createSession, isAdmin, verifyPassword, verifySession } = require("../lib/case-auth");
 const { CATEGORIES, IMAGE_TYPES, duplicateRecordData, normalizeFields, validateRecord } = require("../lib/case-store");
 
 const password = "test-admin-password";
@@ -15,6 +15,9 @@ const session = createSession(1000);
 assert.equal(verifySession(session, 2000), true);
 assert.equal(verifySession(session, 1000 + 13 * 60 * 60 * 1000), false);
 assert.equal(verifySession(`${session}x`, 2000), false);
+assert.equal(isAdmin({ headers: { cookie: `yzh_case_admin=${createSession()}` } }), true);
+assert.equal(isAdmin({ headers: { authorization: `Bearer ${createSession()}` } }), true);
+assert.equal(isAdmin({ headers: { authorization: "Bearer invalid" } }), false);
 
 const normalized = normalizeFields({
   title: "  Full-Arch Test  ",

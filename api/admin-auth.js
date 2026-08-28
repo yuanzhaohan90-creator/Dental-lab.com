@@ -20,8 +20,8 @@ module.exports = async function handler(req, res) {
     if (req.method === "POST") {
       const body = await readJson(req);
       if (!verifyPassword(body.password)) return reply(res, 401, { ok: false, error: "Invalid password." });
-      setSessionCookie(res);
-      return reply(res, 200, { ok: true, authenticated: true });
+      const sessionToken = setSessionCookie(res);
+      return reply(res, 200, { ok: true, authenticated: true, sessionToken });
     }
     if (req.method === "DELETE") {
       clearSessionCookie(res);

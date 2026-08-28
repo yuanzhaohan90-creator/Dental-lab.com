@@ -15,6 +15,7 @@ const nextPath = new URLSearchParams(window.location.search).get("next");
 const publishPrivacyText = "请确认此内容不包含未经授权的患者身份信息。\n\n未经适当授权，不得发布患者姓名、出生日期、病历号、正脸、含身份信息的处方或其他可识别患者的信息。";
 const categoryLabels = { "Full-Arch / All-on-X": "全口 / All-on-X", "Implant Bridge": "种植桥", "Custom Abutment": "个性化基台", "Crown & Bridge": "冠桥", "Surgical Guide": "手术导板" };
 const imageTypeLabels = { CAD: "CAD", Model: "模型", Framework: "支架", "Ti-base": "Ti-base", PMMA: "PMMA", "Try-in": "试戴", Final: "最终修复体", QC: "质量检查", Other: "其他" };
+const ADMIN_SESSION_KEY = "yzh_admin_session";
 function categoryLabel(value) { return categoryLabels[value] || value; }
 function imageTypeLabel(value) { return imageTypeLabels[value] || value; }
 
@@ -43,8 +44,12 @@ function adminErrorMessage(message) {
 }
 
 async function api(url, options = {}) {
-  const response = await fetch(url, options);
+  const headers = new Headers(options.headers || {});
+  const sessionToken = sessionStorage.getItem(ADMIN_SESSION_KEY);
+  if (sessionToken) headers.set("Authorization", `Bearer ${sessionToken}`);
+  const response = await fetch(url, { ...options, headers });
   const data = await response.json().catch(() => ({}));
+  if (response.status === 401) sessionStorage.removeItem(ADMIN_SESSION_KEY);
   if (!response.ok || data.ok === false) throw new Error(adminErrorMessage(data.error || "Request failed."));
   return data;
 }
@@ -204,12 +209,13 @@ async function saveCase(statusOverride) {
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault(); showMessage(loginMessage, "正在登录...");
   try {
-    await api("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: loginForm.elements.password.value }) });
+    const auth = await api("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: loginForm.elements.password.value }) });
+    if (auth.sessionToken) sessionStorage.setItem(ADMIN_SESSION_KEY, auth.sessionToken);
     loginForm.reset(); setAuthenticated(true); await loadCases(); handleInitialAction();
   } catch (error) { showMessage(loginMessage, error.message, "error"); }
 });
 
-logoutButton.addEventListener("click", async () => { await api("/api/admin-auth", { method: "DELETE" }); setAuthenticated(false); editor.hidden = true; window.location.href = "/admin"; });
+logoutButton.addEventListener("click", async () => { try { await api("/api/admin-auth", { method: "DELETE" }); } finally { sessionStorage.removeItem(ADMIN_SESSION_KEY); } setAuthenticated(false); editor.hidden = true; window.location.href = "/admin"; });
 document.getElementById("addQuickWorkButton").addEventListener("click", () => openEditor(null, "quick_work"));
 document.getElementById("addCaseStudyButton").addEventListener("click", () => openEditor(null, "case_study"));
 editor.elements.contentType.addEventListener("change", updateTypeUI);

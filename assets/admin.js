@@ -4,6 +4,8 @@ const loginForm = document.getElementById("ownerLoginForm");
 const loginMessage = document.getElementById("ownerLoginMessage");
 const nav = document.getElementById("adminNav");
 const navToggle = document.getElementById("adminNavToggle");
+const ADMIN_SESSION_KEY = "yzh_admin_session";
+const isAdminRoot = /^\/admin\/?$/.test(location.pathname);
 
 function escapeHtml(value) {
   const node = document.createElement("div");
@@ -33,9 +35,13 @@ function adminErrorMessage(message) {
 }
 
 async function api(url, options = {}) {
-  const response = await fetch(url, options);
+  const headers = new Headers(options.headers || {});
+  const sessionToken = sessionStorage.getItem(ADMIN_SESSION_KEY);
+  if (sessionToken) headers.set("Authorization", `Bearer ${sessionToken}`);
+  const response = await fetch(url, { ...options, headers });
   const data = await response.json().catch(() => ({}));
-  if (response.status === 401 && location.pathname !== "/admin") {
+  if (response.status === 401 && !isAdminRoot) {
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
     location.replace(`/admin?next=${encodeURIComponent(location.pathname + location.search)}`);
     throw new Error("请先登录管理员后台。");
   }
@@ -78,7 +84,7 @@ async function initialize() {
   try {
     const auth = await api("/api/admin-auth");
     if (auth.authenticated) return showShell();
-    if (location.pathname !== "/admin") return location.replace(`/admin?next=${encodeURIComponent(location.pathname + location.search)}`);
+    if (!isAdminRoot) return location.replace(`/admin?next=${encodeURIComponent(location.pathname + location.search)}`);
     loginPanel.hidden = false;
   } catch {
     loginPanel.hidden = false;
@@ -89,7 +95,8 @@ loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   showMessage(loginMessage, "正在登录...");
   try {
-    await api("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: loginForm.elements.password.value }) });
+    const auth = await api("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: loginForm.elements.password.value }) });
+    if (auth.sessionToken) sessionStorage.setItem(ADMIN_SESSION_KEY, auth.sessionToken);
     loginForm.reset();
     const next = new URLSearchParams(location.search).get("next");
     if (next?.startsWith("/admin") && next !== "/admin") return location.assign(next);
@@ -98,7 +105,8 @@ loginForm.addEventListener("submit", async (event) => {
 });
 
 document.getElementById("ownerLogout").addEventListener("click", async () => {
-  await api("/api/admin-auth", { method: "DELETE" });
+  try { await api("/api/admin-auth", { method: "DELETE" }); }
+  finally { sessionStorage.removeItem(ADMIN_SESSION_KEY); }
   location.assign("/admin");
 });
 
