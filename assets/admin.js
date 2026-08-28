@@ -27,7 +27,11 @@ function adminErrorMessage(message) {
     "Invalid request origin.": "请求来源无效，请刷新页面后重试。",
     "Request failed.": "请求失败，请稍后重试。",
     "Media item not found.": "未找到该媒体。",
-    "This image is currently in use.": "该媒体正在被页面使用，暂时不能删除。",
+    "This image is currently in use.": "该媒体正在被页面使用。",
+    "This media is currently in use.": "该媒体正在被页面使用，请先替换或移除引用。",
+    "A published section requires replacement media.": "已上线区块没有备用图，必须选择替换媒体。",
+    "Move media to Trash before permanent deletion.": "请先把媒体移入回收站，再永久删除。",
+    "Move the submission to Trash before permanent deletion.": "请先把客户提交移入回收站，再永久删除。",
     "Submission not found.": "未找到该客户提交。",
     "Method not allowed.": "当前操作不受支持。"
   };
@@ -129,7 +133,7 @@ function formatBytes(value) {
 }
 
 const CATEGORY_LABELS = { Cases: "案例", Homepage: "网站首页", Implant: "种植修复", "Full-Arch": "全口修复", Lab: "实验室", Products: "产品", Other: "其他" };
-const STATUS_LABELS = { New: "新提交", Reviewed: "已查看", Archived: "已归档", draft: "草稿", published: "已发布" };
+const STATUS_LABELS = { New: "新提交", Reviewed: "已查看", Archived: "已归档", Trash: "回收站", draft: "草稿", published: "已发布" };
 function categoryLabel(value) { return CATEGORY_LABELS[value] || value || "-"; }
 function statusLabel(value) { return STATUS_LABELS[value] || value || "-"; }
 
@@ -145,11 +149,13 @@ async function loadDashboard() {
 
 let submissions = [];
 let currentSubmissionId = "";
+let submissionFilter = "New";
 
 async function loadSubmissions() {
   try {
     const data = await api("/api/admin?module=submissions");
     submissions = data.submissions;
+    document.getElementById("submissionStorage").textContent = `私密客户文件：${formatBytes(data.storage?.privateCustomerFiles)} · 回收站：${formatBytes(data.storage?.trash)}`;
     renderSubmissions();
     const requested = new URLSearchParams(location.search).get("case");
     if (requested && submissions.some((item) => item.caseId === requested)) openSubmission(requested);
@@ -157,12 +163,17 @@ async function loadSubmissions() {
 }
 
 function renderSubmissions() {
-  const filter = document.getElementById("submissionFilter").value;
-  const filtered = submissions.filter((item) => !filter || item.status === filter);
+  const filtered = submissions.filter((item) => item.status === submissionFilter);
   document.getElementById("submissionList").innerHTML = filtered.length ? filtered.map((item) => `<button class="admin-record-button ${item.caseId === currentSubmissionId ? "active" : ""}" type="button" data-submission-id="${escapeHtml(item.caseId)}"><strong>${escapeHtml(item.caseId)}</strong><span>${escapeHtml(item.fields.name || "未填写姓名")} · ${escapeHtml(item.fields.company || "未填写公司")}</span><span class="admin-record-meta"><span>${formatDate(item.submittedAt)}</span><span class="admin-status-pill">${escapeHtml(statusLabel(item.status))} · ${item.fileCount} 个文件</span></span></button>`).join("") : '<p class="admin-empty">此状态下暂无提交记录。</p>';
 }
 
-document.getElementById("submissionFilter").addEventListener("change", renderSubmissions);
+document.getElementById("submissionTabs").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-submission-filter]");
+  if (!button) return;
+  submissionFilter = button.dataset.submissionFilter;
+  document.querySelectorAll("[data-submission-filter]").forEach((item) => item.classList.toggle("active", item === button));
+  renderSubmissions();
+});
 document.getElementById("submissionList").addEventListener("click", (event) => {
   const button = event.target.closest("[data-submission-id]");
   if (button) openSubmission(button.dataset.submissionId);
@@ -182,20 +193,49 @@ async function openSubmission(id) {
   try {
     const { submission } = await api(`/api/admin?module=submissions&id=${encodeURIComponent(id)}`);
     const fields = submission.fields || {};
-    const detailItems = [["客户姓名", fields.name], ["公司", fields.company], ["邮箱", fields.email], ["WhatsApp", fields.whatsapp], ["国家", fields.country], ["案例类型", fields.case_type], ["种植体品牌", fields.implant_brand], ["种植系统", fields.implant_system], ["平台", fields.platform], ["修复类型", fields.restoration_type], ["材料", fields.material], ["色号", fields.shade], ["数量", fields.quantity], ["要求日期", fields.due_date], ["提交时间", formatDate(submission.submittedAt)]];
-    detail.innerHTML = `<div class="admin-detail-head"><div><p class="eyebrow">客户提交</p><h2>${escapeHtml(submission.caseId)}</h2></div><select id="submissionStatus"><option value="New" ${submission.status === "New" ? "selected" : ""}>新提交</option><option value="Reviewed" ${submission.status === "Reviewed" ? "selected" : ""}>已查看</option><option value="Archived" ${submission.status === "Archived" ? "selected" : ""}>已归档</option></select></div><dl class="admin-detail-grid">${detailItems.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(value || "-")}</dd></div>`).join("")}</dl><div class="admin-instructions"><strong>客户说明</strong><br>${escapeHtml(fields.instructions || "客户未填写说明。")}</div><h3>附件</h3><div class="admin-file-list">${submission.files.length ? submission.files.map((file) => `<div class="admin-file"><span><strong>${escapeHtml(file.originalName || file.filename)}</strong><br><small>${formatBytes(file.size)} · ${escapeHtml(file.contentType)}</small></span><a class="btn btn-secondary" href="${file.downloadUrl}">下载</a></div>`).join("") : '<p class="admin-empty">没有上传文件。</p>'}</div><div class="admin-copy-actions"><button class="btn btn-secondary" type="button" data-copy-value="${escapeHtml(fields.email)}">复制邮箱</button><button class="btn btn-secondary" type="button" data-copy-value="${escapeHtml(fields.whatsapp)}">复制 WhatsApp</button></div><div class="admin-message" id="submissionMessage" role="status"></div>`;
-    document.getElementById("submissionStatus").addEventListener("change", async (event) => {
+    const detailItems = [["客户姓名", fields.name], ["公司", fields.company], ["邮箱", fields.email], ["WhatsApp", fields.whatsapp], ["国家", fields.country], ["案例类型", fields.case_type], ["种植体品牌", fields.implant_brand], ["种植系统", fields.implant_system], ["平台", fields.platform], ["修复类型", fields.restoration_type], ["材料", fields.material], ["色号", fields.shade], ["数量", fields.quantity], ["要求日期", fields.due_date], ["提交时间", formatDate(submission.submittedAt)], ["附件总大小", formatBytes(submission.totalFileSize)]];
+    const trashActions = submission.status === "Trash"
+      ? `<button class="btn btn-secondary" type="button" data-submission-action="restore">恢复提交</button><button class="btn admin-danger" type="button" data-submission-action="permanent-delete">永久删除</button>`
+      : `<button class="btn btn-secondary" type="button" data-submission-action="archive">归档</button><button class="btn admin-danger" type="button" data-submission-action="delete-files" ${submission.fileCount ? "" : "disabled"}>删除附件</button><button class="btn admin-danger" type="button" data-submission-action="trash">删除提交</button>`;
+    detail.innerHTML = `<div class="admin-detail-head"><div><p class="eyebrow">客户提交</p><h2>${escapeHtml(submission.caseId)}</h2></div>${submission.status === "Trash" ? '<span class="admin-status-pill">回收站</span>' : `<select id="submissionStatus"><option value="New" ${submission.status === "New" ? "selected" : ""}>新提交</option><option value="Reviewed" ${submission.status === "Reviewed" ? "selected" : ""}>已查看</option><option value="Archived" ${submission.status === "Archived" ? "selected" : ""}>已归档</option></select>`}</div>${submission.trashedAt ? `<p class="admin-trash-meta">删除时间：${formatDate(submission.trashedAt)} · 30 天后自动清理</p>` : ""}<dl class="admin-detail-grid">${detailItems.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(value || "-")}</dd></div>`).join("")}</dl><div class="admin-instructions"><strong>客户说明</strong><br>${escapeHtml(fields.instructions || "客户未填写说明。")}</div><h3>附件</h3><div class="admin-file-list">${submission.files.length ? submission.files.map((file) => `<div class="admin-file"><span><strong>${escapeHtml(file.originalName || file.filename)}</strong><br><small>${formatBytes(file.size)} · ${escapeHtml(file.contentType)}</small></span><a class="btn btn-secondary" href="${file.downloadUrl}">下载</a></div>`).join("") : '<p class="admin-empty">没有上传文件，或附件已永久删除。</p>'}</div><div class="admin-copy-actions"><button class="btn btn-secondary" type="button" data-copy-value="${escapeHtml(fields.email)}">复制邮箱</button><button class="btn btn-secondary" type="button" data-copy-value="${escapeHtml(fields.whatsapp)}">复制 WhatsApp</button></div><div class="admin-destructive-actions">${trashActions}</div><div class="admin-message" id="submissionMessage" role="status"></div>`;
+    document.getElementById("submissionStatus")?.addEventListener("change", async (event) => {
       try {
         await api("/api/admin?module=submissions", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ caseId: id, status: event.target.value }) });
         const item = submissions.find((entry) => entry.caseId === id); if (item) item.status = event.target.value; renderSubmissions(); showMessage(document.getElementById("submissionMessage"), "状态已更新。", "success");
       } catch (error) { showMessage(document.getElementById("submissionMessage"), error.message, "error"); }
     });
     detail.querySelectorAll("[data-copy-value]").forEach((button) => button.addEventListener("click", async () => { await copyText(button.dataset.copyValue); showMessage(document.getElementById("submissionMessage"), "已复制。", "success"); }));
+    detail.querySelectorAll("[data-submission-action]").forEach((button) => button.addEventListener("click", async () => {
+      const action = button.dataset.submissionAction;
+      const confirmations = {
+        archive: `将 ${submission.caseId} 归档？附件会保留。`,
+        "delete-files": `永久删除客户附件？\n\nCase ID：${submission.caseId}\n客户：${fields.name || fields.company || "未填写"}\n附件：${submission.fileCount} 个\n总大小：${formatBytes(submission.totalFileSize)}\n\n提交记录和客户说明会保留，此操作无法撤销。`,
+        trash: `删除这条客户提交？\n\nCase ID：${submission.caseId}\n客户：${fields.name || fields.company || "未填写"}\n日期：${formatDate(submission.submittedAt)}\n附件：${submission.fileCount} 个（${formatBytes(submission.totalFileSize)}）\n\n提交将进入回收站，30 天内可以恢复。`,
+        restore: `恢复客户提交 ${submission.caseId}？`,
+        "permanent-delete": `永久删除这条客户提交？\n\nCase ID：${submission.caseId}\n附件：${submission.fileCount} 个（${formatBytes(submission.totalFileSize)}）\n\n记录和所有私密附件将永久删除，无法恢复。`
+      };
+      if (!confirm(confirmations[action])) return;
+      const message = document.getElementById("submissionMessage");
+      showMessage(message, "正在处理...");
+      try {
+        await api("/api/admin?module=submission-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ caseId: id, action }) });
+        if (action === "permanent-delete") { currentSubmissionId = ""; detail.innerHTML = '<p class="admin-empty">提交已永久删除。</p>'; }
+        await loadSubmissions();
+        if (action !== "permanent-delete") {
+          submissionFilter = submissions.find((item) => item.caseId === id)?.status || submissionFilter;
+          document.querySelectorAll("[data-submission-filter]").forEach((item) => item.classList.toggle("active", item.dataset.submissionFilter === submissionFilter));
+          renderSubmissions();
+          await openSubmission(id);
+        }
+      } catch (error) { showMessage(message, error.message, "error"); }
+    }));
   } catch (error) { detail.innerHTML = `<p class="admin-empty">${escapeHtml(error.message)}</p>`; }
 }
 
 let mediaItems = [];
 let mediaTypeFilter = "";
+let mediaTrashView = false;
+const selectedMediaIds = new Set();
 const VIDEO_ACCEPT = "video/*,.mp4,.mov,.m4v";
 const processingLabels = { uploading: "正在上传", processing: "处理中", ready: "可使用", failed: "处理失败" };
 
@@ -214,9 +254,14 @@ function mediaFileDetails(item) {
 
 async function loadMedia() {
   try {
-    const data = await api("/api/admin?module=media");
+    const data = await api(`/api/admin?module=media${mediaTrashView ? "&view=trash" : ""}`);
     mediaItems = data.media;
+    selectedMediaIds.clear();
+    document.getElementById("mediaSelectAll").checked = false;
+    document.getElementById("mediaStorage").textContent = `公开媒体：${formatBytes(data.storage?.publicMedia)} · 回收站：${formatBytes(data.storage?.trash)}`;
     renderMedia();
+    const target = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+    if (target) requestAnimationFrame(() => target.scrollIntoView({ block: "center" }));
   } catch (error) { document.getElementById("mediaList").innerHTML = `<p class="admin-empty">${escapeHtml(error.message)}</p>`; }
 }
 
@@ -230,7 +275,17 @@ function mediaPreview(item, className = "") {
 function renderMedia() {
   const category = document.getElementById("mediaCategoryFilter").value;
   const filtered = mediaItems.filter((item) => (!mediaTypeFilter || item.mediaType === mediaTypeFilter) && (!category || item.category === category));
-  document.getElementById("mediaList").innerHTML = filtered.length ? filtered.map((item) => `<article class="admin-media-item" data-media-id="${item.id}">${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><label class="field">显示名称<input data-media-key="displayName" value="${escapeHtml(item.displayName)}"></label><label class="field">图片说明（ALT）<input data-media-key="altText" value="${escapeHtml(item.altText)}"></label><label class="field">分类<select data-media-key="category">${["Cases", "Homepage", "Implant", "Full-Arch", "Lab", "Products", "Other"].map((value) => `<option value="${value}" ${value === item.category ? "selected" : ""}>${categoryLabel(value)}</option>`).join("")}</select></label>${item.mediaType === "video" ? `<label class="field">视频海报<select data-media-key="posterMediaId">${mediaOptions(item.posterMediaId, "image")}</select></label>${item.processingMessage ? `<p class="admin-helper">${escapeHtml(item.processingMessage)}</p>` : ""}` : ""}<p class="admin-media-usage"><strong>使用位置：</strong> ${item.usedIn.length ? escapeHtml(item.usedIn.join(", ")) : "当前未使用"}</p><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-use ${item.mediaType === "video" && item.processingStatus !== "ready" ? "disabled" : ""}>使用到页面</button><button class="btn btn-secondary" type="button" data-media-save>保存信息</button><button class="btn admin-danger" type="button" data-media-delete>删除</button></div><div class="media-use-menu" hidden><a href="/admin/home">网站首页</a><a href="/admin/implant">种植修复</a><a href="/admin/full-arch">全口修复</a><a href="/admin/about">关于我们</a></div><div class="admin-message" role="status"></div></div></article>`).join("") : '<p class="admin-empty">没有符合当前筛选条件的媒体。</p>';
+  document.getElementById("mediaBulkActions").hidden = mediaTrashView;
+  document.getElementById("showMediaUpload").hidden = mediaTrashView;
+  document.getElementById("mediaUploadForm").hidden = mediaTrashView;
+  document.getElementById("mediaSelectedCount").textContent = `已选择 ${selectedMediaIds.size} 项`;
+  document.getElementById("mediaList").innerHTML = filtered.length ? filtered.map((item) => {
+    const usage = item.usedIn.length
+      ? `<ul class="admin-used-in">${item.usedIn.map((place) => `<li><a href="${escapeHtml(place.editorUrl)}">${escapeHtml(place.label)}</a>${place.required ? "<small>需要替换</small>" : ""}</li>`).join("")}</ul>`
+      : '<p class="admin-media-usage">当前未使用</p>';
+    if (mediaTrashView) return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}">${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><p class="admin-trash-meta">删除时间：${formatDate(item.trashedAt)}<br>原位置：${escapeHtml(categoryLabel(item.originalLocation || item.category))}<br>30 天后自动清理</p><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-restore>恢复</button><button class="btn admin-danger" type="button" data-media-permanent>永久删除</button></div><div class="admin-message" role="status"></div></div></article>`;
+    return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}"><label class="admin-media-select"><input type="checkbox" data-media-select ${selectedMediaIds.has(item.id) ? "checked" : ""}> 选择</label>${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><label class="field">显示名称<input data-media-key="displayName" value="${escapeHtml(item.displayName)}"></label><label class="field">图片说明（ALT）<input data-media-key="altText" value="${escapeHtml(item.altText)}"></label><label class="field">分类<select data-media-key="category">${["Cases", "Homepage", "Implant", "Full-Arch", "Lab", "Products", "Other"].map((value) => `<option value="${value}" ${value === item.category ? "selected" : ""}>${categoryLabel(value)}</option>`).join("")}</select></label>${item.mediaType === "video" ? `<label class="field">视频海报<select data-media-key="posterMediaId">${mediaOptions(item.posterMediaId, "image")}</select></label>${item.processingMessage ? `<p class="admin-helper">${escapeHtml(item.processingMessage)}</p>` : ""}` : ""}<div class="admin-media-usage"><strong>使用位置</strong>${usage}</div><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-use ${item.mediaType === "video" && item.processingStatus !== "ready" ? "disabled" : ""}>使用到页面</button><button class="btn btn-secondary" type="button" data-media-save>保存信息</button><button class="btn admin-danger" type="button" data-media-delete>删除</button></div><div class="media-use-menu" hidden><a href="/admin/home">网站首页</a><a href="/admin/implant">种植修复</a><a href="/admin/full-arch">全口修复</a><a href="/admin/about">关于我们</a></div><div class="admin-message" role="status"></div></div></article>`;
+  }).join("") : `<p class="admin-empty">${mediaTrashView ? "回收站为空。" : "没有符合当前筛选条件的媒体。"}</p>`;
 }
 
 document.getElementById("mediaTypeTabs").addEventListener("click", (event) => {
@@ -240,8 +295,34 @@ document.getElementById("mediaTypeTabs").addEventListener("click", (event) => {
   document.querySelectorAll("#mediaTypeTabs button").forEach((item) => item.classList.toggle("active", item === button));
   renderMedia();
 });
+document.getElementById("mediaViewTabs").addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-media-view]");
+  if (!button) return;
+  mediaTrashView = button.dataset.mediaView === "trash";
+  document.querySelectorAll("[data-media-view]").forEach((item) => item.classList.toggle("active", item === button));
+  await loadMedia();
+});
 document.getElementById("mediaCategoryFilter").addEventListener("change", renderMedia);
 document.getElementById("showMediaUpload").addEventListener("click", () => document.getElementById("mediaUploadForm").scrollIntoView({ behavior: "smooth", block: "start" }));
+document.getElementById("mediaSelectAll").addEventListener("change", (event) => {
+  const category = document.getElementById("mediaCategoryFilter").value;
+  const visible = mediaItems.filter((item) => (!mediaTypeFilter || item.mediaType === mediaTypeFilter) && (!category || item.category === category));
+  visible.forEach((item) => event.target.checked ? selectedMediaIds.add(item.id) : selectedMediaIds.delete(item.id));
+  renderMedia();
+});
+document.getElementById("mediaBulkTrash").addEventListener("click", async () => {
+  if (!selectedMediaIds.size) return alert("请先选择媒体。");
+  if (!confirm(`将选中的 ${selectedMediaIds.size} 项媒体移入回收站？正在使用的媒体会先进入冲突检查。`)) return;
+  try {
+    const result = await api("/api/admin?module=media-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "bulk-trash", ids: [...selectedMediaIds] }) });
+    await loadMedia();
+    if (result.conflicts.length) {
+      alert(`${result.moved.length} 项已移入回收站。${result.conflicts.length} 项仍在使用，需要逐项选择替换或移除。`);
+      const first = mediaItems.find((item) => item.id === result.conflicts[0].id);
+      if (first) openMediaDeleteReview(first);
+    }
+  } catch (error) { alert(error.message); }
+});
 
 async function uploadMediaFile(file, metadata, onProgress) {
   if (!window.yzhUploadMedia) throw new Error("媒体上传组件尚未就绪，请刷新页面后重试。");
@@ -284,10 +365,47 @@ mediaUploadForm.addEventListener("submit", async (event) => {
   } catch (error) { progress.hidden = true; showMessage(message, error.message || "上传中断，请重试。", "error"); }
 });
 
+function closeAdminModal(modal) {
+  modal?.remove();
+}
+
+function openMediaDeleteReview(item) {
+  const required = item.usedIn.some((place) => place.required);
+  const replacements = mediaItems.filter((candidate) => candidate.id !== item.id && !candidate.trashedAt && (candidate.mediaType !== "video" || candidate.processingStatus === "ready"));
+  const modal = document.createElement("div");
+  modal.className = "admin-modal-backdrop";
+  modal.innerHTML = `<section class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="mediaDeleteTitle"><h2 id="mediaDeleteTitle">处理正在使用的媒体</h2><p><strong>${escapeHtml(item.displayName || item.originalFilename)}</strong> 当前用于：</p><div class="admin-conflict-list">${item.usedIn.map((place) => `<label><input type="checkbox" data-usage-id="${escapeHtml(place.id)}" checked> <span><a href="${escapeHtml(place.editorUrl)}">${escapeHtml(place.label)}</a>${place.required ? "<small>该已上线位置没有备用图，必须替换。</small>" : ""}</span></label>`).join("")}</div><label class="field">替换为<select id="replacementMedia"><option value="">请选择另一项媒体</option>${replacements.map((candidate) => `<option value="${candidate.id}">${escapeHtml(candidate.displayName || candidate.originalFilename)} · ${candidate.mediaType === "video" ? "视频" : "图片"}</option>`).join("")}</select></label>${required ? '<p class="admin-warning">至少有一个已上线位置没有备用图，不能直接移除，必须选择替换媒体。</p>' : ""}<div class="admin-modal-actions"><button class="btn btn-primary" type="button" data-delete-mode="replace-delete">替换并删除</button><button class="btn admin-danger" type="button" data-delete-mode="remove-delete" ${required ? "disabled" : ""}>从页面移除并删除</button><button class="btn btn-secondary" type="button" data-delete-cancel>取消</button></div><div class="admin-message" role="status"></div></section>`;
+  document.body.append(modal);
+  modal.querySelector("[data-delete-cancel]").addEventListener("click", () => closeAdminModal(modal));
+  modal.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-delete-mode]");
+    if (!button) return;
+    const usageIds = [...modal.querySelectorAll("[data-usage-id]:checked")].map((input) => input.dataset.usageId);
+    const action = button.dataset.deleteMode;
+    const replacementId = modal.querySelector("#replacementMedia").value;
+    const message = modal.querySelector(".admin-message");
+    if (usageIds.length !== item.usedIn.length) return showMessage(message, "要将旧媒体移入回收站，必须处理全部使用位置。", "error");
+    if (action === "replace-delete" && !replacementId) return showMessage(message, "请选择替换媒体。", "error");
+    if (!confirm(action === "replace-delete" ? "确认替换全部列出的使用位置，并把旧媒体移入回收站？" : "确认从全部列出的位置移除媒体，并把旧媒体移入回收站？")) return;
+    showMessage(message, "正在更新引用...");
+    try {
+      await api("/api/admin?module=media-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, id: item.id, replacementId, usageIds }) });
+      closeAdminModal(modal);
+      await loadMedia();
+    } catch (error) { showMessage(message, error.message, "error"); }
+  });
+}
+
 document.getElementById("mediaList").addEventListener("click", async (event) => {
   const card = event.target.closest("[data-media-id]"); if (!card) return;
+  const item = mediaItems.find((entry) => entry.id === card.dataset.mediaId);
   const message = card.querySelector(".admin-message");
   try {
+    if (event.target.closest("[data-media-select]")) {
+      event.target.checked ? selectedMediaIds.add(card.dataset.mediaId) : selectedMediaIds.delete(card.dataset.mediaId);
+      document.getElementById("mediaSelectedCount").textContent = `已选择 ${selectedMediaIds.size} 项`;
+      return;
+    }
     if (event.target.closest("[data-media-use]")) card.querySelector(".media-use-menu").hidden = !card.querySelector(".media-use-menu").hidden;
     if (event.target.closest("[data-media-save]")) {
       const body = { id: card.dataset.mediaId };
@@ -296,11 +414,22 @@ document.getElementById("mediaList").addEventListener("click", async (event) => 
       showMessage(message, "名称和图片说明已保存。", "success"); await loadMedia();
     }
     if (event.target.closest("[data-media-delete]")) {
-      if (!confirm("确定删除这项公开媒体吗？正在被页面使用的媒体无法删除。")) return;
-      await api(`/api/admin?module=media&id=${encodeURIComponent(card.dataset.mediaId)}`, { method: "DELETE" });
+      if (item.usedIn.length) return openMediaDeleteReview(item);
+      if (!confirm("将这项媒体移入回收站？30 天内可以恢复。")) return;
+      await api("/api/admin?module=media-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "trash", id: card.dataset.mediaId }) });
       await loadMedia();
     }
-  } catch (error) { showMessage(message, error.status === 409 ? `当前使用位置：${(error.data.usedIn || []).join(", ")}` : error.message, "error"); }
+    if (event.target.closest("[data-media-restore]")) {
+      if (!confirm("恢复这项媒体到媒体库？")) return;
+      await api("/api/admin?module=media-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "restore", id: card.dataset.mediaId }) });
+      await loadMedia();
+    }
+    if (event.target.closest("[data-media-permanent]")) {
+      if (!confirm(`永久删除 ${item.originalFilename || item.displayName}？文件和媒体记录将被删除，无法恢复。`)) return;
+      await api("/api/admin?module=media-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "permanent-delete", id: card.dataset.mediaId }) });
+      await loadMedia();
+    }
+  } catch (error) { showMessage(message, error.message, "error"); }
 });
 
 function getPath(object, path) {
@@ -414,8 +543,10 @@ function renderPageEditor() {
     else if (section.restorationOptions) content = restorationOptionsEditor(value);
     else if (section.featuredCase) content = `${textFields(section.key, value, section)}<label class="field">选择精选案例<select data-path="${section.key}.caseId">${caseOptions(value.caseId, section.caseStudyOnly)}</select></label>`;
     else content = `${textFields(section.key, value, section)}${section.media ? renderMediaEditor(`${section.key}.media`, value.media, section.video, section.hint) : ""}`;
-    return `<section class="page-section-editor"><div class="page-section-heading"><span>${escapeHtml(section.label.split(" ")[0])}</span><div><h2>${escapeHtml(section.label.replace(/^\d+\s/, ""))}</h2><p>${escapeHtml(section.hint)}</p></div></div>${content}</section>`;
+    return `<section class="page-section-editor" id="${escapeHtml(section.key)}"><div class="page-section-heading"><span>${escapeHtml(section.label.split(" ")[0])}</span><div><h2>${escapeHtml(section.label.replace(/^\d+\s/, ""))}</h2><p>${escapeHtml(section.hint)}</p></div></div>${content}</section>`;
   }).join("");
+  const target = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+  if (target) requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
 }
 
 function collectPageDraft() {

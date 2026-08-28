@@ -7,6 +7,7 @@ const {
   DEFAULT_PAGE_CONFIGS,
   DEFAULT_SETTINGS,
   MEDIA_CATEGORIES,
+  deleteSubmissionFiles,
   deleteMedia,
   getConfig,
   getMedia,
@@ -17,13 +18,19 @@ const {
   normalizeHomepage,
   normalizePageConfig,
   normalizeSettings,
+  permanentlyDeleteSubmission,
   publishConfig,
   restoreConfig,
+  restoreMedia,
+  restoreSubmission,
   saveConfigDraft,
   saveMedia,
   saveSubmissionStatus,
   storeClientMedia,
-  storeMediaFile
+  storeMediaFile,
+  trashMedia,
+  trashSubmission,
+  updateMediaReferences
 } = require("../lib/admin-store");
 const { listRecords, publicRecord, saveRecord } = require("../lib/case-store");
 
@@ -56,12 +63,17 @@ function parseUpload(req) {
 }
 
 function adminSubmission(item, detail = false) {
+  const totalFileSize = (item.files || []).reduce((sum, file) => sum + (Number(file.size) || 0), 0);
   const base = {
     caseId: item.caseId,
     submittedAt: item.submittedAt,
     status: item.status,
     fields: item.fields || {},
-    fileCount: item.files?.length || 0
+    fileCount: item.files?.length || 0,
+    totalFileSize,
+    trashedAt: item.trashedAt || "",
+    trashExpiresAt: item.trashExpiresAt || "",
+    filesDeletedAt: item.filesDeletedAt || ""
   };
   if (!detail) return base;
   return {
@@ -142,13 +154,14 @@ async function homepageData(config) {
 async function mediaUrl(id, fallback) {
   if (!id) return fallback;
   const record = await getMedia(id);
-  if (!record) return fallback;
+  if (!record || record.trashedAt) return fallback;
   if (String(record.contentType || "").startsWith("video/") && (record.processingStatus || "ready") !== "ready") return fallback;
   return `/api/admin?module=media-image&id=${encodeURIComponent(id)}`;
 }
 
 async function resolveMedia(slot = {}) {
   const record = slot.mediaId ? await getMedia(slot.mediaId) : null;
+  if (record?.trashedAt) return { ...slot, url: slot.fallbackPath, mediaType: "image", posterUrl: "", processingStatus: "ready" };
   const videoReady = record && String(record.contentType || "").startsWith("video/") && (record.processingStatus || "ready") === "ready";
   const posterId = slot.posterMediaId || record?.posterMediaId;
   const posterUrl = await mediaUrl(posterId, "");
@@ -176,10 +189,11 @@ async function handleDashboard(req, res) {
   const published = cases.filter((item) => item.status === "published");
   const drafts = cases.filter((item) => item.status !== "published");
   const fresh = submissions.filter((item) => item.status === "New");
+  const activeSubmissions = submissions.filter((item) => item.status !== "Trash");
   return reply(res, 200, {
     ok: true,
     counts: { publishedCases: published.length, draftCases: drafts.length, newSubmissions: fresh.length },
-    recentSubmissions: submissions.slice(0, 5).map((item) => ({ caseId: item.caseId, submittedAt: item.submittedAt, name: item.fields?.name || "", company: item.fields?.company || "", caseType: item.fields?.case_type || "", status: item.status })),
+    recentSubmissions: activeSubmissions.slice(0, 5).map((item) => ({ caseId: item.caseId, submittedAt: item.submittedAt, name: item.fields?.name || "", company: item.fields?.company || "", caseType: item.fields?.case_type || "", status: item.status })),
     recentPublished: published.slice(0, 5).map((item) => ({ id: item.id, title: item.title, category: item.category, publishedAt: item.publishedAt }))
   });
 }
@@ -192,7 +206,15 @@ async function handleSubmissions(req, res) {
       return item ? reply(res, 200, { ok: true, submission: adminSubmission(item, true) }) : reply(res, 404, { ok: false, error: "Submission not found." });
     }
     const items = await listSubmissions();
-    return reply(res, 200, { ok: true, submissions: items.map((item) => adminSubmission(item)) });
+    const summaries = items.map((item) => adminSubmission(item));
+    return reply(res, 200, {
+      ok: true,
+      submissions: summaries,
+      storage: {
+        privateCustomerFiles: summaries.filter((item) => item.status !== "Trash").reduce((sum, item) => sum + item.totalFileSize, 0),
+        trash: summaries.filter((item) => item.status === "Trash").reduce((sum, item) => sum + item.totalFileSize, 0)
+      }
+    });
   }
   if (req.method === "PUT") {
     const body = await readJson(req);
@@ -201,6 +223,30 @@ async function handleSubmissions(req, res) {
     return reply(res, 200, { ok: true, submission: adminSubmission(item, true) });
   }
   return reply(res, 405, { ok: false, error: "Method not allowed." });
+}
+
+async function handleSubmissionManage(req, res) {
+  if (req.method !== "POST") return reply(res, 405, { ok: false, error: "Method not allowed." });
+  const body = await readJson(req);
+  const caseId = String(body.caseId || "");
+  const submission = await getSubmission(caseId);
+  if (!submission) return reply(res, 404, { ok: false, error: "Submission not found." });
+  if (body.action === "archive") {
+    await saveSubmissionStatus(caseId, "Archived");
+    return reply(res, 200, { ok: true, submission: adminSubmission(await getSubmission(caseId), true) });
+  }
+  if (body.action === "trash") return reply(res, 200, { ok: true, submission: adminSubmission(await trashSubmission(caseId), true) });
+  if (body.action === "restore") {
+    await restoreSubmission(caseId);
+    return reply(res, 200, { ok: true, submission: adminSubmission(await getSubmission(caseId), true) });
+  }
+  if (body.action === "delete-files") return reply(res, 200, { ok: true, submission: adminSubmission(await deleteSubmissionFiles(caseId), true) });
+  if (body.action === "permanent-delete") {
+    if (submission.status !== "Trash") return reply(res, 409, { ok: false, error: "Move the submission to Trash before permanent deletion." });
+    await permanentlyDeleteSubmission(caseId);
+    return reply(res, 200, { ok: true });
+  }
+  return reply(res, 400, { ok: false, error: "Invalid submission action." });
 }
 
 async function handleSubmissionFile(req, res) {
@@ -237,8 +283,18 @@ async function handleSubmissionFile(req, res) {
 
 async function handleMedia(req, res) {
   if (req.method === "GET") {
-    const records = await listMedia();
-    return reply(res, 200, { ok: true, media: await Promise.all(records.map(adminMedia)), categories: MEDIA_CATEGORIES });
+    const trash = query(req, "view") === "trash";
+    const records = await listMedia({ trash });
+    const active = trash ? await listMedia() : records;
+    return reply(res, 200, {
+      ok: true,
+      media: await Promise.all(records.map(adminMedia)),
+      categories: MEDIA_CATEGORIES,
+      storage: {
+        publicMedia: active.reduce((sum, item) => sum + (Number(item.size) || 0), 0),
+        trash: (trash ? records : await listMedia({ trash: true })).reduce((sum, item) => sum + (Number(item.size) || 0), 0)
+      }
+    });
   }
   if (req.method === "POST") {
     const { fields, file } = await parseUpload(req);
@@ -256,11 +312,55 @@ async function handleMedia(req, res) {
     const record = await getMedia(query(req, "id"));
     if (!record) return reply(res, 404, { ok: false, error: "Media item not found." });
     const usedIn = await mediaUsage(record.id);
-    if (usedIn.length) return reply(res, 409, { ok: false, error: "This image is currently in use.", usedIn });
+    if (usedIn.length) return reply(res, 409, { ok: false, error: "This media is currently in use.", usedIn });
+    await trashMedia(record);
+    return reply(res, 200, { ok: true, trashed: true });
+  }
+  return reply(res, 405, { ok: false, error: "Method not allowed." });
+}
+
+async function handleMediaManage(req, res) {
+  if (req.method !== "POST") return reply(res, 405, { ok: false, error: "Method not allowed." });
+  const body = await readJson(req);
+  const action = String(body.action || "");
+  if (action === "bulk-trash") {
+    const ids = [...new Set((Array.isArray(body.ids) ? body.ids : []).map(String))];
+    const moved = [];
+    const conflicts = [];
+    for (const id of ids) {
+      const record = await getMedia(id);
+      if (!record || record.trashedAt) continue;
+      const usedIn = await mediaUsage(id);
+      if (usedIn.length) conflicts.push({ id, displayName: record.displayName || record.originalFilename, usedIn });
+      else { await trashMedia(record); moved.push(id); }
+    }
+    return reply(res, 200, { ok: true, moved, conflicts });
+  }
+  const record = await getMedia(String(body.id || ""));
+  if (!record) return reply(res, 404, { ok: false, error: "Media item not found." });
+  if (action === "restore") {
+    if (!record.trashedAt) return reply(res, 400, { ok: false, error: "Media item is not in Trash." });
+    return reply(res, 200, { ok: true, media: await adminMedia(await restoreMedia(record)) });
+  }
+  if (action === "permanent-delete") {
+    if (!record.trashedAt) return reply(res, 409, { ok: false, error: "Move media to Trash before permanent deletion." });
     await deleteMedia(record);
     return reply(res, 200, { ok: true });
   }
-  return reply(res, 405, { ok: false, error: "Method not allowed." });
+  const usedIn = await mediaUsage(record.id);
+  if (action === "trash") {
+    if (usedIn.length) return reply(res, 409, { ok: false, error: "This media is currently in use.", usedIn });
+    return reply(res, 200, { ok: true, media: await adminMedia(await trashMedia(record)) });
+  }
+  if (!["replace-delete", "remove-delete"].includes(action)) return reply(res, 400, { ok: false, error: "Invalid media action." });
+  const usageIds = Array.isArray(body.usageIds) ? body.usageIds : [];
+  if (usageIds.length !== usedIn.length || usedIn.some((item) => !usageIds.includes(item.id))) {
+    return reply(res, 409, { ok: false, error: "Resolve every current usage before moving this media to Trash.", usedIn });
+  }
+  await updateMediaReferences({ mediaId: record.id, usageIds, replacementId: body.replacementId, mode: action === "replace-delete" ? "replace" : "remove" });
+  const remaining = await mediaUsage(record.id);
+  if (remaining.length) return reply(res, 409, { ok: false, error: "Some media usages still need review.", usedIn: remaining });
+  return reply(res, 200, { ok: true, media: await adminMedia(await trashMedia(record)) });
 }
 
 async function handleMediaUpload(req, res) {
@@ -326,6 +426,10 @@ async function handleMediaImage(req, res) {
   }
   const record = await getMedia(query(req, "id"));
   if (!record) {
+    res.statusCode = 404;
+    return res.end("Media not found");
+  }
+  if (record.trashedAt && !isAdmin(req)) {
     res.statusCode = 404;
     return res.end("Media not found");
   }
@@ -473,8 +577,10 @@ module.exports = async function handler(req, res) {
   try {
     if (moduleName === "dashboard") return await handleDashboard(req, res);
     if (moduleName === "submissions") return await handleSubmissions(req, res);
+    if (moduleName === "submission-manage") return await handleSubmissionManage(req, res);
     if (moduleName === "submission-file") return await handleSubmissionFile(req, res);
     if (moduleName === "media") return await handleMedia(req, res);
+    if (moduleName === "media-manage") return await handleMediaManage(req, res);
     if (moduleName === "media-upload") return await handleMediaUpload(req, res);
     if (moduleName === "media-finalize") return await handleMediaFinalize(req, res);
     if (moduleName === "media-image") return await handleMediaImage(req, res);

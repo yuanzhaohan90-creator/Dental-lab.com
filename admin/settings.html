@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>YZH 网站管理后台</title><meta name="robots" content="noindex,nofollow"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/site.css"><link rel="stylesheet" href="/assets/admin.css?v=20260828-video1"></head>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>YZH 网站管理后台</title><meta name="robots" content="noindex,nofollow"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/site.css"><link rel="stylesheet" href="/assets/admin.css?v=20260828-delete1"></head>
 <body class="admin-v1-body">
 <section class="admin-v1-login" id="adminLogin"><form id="ownerLoginForm"><a class="brand" href="/"><span class="brand-mark">Y</span><span>YZH Dental Lab</span></a><p class="eyebrow">YZH 网站管理后台</p><h1>管理员登录</h1><p>管理网站页面、案例、公开媒体和客户提交资料。</p><label class="field">管理员密码<input type="password" name="password" autocomplete="current-password" required></label><button class="btn btn-primary" type="submit">登录</button><div class="admin-message" id="ownerLoginMessage" role="status"></div></form></section>
 
@@ -29,15 +29,18 @@
       </section>
 
       <section class="admin-view" id="submissionsView" data-view="submissions" hidden>
-        <div class="admin-page-head"><div><p class="eyebrow">客户隐私文件</p><h1>客户提交</h1></div><select id="submissionFilter" aria-label="筛选客户提交"><option value="">全部状态</option><option value="New">新提交</option><option value="Reviewed">已查看</option><option value="Archived">已归档</option></select></div>
+        <div class="admin-page-head"><div><p class="eyebrow">客户隐私文件</p><h1>客户提交</h1></div><div class="segmented submission-tabs" id="submissionTabs" aria-label="筛选客户提交"><button class="active" type="button" data-submission-filter="New">新提交</button><button type="button" data-submission-filter="Reviewed">已查看</button><button type="button" data-submission-filter="Archived">已归档</button><button type="button" data-submission-filter="Trash">回收站</button></div></div>
         <p class="admin-private-note">客户文件保持私密，不会自动进入媒体库或案例库。</p>
+        <p class="admin-storage-summary" id="submissionStorage"></p>
         <div class="admin-split"><div class="admin-record-list" id="submissionList"><p class="admin-loading">正在加载...</p></div><section class="admin-detail" id="submissionDetail"><p class="admin-empty">请选择一条提交记录，查看客户资料、说明和附件。</p></section></div>
       </section>
 
       <section class="admin-view" id="mediaView" data-view="media" hidden>
         <div class="admin-page-head"><div><p class="eyebrow">公开网站媒体</p><h1>媒体库</h1><p>这里只存放公开网站使用的图片和视频。</p></div><button class="btn btn-primary" id="showMediaUpload" type="button">上传媒体</button></div>
         <form class="admin-upload-form" id="mediaUploadForm"><div class="form-grid"><label class="field">图片或视频 *<input type="file" name="file" accept="image/jpeg,image/png,image/webp,video/*,.mp4,.mov,.m4v" required></label><label class="field">分类<select name="category"><option value="Cases">案例</option><option value="Homepage">网站首页</option><option value="Implant">种植修复</option><option value="Full-Arch">全口修复</option><option value="Lab">实验室</option><option value="Products">产品</option><option value="Other">其他</option></select></label><label class="field">显示名称<input name="displayName" maxlength="160"></label><label class="field">图片说明（ALT）<input name="altText" maxlength="240"></label></div><div class="admin-upload-progress" id="mediaUploadProgress" hidden><span></span></div><button class="btn btn-primary" type="submit">开始上传</button><div class="admin-message" id="mediaMessage" role="status"></div></form>
+        <div class="media-view-toolbar"><div class="segmented" id="mediaViewTabs"><button class="active" type="button" data-media-view="active">媒体库</button><button type="button" data-media-view="trash">回收站</button></div><p class="admin-storage-summary" id="mediaStorage"></p></div>
         <div class="media-toolbar"><div class="segmented" id="mediaTypeTabs"><button class="active" type="button" data-type="">全部</button><button type="button" data-type="image">图片</button><button type="button" data-type="video">视频</button></div><label>分类筛选<select id="mediaCategoryFilter"><option value="">全部分类</option><option value="Cases">案例</option><option value="Homepage">网站首页</option><option value="Implant">种植修复</option><option value="Full-Arch">全口修复</option><option value="Lab">实验室</option><option value="Products">产品</option><option value="Other">其他</option></select></label></div>
+        <div class="media-bulk-actions" id="mediaBulkActions"><label><input type="checkbox" id="mediaSelectAll"> 全选当前结果</label><button class="btn admin-danger" id="mediaBulkTrash" type="button">移入回收站</button><span id="mediaSelectedCount">已选择 0 项</span></div>
         <div class="admin-media-grid" id="mediaList"><p class="admin-loading">正在加载...</p></div>
       </section>
 
@@ -49,4 +52,4 @@
     </main>
   </div>
 </div>
-<script src="/assets/admin-upload-client.js?v=20260828-video1" defer></script><script src="/assets/admin.js?v=20260828-video1" defer></script></body></html>
+<script src="/assets/admin-upload-client.js?v=20260828-delete1" defer></script><script src="/assets/admin.js?v=20260828-delete1" defer></script></body></html>

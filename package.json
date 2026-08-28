@@ -8,7 +8,8 @@
     "test:submit-case": "node scripts/test-submit-case.js",
     "test:case-library": "node scripts/test-case-library.js",
     "test:admin": "node scripts/test-admin-v1.js",
-    "test:media-upload": "node scripts/test-media-upload.js"
+    "test:media-upload": "node scripts/test-media-upload.js",
+    "test:admin-deletion": "node scripts/test-admin-deletion.js"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",
