@@ -29,16 +29,42 @@ function makeCaseCard(item, index) {
   const cover = item.coverImage?.url || "/assets/real/full-arch-titanium-framework-10.jpg";
   const lines = [item.material, item.implantSystem, item.restorationType].filter(Boolean).slice(0, 2).join(" · ");
   const url = `/cases/${encodeURIComponent(item.slug)}`;
-  return `<article class="priority-case ${index === 0 ? "large" : ""}">
+  return `<a class="priority-case ${index === 0 ? "large" : ""}" href="${url}">
     <img src="${cover}" alt="${escapeAttr(item.coverImage?.caption || item.title)}">
     <div>
       <p class="case-category">${escapeHtml(item.category)}</p>
       <h3>${escapeHtml(item.title)}</h3>
       <p>${escapeHtml(lines || item.shortNote || item.summary || "Completed dental work with technical review before production.")}</p>
-      <a class="text-link" href="${url}">${item.contentType === "case_study" ? "View Case Study" : "View Work"}</a>
+      <span class="text-link">${item.contentType === "case_study" ? "View Case Study" : "View Work"}</span>
     </div>
-  </article>`;
+  </a>`;
 }
+
+function enableLinkedCards(root = document) {
+  root.querySelectorAll("[data-card-href]").forEach((card) => {
+    if (card.dataset.cardLinkReady === "true") return;
+    const href = card.dataset.cardHref;
+    if (!href) return;
+    card.dataset.cardLinkReady = "true";
+    card.tabIndex = 0;
+    card.setAttribute("role", "link");
+    if (!card.hasAttribute("aria-label")) {
+      const heading = card.querySelector("h2,h3");
+      if (heading) card.setAttribute("aria-label", heading.textContent.trim());
+    }
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("a,button,input,select,textarea")) return;
+      window.location.href = href;
+    });
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || event.target.closest("a,button,input,select,textarea")) return;
+      event.preventDefault();
+      window.location.href = href;
+    });
+  });
+}
+
+enableLinkedCards();
 
 function escapeHtml(value) {
   const element = document.createElement("div");

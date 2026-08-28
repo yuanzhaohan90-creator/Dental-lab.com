@@ -71,6 +71,9 @@ h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .case-card p{padding-bottom:18px;margin-bottom:0}
 .priority-case-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:stretch}
 .priority-case{background:#fff;border:1px solid rgba(216,228,238,.9);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-rows:auto 1fr}
+.priority-case:is(a),[data-card-href]{color:inherit;text-decoration:none}
+[data-card-href]{cursor:pointer}
+.priority-case:is(a):focus-visible,[data-card-href]:focus-visible{outline:3px solid rgba(18,91,142,.35);outline-offset:3px}
 .priority-case.large{grid-row:span 2}
 .priority-case img{width:100%;aspect-ratio:16/11;object-fit:cover;background:#eef5fa}
 .priority-case.large{grid-template-rows:minmax(520px,1fr) auto}
