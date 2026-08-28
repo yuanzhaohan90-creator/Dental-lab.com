@@ -69,6 +69,7 @@ function currentView() {
 function showShell() {
   loginPanel.hidden = true;
   shell.hidden = false;
+  window.scrollTo({ top: 0, left: 0 });
   const view = currentView();
   const route = routePart();
   document.querySelectorAll("[data-view]").forEach((section) => { section.hidden = section.dataset.view !== view; });

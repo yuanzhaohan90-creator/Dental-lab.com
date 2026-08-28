@@ -58,6 +58,7 @@ function setAuthenticated(authenticated) {
   loginPanel.hidden = authenticated;
   managerPanel.hidden = !authenticated;
   logoutButton.hidden = !authenticated;
+  if (authenticated) window.scrollTo({ top: 0, left: 0 });
 }
 
 async function loadCases() {
