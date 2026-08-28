@@ -452,38 +452,38 @@ const PAGE_META = {
 
 const PAGE_SECTIONS = {
   home: [
-    { key: "hero", label: "01 首屏主视觉", hint: "建议使用最有说服力的真实全口修复成品。", media: true, video: true, eyebrow: true, cta: true, secondaryCta: true },
+    { key: "hero", label: "01 首屏主视觉", hint: "建议使用最有说服力的真实全口修复成品。", media: true, video: true, eyebrow: true, cta: true, secondaryCta: true, ratio: "16:9", mobileRatio: "4:5" },
     { key: "capabilities", label: "02 核心能力导航", hint: "客户可以点击整块能力卡进入对应页面或技术区段。", capabilityLinks: true },
     { key: "selectedWork", label: "03 精选作品", hint: "最多选择 3 个已发布案例，客户点击图片可进入案例详情。", selectedCases: true, eyebrow: true },
-    { key: "technicalProof", label: "04 技术证明", hint: "建议使用真实 CAD、支架、模型就位或质检照片。", media: true, video: true, eyebrow: true, technicalTopics: true },
+    { key: "technicalProof", label: "04 技术证明", hint: "建议使用真实 CAD、支架、模型就位或质检照片。", media: true, video: true, eyebrow: true, technicalTopics: true, ratio: "16:9", mobileRatio: "16:9" },
     { key: "workflow", label: "05 工作流程", hint: "可分别为文件、CAD / 设计、生产和质检添加图片与链接目标。", workflow: true, eyebrow: true },
-    { key: "finalCta", label: "06 最终行动区", hint: "使用相关背景图或短 MP4 视频。", media: true, video: true, eyebrow: true, cta: true }
+    { key: "finalCta", label: "06 最终行动区", hint: "使用相关背景图或短 MP4 视频。", media: true, video: true, eyebrow: true, cta: true, ratio: "16:9", mobileRatio: "16:9" }
   ],
   implant: [
-    { key: "hero", label: "01 首屏主视觉", hint: "建议使用最强的螺丝固位种植桥或种植修复作品。", media: true, eyebrow: true, cta: true },
+    { key: "hero", label: "01 首屏主视觉", hint: "建议使用最强的螺丝固位种植桥或种植修复作品。", media: true, eyebrow: true, cta: true, ratio: "16:9", mobileRatio: "4:5" },
     { key: "featuredWork", label: "02 精选种植作品", hint: "从真实的已发布案例中选择。", featuredCase: true },
-    { key: "customAbutments", label: "03 个性化基台", hint: "建议使用真实个性化基台 / 牙冠组合照片。", media: true, linkable: true },
-    { key: "implantBridge", label: "04 螺丝固位 / 种植桥", hint: "建议使用真实螺丝固位桥、接口或组装照片。", media: true, linkable: true },
-    { key: "qc", label: "05 质量检查", hint: "建议使用接口、模型就位、螺丝通道或检查照片。", media: true, linkable: true },
-    { key: "cta", label: "06 行动按钮", hint: "最终按钮跳转到提交案例页面。", media: true, eyebrow: true, cta: true }
+    { key: "customAbutments", label: "03 个性化基台", hint: "建议使用真实个性化基台 / 牙冠组合照片。", media: true, linkable: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "implantBridge", label: "04 螺丝固位 / 种植桥", hint: "建议使用真实螺丝固位桥、接口或组装照片。", media: true, linkable: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "qc", label: "05 质量检查", hint: "建议使用接口、模型就位、螺丝通道或检查照片。", media: true, linkable: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "cta", label: "06 行动按钮", hint: "最终按钮跳转到提交案例页面。", media: true, eyebrow: true, cta: true, ratio: "16:9", mobileRatio: "16:9" }
   ],
   fullArch: [
-    { key: "hero", label: "01 首屏主视觉", hint: "建议使用最强的真实全口最终修复成品。", media: true, video: true, eyebrow: true, cta: true },
+    { key: "hero", label: "01 首屏主视觉", hint: "建议使用最强的真实全口最终修复成品。", media: true, video: true, eyebrow: true, cta: true, ratio: "16:9", mobileRatio: "4:5" },
     { key: "featuredCase", label: "02 精选全口案例", hint: "从已发布的重点案例研究中选择。", featuredCase: true, caseStudyOnly: true },
     { key: "restorationOptions", label: "03 修复方案", hint: "PMMA、整块氧化锆及钛杆氧化锆方案。", restorationOptions: true },
-    { key: "framework", label: "04 钛支架 / 钛杆", hint: "建议使用真实钛杆、支架照片或加工视频。", media: true, video: true, linkable: true },
-    { key: "workflow", label: "05 工作流程", hint: "使用真实全口制作流程图片或短 MP4。", media: true, video: true, linkable: true },
-    { key: "qc", label: "06 质量检查", hint: "建议展示接口、适合度、模型就位或最终检查。", media: true, linkable: true },
-    { key: "cta", label: "07 行动按钮", hint: "最终按钮跳转到提交案例页面。", media: true, eyebrow: true, cta: true }
+    { key: "framework", label: "04 钛支架 / 钛杆", hint: "建议使用真实钛杆、支架照片或加工视频。", media: true, video: true, linkable: true, ratio: "16:9", mobileRatio: "16:9" },
+    { key: "workflow", label: "05 工作流程", hint: "使用真实全口制作流程图片或短 MP4。", media: true, video: true, linkable: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "qc", label: "06 质量检查", hint: "建议展示接口、适合度、模型就位或最终检查。", media: true, linkable: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "cta", label: "07 行动按钮", hint: "最终按钮跳转到提交案例页面。", media: true, eyebrow: true, cta: true, ratio: "16:9", mobileRatio: "16:9" }
   ],
   about: [
-    { key: "hero", label: "01 首屏主视觉", hint: "使用真实实验室或 CAD 工作站媒体。", media: true, video: true, eyebrow: true, cta: true },
-    { key: "laboratory", label: "02 实验室", hint: "上传真实实验室工作区照片或视频。", media: true, video: true },
-    { key: "cad", label: "03 CAD / 设计", hint: "上传真实 CAD 工作站照片或视频。", media: true, video: true },
-    { key: "production", label: "04 生产", hint: "上传真实切削或生产照片、视频。", media: true, video: true },
-    { key: "finishing", label: "05 修整", hint: "上传真实技师工作照片或视频。", media: true, video: true },
-    { key: "qc", label: "06 质量检查", hint: "上传真实质检照片或视频。", media: true, video: true },
-    { key: "packing", label: "07 包装 / 发货", hint: "上传真实包装或发货照片、视频；没有真实媒体时请留空。", media: true, video: true }
+    { key: "hero", label: "01 首屏主视觉", hint: "使用真实实验室或 CAD 工作站媒体。", media: true, video: true, eyebrow: true, cta: true, ratio: "16:9", mobileRatio: "4:5" },
+    { key: "laboratory", label: "02 实验室", hint: "上传真实实验室工作区照片或视频。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "cad", label: "03 CAD / 设计", hint: "上传真实 CAD 工作站照片或视频。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "production", label: "04 生产", hint: "上传真实切削或生产照片、视频。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "finishing", label: "05 修整", hint: "上传真实技师工作照片或视频。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "qc", label: "06 质量检查", hint: "上传真实质检照片或视频。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "packing", label: "07 包装 / 发货", hint: "上传真实包装或发货照片、视频；没有真实媒体时请留空。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" }
   ]
 };
 
@@ -531,6 +531,10 @@ function currentMedia(slot) {
   return mediaItems.find((item) => item.id === slot?.mediaId);
 }
 
+function focusPosition(value) {
+  return { center: "center center", top: "center top", bottom: "center bottom", left: "left center", right: "right center" }[value] || "center center";
+}
+
 function editorMediaPreview(slot) {
   const item = currentMedia(slot);
   if (item) return mediaPreview(item, "editor-media-preview");
@@ -538,9 +542,30 @@ function editorMediaPreview(slot) {
   return '<div class="editor-media-empty">尚未选择公开媒体</div>';
 }
 
-function renderMediaEditor(path, slot, allowVideo, hint) {
+function ratioLabel(width, height) {
+  width = Number(width) || 0; height = Number(height) || 0;
+  if (!width || !height) return "读取中";
+  const common = [[16, 9], [4, 3], [3, 4], [4, 5], [1, 1], [9, 16]];
+  const match = common.find(([w, h]) => Math.abs(width / height - w / h) < 0.025);
+  if (match) return `${match[0]}:${match[1]}`;
+  return width >= height ? `${(width / height).toFixed(2)}:1` : `1:${(height / width).toFixed(2)}`;
+}
+
+function previewFrame(slot, ratio, mode) {
+  const fit = slot?.fit === "contain" ? "contain" : "cover";
+  const position = focusPosition(slot?.focalPosition);
+  return `<div class="media-device-preview"><span>${mode}</span><div class="media-position-preview ${mode === "手机" ? "mobile" : "desktop"}" style="--preview-ratio:${escapeHtml(ratio.replace(":", " / "))};--media-fit:${fit};--media-position:${position}">${editorMediaPreview(slot)}</div></div>`;
+}
+
+function renderMediaEditor(path, slot, allowVideo, hint, rules = {}) {
   const isVideo = slot?.mediaType === "video" || currentMedia(slot)?.mediaType === "video";
-  return `<div class="media-position" data-media-position="${path}"><div class="media-position-preview">${editorMediaPreview(slot)}</div><div class="media-position-controls"><p class="admin-helper">${escapeHtml(hint)}</p><label class="field">从媒体库选择<select data-path="${path}.mediaId">${mediaOptions(slot?.mediaId)}</select></label><div class="media-action-row"><button class="btn btn-secondary" type="button" data-choose-upload="image" data-media-path="${path}">替换图片</button>${allowVideo ? `<button class="btn btn-secondary" type="button" data-choose-upload="video" data-media-path="${path}">上传视频</button>` : ""}<a class="btn btn-secondary" href="/admin/media">打开媒体库</a></div><input class="visually-hidden" type="file" data-media-upload="${path}" accept="image/jpeg,image/png,image/webp,${VIDEO_ACCEPT}"><div class="video-options" ${isVideo ? "" : "hidden"}><label class="field">视频封面图<select data-path="${path}.posterMediaId">${mediaOptions(slot?.posterMediaId, "image")}</select></label><label class="check-field"><input type="checkbox" data-path="${path}.autoplay" ${slot?.autoplay ? "checked" : ""}> 自动播放</label><label class="check-field"><input type="checkbox" data-path="${path}.muted" checked disabled> 静音</label><label class="check-field"><input type="checkbox" data-path="${path}.loop" ${slot?.loop ? "checked" : ""}> 循环播放</label></div></div></div>`;
+  const item = currentMedia(slot);
+  const desktopRatio = rules.ratio || "4:3";
+  const mobileRatio = rules.mobileRatio || desktopRatio;
+  const fileRatio = ratioLabel(item?.width, item?.height);
+  const fit = slot?.fit === "contain" ? "contain" : "cover";
+  const focal = ["center", "top", "bottom", "left", "right"].includes(slot?.focalPosition) ? slot.focalPosition : "center";
+  return `<div class="media-position" data-media-position="${path}"><div class="media-preview-pair">${previewFrame(slot, desktopRatio, "桌面")}${previewFrame(slot, mobileRatio, "手机")}</div><div class="media-position-controls"><p class="admin-helper">${escapeHtml(hint)}</p><div class="media-ratio-summary"><span>推荐比例：<strong>${escapeHtml(desktopRatio)}</strong></span><span>当前文件比例：<strong data-current-ratio>${escapeHtml(fileRatio)}</strong></span><small>比例不同也可以使用，不会拉伸图片或视频。</small></div><label class="field">从媒体库选择<select data-path="${path}.mediaId">${mediaOptions(slot?.mediaId)}</select></label><div class="form-grid media-fit-controls"><label class="field">适配方式（Fit）<select data-path="${path}.fit"><option value="cover" ${fit === "cover" ? "selected" : ""}>Cover / 填满槽位</option><option value="contain" ${fit === "contain" ? "selected" : ""}>Contain / 显示完整内容</option></select></label><label class="field">焦点位置（Focus）<select data-path="${path}.focalPosition"><option value="center" ${focal === "center" ? "selected" : ""}>Center / 居中</option><option value="top" ${focal === "top" ? "selected" : ""}>Top / 顶部</option><option value="bottom" ${focal === "bottom" ? "selected" : ""}>Bottom / 底部</option><option value="left" ${focal === "left" ? "selected" : ""}>Left / 左侧</option><option value="right" ${focal === "right" ? "selected" : ""}>Right / 右侧</option></select></label></div><div class="media-action-row"><button class="btn btn-secondary" type="button" data-choose-upload="image" data-media-path="${path}">替换图片</button>${allowVideo ? `<button class="btn btn-secondary" type="button" data-choose-upload="video" data-media-path="${path}">上传视频</button>` : ""}<a class="btn btn-secondary" href="/admin/media">打开媒体库</a></div><input class="visually-hidden" type="file" data-media-upload="${path}" accept="image/jpeg,image/png,image/webp,${VIDEO_ACCEPT}"><div class="video-options" ${isVideo ? "" : "hidden"}><label class="field">视频封面图<select data-path="${path}.posterMediaId">${mediaOptions(slot?.posterMediaId, "image")}</select></label><label class="check-field"><input type="checkbox" data-path="${path}.autoplay" ${slot?.autoplay ? "checked" : ""}> 自动播放</label><label class="check-field"><input type="checkbox" data-path="${path}.muted" checked disabled> 静音</label><label class="check-field"><input type="checkbox" data-path="${path}.loop" ${slot?.loop ? "checked" : ""}> 循环播放</label></div></div></div>`;
 }
 
 function textFields(path, value, section) {
@@ -553,11 +578,11 @@ function selectedWorkEditor(value) {
 }
 
 function workflowEditor(value, section) {
-  return `${textFields("workflow", value, section)}<div class="workflow-media-grid">${(value.items || []).map((item, index) => `<div><label class="field">流程阶段<input data-path="workflow.items.${index}.label" value="${escapeHtml(item.label)}"></label>${linkDestinationEditor(`workflow.items.${index}.destination`, item.destination)}${renderMediaEditor(`workflow.items.${index}.media`, item.media, false, `${item.label} 阶段可选图片。`)}</div>`).join("")}</div>`;
+  return `${textFields("workflow", value, section)}<div class="workflow-media-grid">${(value.items || []).map((item, index) => `<div><label class="field">流程阶段<input data-path="workflow.items.${index}.label" value="${escapeHtml(item.label)}"></label>${linkDestinationEditor(`workflow.items.${index}.destination`, item.destination)}${renderMediaEditor(`workflow.items.${index}.media`, item.media, false, `${item.label} 阶段可选图片。`, { ratio: "4:3", mobileRatio: "4:3" })}</div>`).join("")}</div>`;
 }
 
 function restorationOptionsEditor(value) {
-  return `<div class="restoration-option-editor">${value.map((option, index) => `<div class="restoration-option"><h3>方案 ${index + 1}</h3>${textFields(`restorationOptions.${index}`, option, {})}${renderMediaEditor(`restorationOptions.${index}.media`, option.media, false, "使用真实修复体图片。")}<label class="field">链接目标 (Link Destination)：已发布案例（可选）<select data-path="restorationOptions.${index}.caseId">${caseOptions(option.caseId)}</select></label></div>`).join("")}</div>`;
+  return `<div class="restoration-option-editor">${value.map((option, index) => `<div class="restoration-option"><h3>方案 ${index + 1}</h3>${textFields(`restorationOptions.${index}`, option, {})}${renderMediaEditor(`restorationOptions.${index}.media`, option.media, false, "使用真实修复体图片。", { ratio: "4:3", mobileRatio: "4:3" })}<label class="field">链接目标 (Link Destination)：已发布案例（可选）<select data-path="restorationOptions.${index}.caseId">${caseOptions(option.caseId)}</select></label></div>`).join("")}</div>`;
 }
 
 function renderPageEditor() {
@@ -571,9 +596,21 @@ function renderPageEditor() {
     else if (section.workflow) content = workflowEditor(value, section);
     else if (section.restorationOptions) content = restorationOptionsEditor(value);
     else if (section.featuredCase) content = `${textFields(section.key, value, section)}<label class="field">选择精选案例<select data-path="${section.key}.caseId">${caseOptions(value.caseId, section.caseStudyOnly)}</select></label>`;
-    else content = `${textFields(section.key, value, section)}${section.technicalTopics ? technicalTopicsEditor(value) : ""}${section.linkable ? linkDestinationEditor(`${section.key}.destination`, value.destination) : ""}${section.media ? renderMediaEditor(`${section.key}.media`, value.media, section.video, section.hint) : ""}`;
+    else content = `${textFields(section.key, value, section)}${section.technicalTopics ? technicalTopicsEditor(value) : ""}${section.linkable ? linkDestinationEditor(`${section.key}.destination`, value.destination) : ""}${section.media ? renderMediaEditor(`${section.key}.media`, value.media, section.video, section.hint, section) : ""}`;
     return `<section class="page-section-editor" id="${escapeHtml(section.key)}"><div class="page-section-heading"><span>${escapeHtml(section.label.split(" ")[0])}</span><div><h2>${escapeHtml(section.label.replace(/^\d+\s/, ""))}</h2><p>${escapeHtml(section.hint)}</p></div></div>${content}</section>`;
   }).join("");
+  document.querySelectorAll(".media-position").forEach((position) => {
+    const output = position.querySelector("[data-current-ratio]");
+    const media = position.querySelector("img,video");
+    if (!output || !media) return;
+    const update = () => {
+      const width = media.videoWidth || media.naturalWidth;
+      const height = media.videoHeight || media.naturalHeight;
+      if (width && height) output.textContent = ratioLabel(width, height);
+    };
+    update();
+    media.addEventListener(media.tagName === "VIDEO" ? "loadedmetadata" : "load", update, { once: true });
+  });
   const target = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
   if (target) requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
 }
@@ -617,6 +654,10 @@ document.getElementById("pageSections").addEventListener("change", (event) => {
     renderPageEditor();
   }
   if (event.target.matches("[data-case-slot]")) {
+    pageData.config.draft = collectPageDraft();
+    renderPageEditor();
+  }
+  if (event.target.matches("select[data-path$='.fit'], select[data-path$='.focalPosition']")) {
     pageData.config.draft = collectPageDraft();
     renderPageEditor();
   }
