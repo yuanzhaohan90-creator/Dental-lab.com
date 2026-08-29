@@ -3,6 +3,12 @@
   "git": {
     "deploymentEnabled": false
   },
+  "functions": {
+    "api/video-process.js": {
+      "maxDuration": 300,
+      "memory": 2048
+    }
+  },
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [

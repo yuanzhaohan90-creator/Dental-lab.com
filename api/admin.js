@@ -7,6 +7,7 @@ const {
   DEFAULT_PAGE_CONFIGS,
   DEFAULT_SETTINGS,
   MEDIA_CATEGORIES,
+  assertPublishableMedia,
   deleteSubmissionFiles,
   deleteMedia,
   getConfig,
@@ -96,7 +97,9 @@ function safeDownloadName(value) {
 async function adminMedia(record) {
   const usedIn = await mediaUsage(record.id);
   const mediaType = String(record.contentType || "").startsWith("video/") ? "video" : "image";
-  const posterUrl = record.posterMediaId ? `/api/admin?module=media-image&id=${encodeURIComponent(record.posterMediaId)}` : "";
+  const posterUrl = record.posterMediaId
+    ? `/api/admin?module=media-image&id=${encodeURIComponent(record.posterMediaId)}`
+    : record.posterPathname ? `/api/admin?module=media-image&id=${encodeURIComponent(record.id)}&variant=poster` : "";
   return { ...record, pathname: undefined, originalPathname: undefined, playbackPathname: undefined, mediaType, url: `/api/admin?module=media-image&id=${encodeURIComponent(record.id)}`, posterUrl, processingStatus: record.processingStatus || "ready", usedIn };
 }
 
@@ -164,7 +167,9 @@ async function resolveMedia(slot = {}) {
   if (record?.trashedAt) return { ...slot, url: slot.fallbackPath, mediaType: "image", posterUrl: "", processingStatus: "ready" };
   const videoReady = record && String(record.contentType || "").startsWith("video/") && (record.processingStatus || "ready") === "ready";
   const posterId = slot.posterMediaId || record?.posterMediaId;
-  const posterUrl = await mediaUrl(posterId, "");
+  const posterUrl = posterId
+    ? await mediaUrl(posterId, "")
+    : record?.posterPathname ? `/api/admin?module=media-image&id=${encodeURIComponent(record.id)}&variant=poster` : "";
   const mediaUrlValue = await mediaUrl(slot.mediaId, slot.fallbackPath);
   return {
     ...slot,
@@ -435,11 +440,18 @@ async function handleMediaImage(req, res) {
   }
   const isVideo = String(record.contentType || "").startsWith("video/");
   const isReady = (record.processingStatus || "ready") === "ready";
+  const posterRequest = query(req, "variant") === "poster";
+  if (posterRequest && !record.posterPathname) {
+    res.statusCode = 404;
+    return res.end("Poster not found");
+  }
   if (isVideo && !isReady && !isAdmin(req)) {
     res.statusCode = 425;
     return res.end("Video is still being prepared for web playback");
   }
-  const pathname = isVideo ? (record.playbackPathname || (isReady ? record.pathname : record.originalPathname || record.pathname)) : record.pathname;
+  const pathname = posterRequest
+    ? record.posterPathname
+    : isVideo ? (record.playbackPathname || (isReady ? record.pathname : record.originalPathname || record.pathname)) : record.pathname;
   const { get } = await import("@vercel/blob");
   const result = await get(pathname, { access: "private" });
   if (!result || result.statusCode !== 200 || !result.stream) {
@@ -447,9 +459,11 @@ async function handleMediaImage(req, res) {
     return res.end("Media not found");
   }
   res.statusCode = 200;
-  res.setHeader("Content-Type", record.contentType);
-  if (record.contentType === "image/svg+xml") res.setHeader("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox");
-  if (record.size) res.setHeader("Content-Length", String(record.size));
+  const responseType = posterRequest ? (record.posterContentType || "image/jpeg") : isVideo && isReady ? (record.playbackContentType || "video/mp4") : record.contentType;
+  const responseSize = posterRequest ? record.posterSize : isVideo && isReady ? (record.playbackSize || record.size) : record.size;
+  res.setHeader("Content-Type", responseType);
+  if (responseType === "image/svg+xml") res.setHeader("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+  if (responseSize) res.setHeader("Content-Length", String(responseSize));
   res.setHeader("Content-Disposition", "inline");
   res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
   const reader = result.stream.getReader();
@@ -483,6 +497,7 @@ async function handleHomepage(req, res) {
     const target = action === "restore" ? current.previous : current.draft;
     if (!target) throw Object.assign(new Error("No previous published version is available."), { statusCode: 400 });
     await validateSelection(target);
+    await assertPublishableMedia(target);
     await syncFeaturedCases(target.selectedWork.caseIds);
     const saved = action === "restore" ? await restoreConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage) : await publishConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage);
     return reply(res, 200, { ok: true, ...(await homepageData(saved)) });
@@ -512,6 +527,7 @@ async function handlePageEditor(req, res) {
     const target = action === "restore" ? current.previous : current.draft;
     if (!target) throw Object.assign(new Error("No previous published version is available."), { statusCode: 400 });
     await validatePageCases(page, target);
+    await assertPublishableMedia(target);
     const saved = action === "restore" ? await restoreConfig(name, defaults, normalize) : await publishConfig(name, defaults, normalize);
     return reply(res, 200, { ok: true, page, config: saved });
   }

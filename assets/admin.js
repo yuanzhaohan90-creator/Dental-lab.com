@@ -308,7 +308,7 @@ function renderMedia() {
       ? `<ul class="admin-used-in">${item.usedIn.map((place) => `<li><a href="${escapeHtml(place.editorUrl)}">${escapeHtml(place.label)}</a>${place.required ? "<small>需要替换</small>" : ""}</li>`).join("")}</ul>`
       : '<p class="admin-media-usage">当前未使用</p>';
     if (mediaTrashView) return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}">${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><p class="admin-trash-meta">删除时间：${formatDate(item.trashedAt)}<br>原分类：${escapeHtml(categoryLabel(item.originalLocation || item.category))}<br>${item.originalUsage?.length ? `原使用位置：${item.originalUsage.map(escapeHtml).join("；")}<br>` : ""}30 天后自动清理</p><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-restore>恢复</button><button class="btn admin-danger" type="button" data-media-permanent>永久删除</button></div><div class="admin-message" role="status"></div></div></article>`;
-    return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}"><label class="admin-media-select"><input type="checkbox" data-media-select ${selectedMediaIds.has(item.id) ? "checked" : ""}> 选择</label>${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><label class="field">显示名称<input data-media-key="displayName" value="${escapeHtml(item.displayName)}"></label><label class="field">图片说明（ALT）<input data-media-key="altText" value="${escapeHtml(item.altText)}"></label><label class="field">分类<select data-media-key="category">${["Cases", "Homepage", "Implant", "Full-Arch", "Lab", "Products", "Other"].map((value) => `<option value="${value}" ${value === item.category ? "selected" : ""}>${categoryLabel(value)}</option>`).join("")}</select></label>${item.mediaType === "video" ? `<label class="field">视频海报<select data-media-key="posterMediaId">${mediaOptions(item.posterMediaId, "image")}</select></label>${item.processingMessage ? `<p class="admin-helper">${escapeHtml(item.processingMessage)}</p>` : ""}` : ""}<div class="admin-media-usage"><strong>使用位置</strong>${usage}</div><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-use ${item.mediaType === "video" && item.processingStatus !== "ready" ? "disabled" : ""}>使用到页面</button><button class="btn btn-secondary" type="button" data-media-replace>替换文件</button><button class="btn btn-secondary" type="button" data-media-save>保存信息</button><button class="btn admin-danger" type="button" data-media-delete>删除</button></div><input class="visually-hidden" type="file" data-media-replace-file accept="image/jpeg,image/png,image/webp,image/svg+xml,${VIDEO_ACCEPT}"><div class="media-use-menu" hidden><a href="/admin/home">网站首页</a><a href="/admin/implant">种植修复</a><a href="/admin/full-arch">全口修复</a><a href="/admin/about">关于我们</a></div><div class="admin-message" role="status"></div></div></article>`;
+    return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}"><label class="admin-media-select"><input type="checkbox" data-media-select ${selectedMediaIds.has(item.id) ? "checked" : ""}> 选择</label>${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><label class="field">显示名称<input data-media-key="displayName" value="${escapeHtml(item.displayName)}"></label><label class="field">图片说明（ALT）<input data-media-key="altText" value="${escapeHtml(item.altText)}"></label><label class="field">分类<select data-media-key="category">${["Cases", "Homepage", "Implant", "Full-Arch", "Lab", "Products", "Other"].map((value) => `<option value="${value}" ${value === item.category ? "selected" : ""}>${categoryLabel(value)}</option>`).join("")}</select></label>${item.mediaType === "video" ? `<label class="field">视频海报<select data-media-key="posterMediaId">${mediaOptions(item.posterMediaId, "image")}</select></label>${item.processingMessage ? `<p class="admin-helper">${escapeHtml(item.processingMessage)}</p>` : ""}` : ""}<div class="admin-media-usage"><strong>使用位置</strong>${usage}</div><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-use ${item.mediaType === "video" && item.processingStatus !== "ready" ? "disabled" : ""}>使用到页面</button>${item.mediaType === "video" && item.processingStatus === "failed" ? '<button class="btn btn-secondary" type="button" data-media-retry>重试视频处理</button>' : ""}<button class="btn btn-secondary" type="button" data-media-replace>替换文件</button><button class="btn btn-secondary" type="button" data-media-save>保存信息</button><button class="btn admin-danger" type="button" data-media-delete>删除</button></div><input class="visually-hidden" type="file" data-media-replace-file accept="image/jpeg,image/png,image/webp,image/svg+xml,${VIDEO_ACCEPT}"><div class="media-use-menu" hidden><a href="/admin/home">网站首页</a><a href="/admin/implant">种植修复</a><a href="/admin/full-arch">全口修复</a><a href="/admin/about">关于我们</a></div><div class="admin-message" role="status"></div></div></article>`;
   }).join("") : `<p class="admin-empty">${mediaTrashView ? "回收站为空。" : "没有符合当前筛选条件的媒体。"}</p>`;
 }
 
@@ -349,12 +349,32 @@ document.getElementById("mediaBulkTrash").addEventListener("click", async () => 
   } catch (error) { alert(error.message); }
 });
 
-async function uploadMediaFile(file, metadata, onProgress) {
+function delay(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+async function processVideoAndWait(media, onStatus, retry = false) {
+  if (media.mediaType !== "video" || (media.processingStatus === "ready" && media.posterUrl)) return media;
+  onStatus?.("视频已上传，正在生成 H.264 网页播放版本和海报...");
+  await api("/api/video-process", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: media.id, action: retry ? "retry" : "start" }) });
+  for (let attempt = 0; attempt < 105; attempt += 1) {
+    await delay(3000);
+    const data = await api("/api/admin?module=media");
+    const current = data.media.find((item) => item.id === media.id);
+    if (!current) throw new Error("视频记录不存在，请刷新媒体库。");
+    if (current.processingStatus === "ready") return current;
+    if (current.processingStatus === "failed") throw new Error(current.processingMessage || "视频转换失败。原文件已安全保留，可在媒体库中重试或删除。");
+    onStatus?.("正在处理视频，请保持此页面打开...");
+  }
+  throw new Error("视频已上传，但仍在准备网页播放版本。请稍后在媒体库查看状态。");
+}
+
+async function uploadMediaFile(file, metadata, onProgress, onStatus) {
   if (!window.yzhUploadMedia) throw new Error("媒体上传组件尚未就绪，请刷新页面后重试。");
   const inspection = await window.yzhInspectMedia(file);
   const uploadResult = await window.yzhUploadMedia(file, { ...metadata, originalFilename: file.name, size: file.size, ...inspection }, onProgress, inspection);
   const result = await api("/api/admin?module=media-finalize", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ blob: uploadResult.blob, metadata: { ...metadata, originalFilename: file.name, size: file.size, ...inspection } }) });
-  return result.media;
+  return processVideoAndWait(result.media, onStatus);
 }
 
 const mediaUploadForm = document.getElementById("mediaUploadForm");
@@ -384,10 +404,10 @@ mediaUploadForm.addEventListener("submit", async (event) => {
   const progress = document.getElementById("mediaUploadProgress");
   showMessage(message, `正在上传 ${file.name}...`); progress.hidden = false;
   try {
-    const media = await uploadMediaFile(file, { category: form.elements.category.value, displayName: form.elements.displayName.value || file.name.replace(/\.[^.]+$/, ""), altText: form.elements.altText.value }, (percentage) => { progress.querySelector("span").style.width = `${percentage}%`; showMessage(message, `正在上传 ${file.name} · ${percentage}%`); });
+    const media = await uploadMediaFile(file, { category: form.elements.category.value, displayName: form.elements.displayName.value || file.name.replace(/\.[^.]+$/, ""), altText: form.elements.altText.value }, (percentage) => { progress.querySelector("span").style.width = `${percentage}%`; showMessage(message, `正在上传 ${file.name} · ${percentage}%`); }, (status) => showMessage(message, status));
     showMessage(message, media.processingStatus === "ready" ? "媒体已上传，可在网站中使用。" : "视频上传成功，正在准备网页播放版本。", "success");
     form.reset(); progress.hidden = true; progress.querySelector("span").style.width = "0"; mediaFileInfo.innerHTML = "<strong>最大视频大小：100 MB</strong><span>支持 MP4、MOV、M4V，包括从 iPhone 照片中选择的视频。</span>"; await loadMedia();
-  } catch (error) { progress.hidden = true; showMessage(message, error.message || "上传中断，请重试。", "error"); }
+  } catch (error) { progress.hidden = true; showMessage(message, error.message || "上传中断，请重试。", "error"); await loadMedia(); }
 });
 
 function closeAdminModal(modal) {
@@ -432,6 +452,13 @@ document.getElementById("mediaList").addEventListener("click", async (event) => 
       return;
     }
     if (event.target.closest("[data-media-use]")) card.querySelector(".media-use-menu").hidden = !card.querySelector(".media-use-menu").hidden;
+    if (event.target.closest("[data-media-retry]")) {
+      showMessage(message, "正在重新处理视频...");
+      await processVideoAndWait(item, (status) => showMessage(message, status), true);
+      showMessage(message, "视频处理完成，可以用于网站。", "success");
+      await loadMedia();
+      return;
+    }
     if (event.target.closest("[data-media-replace]")) card.querySelector("[data-media-replace-file]").click();
     if (event.target.closest("[data-media-save]")) {
       const body = { id: card.dataset.mediaId };

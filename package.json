@@ -9,10 +9,13 @@
     "test:case-library": "node scripts/test-case-library.js",
     "test:admin": "node scripts/test-admin-v1.js",
     "test:media-upload": "node scripts/test-media-upload.js",
+    "test:video-transcode": "node scripts/test-video-transcode.js",
     "test:admin-deletion": "node scripts/test-admin-deletion.js"
   },
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@vercel/blob": "^2.8.0",
+    "@vercel/functions": "^3.9.5",
     "busboy": "^1.6.0"
   }
 }
