@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "postinstall": "node scripts/test-video-transcode.js",
     "start": "vercel dev",
     "check": "node scripts/check-site.js",
     "test:submit-case": "node scripts/test-submit-case.js",
