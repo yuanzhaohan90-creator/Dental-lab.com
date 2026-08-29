@@ -793,7 +793,7 @@ async function loadSettings() {
     const [settings, media] = await Promise.all([api("/api/admin?module=settings"), api("/api/admin?module=media")]);
     settingsData = settings; mediaItems = media.media;
     const draft = settings.settings.draft;
-    ["companyName", "publicEmail", "whatsapp", "whatsappUrl", "phone", "location", "defaultSeoTitle", "defaultSeoDescription"].forEach((name) => { form.elements[name].value = draft[name]; });
+    ["companyName", "publicEmail", "whatsapp", "whatsappUrl", "phone", "linkedinUrl", "location", "defaultSeoTitle", "defaultSeoDescription"].forEach((name) => { form.elements[name].value = draft[name] || ""; });
     form.elements.defaultOgMediaId.innerHTML = mediaOptionsSimple(media.media, draft.defaultOgMediaId, "使用当前社交分享图片");
     renderBrandingFields();
     const hasDraftChanges = JSON.stringify(settings.settings.draft) !== JSON.stringify(settings.settings.published);
@@ -806,7 +806,7 @@ async function loadSettings() {
 function settingsPayload() {
   const form = document.getElementById("settingsForm");
   const payload = {};
-  ["companyName", "primaryLogoMediaId", "darkLogoMediaId", "faviconMediaId", "publicEmail", "whatsapp", "whatsappUrl", "phone", "location", "defaultSeoTitle", "defaultSeoDescription", "defaultOgMediaId"].forEach((name) => { payload[name] = form.elements[name].value; });
+  ["companyName", "primaryLogoMediaId", "darkLogoMediaId", "faviconMediaId", "publicEmail", "whatsapp", "whatsappUrl", "phone", "linkedinUrl", "location", "defaultSeoTitle", "defaultSeoDescription", "defaultOgMediaId"].forEach((name) => { payload[name] = form.elements[name].value; });
   payload.defaultOgImagePath = settingsData.settings.draft.defaultOgImagePath;
   return payload;
 }

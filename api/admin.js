@@ -8,6 +8,7 @@ const {
   DEFAULT_SETTINGS,
   MEDIA_CATEGORIES,
   assertPublishableMedia,
+  isValidLinkedInUrl,
   deleteSubmissionFiles,
   deleteMedia,
   getConfig,
@@ -535,9 +536,18 @@ async function handlePageEditor(req, res) {
 }
 
 async function handleSettings(req, res) {
-  if (req.method === "GET") return reply(res, 200, { ok: true, settings: await getConfig("settings", DEFAULT_SETTINGS) });
+  if (req.method === "GET") {
+    const current = await getConfig("settings", DEFAULT_SETTINGS);
+    return reply(res, 200, { ok: true, settings: {
+      ...current,
+      draft: normalizeSettings(current.draft),
+      published: normalizeSettings(current.published),
+      previous: current.previous ? normalizeSettings(current.previous) : null
+    } });
+  }
   if (req.method === "PUT") {
     const body = await readJson(req);
+    if (!isValidLinkedInUrl(body.linkedinUrl)) throw Object.assign(new Error("Enter a full LinkedIn profile or company URL beginning with https://www.linkedin.com/in/ or /company/."), { statusCode: 400 });
     for (const key of ["primaryLogoMediaId", "darkLogoMediaId", "faviconMediaId", "defaultOgMediaId"]) {
       if (!body[key]) continue;
       const media = await getMedia(body[key]);
@@ -573,7 +583,7 @@ async function handlePublicSite(req, res) {
     fullArch: normalizePageConfig("fullArch", fullArchConfig.published || DEFAULT_PAGE_CONFIGS.fullArch),
     about: normalizePageConfig("about", aboutConfig.published || DEFAULT_PAGE_CONFIGS.about)
   };
-  const settings = structuredClone(settingsConfig.published || DEFAULT_SETTINGS);
+  const settings = normalizeSettings(settingsConfig.published || DEFAULT_SETTINGS);
   const resolvedHomepage = await resolvePageMedia(homepage);
   const resolvedPages = await resolvePageMedia(pages);
   settings.primaryLogoUrl = await mediaUrl(settings.primaryLogoMediaId, "");

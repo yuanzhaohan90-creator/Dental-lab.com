@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>YZH 网站管理后台</title><meta name="robots" content="noindex,nofollow"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/site.css?v=manager-hevc-1"><link rel="stylesheet" href="/assets/admin.css?v=manager-hevc-1"></head>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>YZH 网站管理后台</title><meta name="robots" content="noindex,nofollow"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/site.css?v=manager-linkedin-1"><link rel="stylesheet" href="/assets/admin.css?v=manager-linkedin-1"></head>
 <body class="admin-v1-body">
 <section class="admin-v1-login" id="adminLogin"><form id="ownerLoginForm"><a class="brand" href="/"><span class="brand-mark">Y</span><span>YZH Dental Lab</span></a><p class="eyebrow">YZH 网站管理后台</p><h1>管理员登录</h1><p>管理网站页面、案例、公开媒体和客户提交资料。</p><label class="field">管理员密码<input type="password" name="password" autocomplete="current-password" required></label><button class="btn btn-primary" type="submit">登录</button><div class="admin-message" id="ownerLoginMessage" role="status"></div></form></section>
 
@@ -49,7 +49,7 @@
         <p class="admin-private-note">技术密钥和环境变量不会在这里显示。</p>
         <form class="admin-content-form" id="settingsForm">
           <section class="settings-group"><div><p class="eyebrow">品牌设置</p><h2>Logo 与网站图标</h2><p>支持 SVG、PNG、WebP。Logo 会保持透明背景和原始比例，不会裁切。</p></div><div class="branding-grid" id="brandingFields"></div></section>
-          <section class="settings-group"><div><p class="eyebrow">联系信息</p><h2>公开联系方式</h2><p>发布后会统一更新页脚、联系区和行动按钮。</p></div><div class="form-grid"><label class="field">公司名称<input name="companyName" maxlength="120"></label><label class="field">公开邮箱<input type="email" name="publicEmail" maxlength="200"></label><label class="field">WhatsApp 显示文字<input name="whatsapp" maxlength="80"></label><label class="field">WhatsApp 链接<input name="whatsappUrl" maxlength="300"></label><label class="field">电话号码<input name="phone" maxlength="80"></label><label class="field">国家 / 地区<input name="location" maxlength="160"></label></div></section>
+          <section class="settings-group"><div><p class="eyebrow">联系信息 / 社交链接</p><h2>公开联系方式</h2><p>发布后会统一更新页脚、联系区和行动按钮。</p></div><div class="form-grid"><label class="field">公司名称<input name="companyName" maxlength="120"></label><label class="field">公开邮箱<input type="email" name="publicEmail" maxlength="200"></label><label class="field">WhatsApp 显示文字<input name="whatsapp" maxlength="80"></label><label class="field">WhatsApp 链接<input name="whatsappUrl" maxlength="300"></label><label class="field">电话号码<input name="phone" maxlength="80"></label><label class="field">LinkedIn URL<input type="url" name="linkedinUrl" maxlength="500" placeholder="https://www.linkedin.com/company/..." inputmode="url"><small>粘贴完整的 LinkedIn 公司主页或个人主页链接。</small></label><label class="field">国家 / 地区<input name="location" maxlength="160"></label></div></section>
           <section class="settings-group"><div><p class="eyebrow">搜索与分享</p><h2>SEO 设置</h2></div><label class="field">默认 SEO 标题<input name="defaultSeoTitle" maxlength="180"></label><label class="field">默认 SEO 描述<textarea name="defaultSeoDescription" maxlength="320"></textarea></label><label class="field">默认社交分享图片<select name="defaultOgMediaId"></select></label></section>
           <div class="admin-message" id="settingsMessage" role="status"></div><div class="admin-form-actions sticky-actions"><button class="btn btn-primary" type="submit">保存草稿</button><button class="btn btn-secondary" id="previewSettings" type="button">预览网站</button><button class="btn btn-secondary" id="publishSettings" type="button">发布设置</button><button class="btn btn-secondary" id="restoreSettings" type="button">恢复上一版本</button></div>
         </form>
@@ -57,4 +57,4 @@
     </main>
   </div>
 </div>
-<script src="/assets/admin-upload-client.js?v=manager-hevc-1" defer></script><script src="/assets/admin.js?v=manager-hevc-1" defer></script></body></html>
+<script src="/assets/admin-upload-client.js?v=manager-linkedin-1" defer></script><script src="/assets/admin.js?v=manager-linkedin-1" defer></script></body></html>

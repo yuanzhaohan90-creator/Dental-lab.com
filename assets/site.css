@@ -155,6 +155,11 @@ h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .contact-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:24px;align-items:start}
 .contact-box,.form{background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:26px}
 .contact-links{display:grid;gap:12px;margin-top:20px}
+.central-contact-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.central-contact-row a,.contact-copy-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:9px 12px;border:1px solid #c7d7e6;border-radius:7px;background:#fff;color:var(--blue);font:inherit;font-size:14px;font-weight:850;line-height:1.2;cursor:pointer}
+.site-footer .contact-copy-link{display:flex;width:max-content;max-width:100%;margin:0 0 8px;border-color:rgba(255,255,255,.24);background:transparent;color:#d8e2ea}
+.site-footer .footer-grid>div:nth-of-type(4)>a{display:flex;align-items:center;min-height:44px;margin:0}
+.copy-email-fallback{position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0}
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .field{display:grid;gap:7px;font-size:14px;font-weight:850;color:#304960}
 .field input,.field select,.field textarea{width:100%;padding:13px;border-radius:8px;border:1px solid #c9d8e6;background:#fff;color:var(--text);font:inherit;outline:none}
@@ -234,6 +239,8 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   .implant-module img{height:auto;min-height:0;aspect-ratio:16/11}
   .image-mosaic{grid-template-columns:1fr 1fr;gap:9px}
   .contact-box,.form,.text-panel,.cta-panel{padding:20px}
+  .central-contact-row{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .central-contact-row a,.central-contact-row .contact-copy-link{width:100%;min-width:0}
 }
 .image-mosaic img[src^="/assets/real/"]{
   object-fit:contain;

@@ -84,6 +84,8 @@ async function seedConfig(name, config) {
   const brandingUsage = await store.mediaUsage(logo.id);
   assert.equal(brandingUsage.some((item) => item.label.includes("网站设置 → 主 Logo")), true);
   assert.equal(brandingUsage.some((item) => item.label.includes("网站设置 → 浏览器图标")), true);
+  const linkedInSettings = await store.saveConfigDraft("settings", store.DEFAULT_SETTINGS, { ...settings, linkedinUrl: "https://www.linkedin.com/company/yzh-dental-lab" }, store.normalizeSettings);
+  assert.equal(linkedInSettings.draft.linkedinUrl, "https://www.linkedin.com/company/yzh-dental-lab");
 
   const mp4 = await media("sample.mp4", "video/mp4", isoVideo("avc1"));
   const mov = await media("sample.mov", "video/quicktime", isoVideo("hvc1"));

@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { DEFAULT_HOMEPAGE, DEFAULT_PAGE_CONFIGS, DEFAULT_SETTINGS, normalizeHomepage, normalizePageConfig, normalizeSettings } = require("../lib/admin-store");
+const { DEFAULT_HOMEPAGE, DEFAULT_PAGE_CONFIGS, DEFAULT_SETTINGS, isValidLinkedInUrl, normalizeHomepage, normalizePageConfig, normalizeSettings } = require("../lib/admin-store");
 
 const long = "x".repeat(1000);
 const homepage = normalizeHomepage({
@@ -67,6 +67,7 @@ const settings = normalizeSettings({
   whatsapp: "+86 000",
   whatsappUrl: "https://wa.me/86000",
   phone: "+86 000",
+  linkedinUrl: "https://www.linkedin.com/company/yzh-dental-lab",
   location: "China",
   defaultSeoTitle: long,
   defaultSeoDescription: long,
@@ -79,6 +80,9 @@ const settings = normalizeSettings({
 
 assert.equal(settings.companyName, "YZH Lab");
 assert.equal(settings.publicEmail, "owner@example.com");
+assert.equal(settings.linkedinUrl, "https://www.linkedin.com/company/yzh-dental-lab");
+assert.equal(isValidLinkedInUrl("https://www.linkedin.com/in/wei-dai-25b911325"), true);
+assert.equal(isValidLinkedInUrl("https://example.com/company/yzh"), false);
 assert.equal(settings.defaultSeoTitle.length, 180);
 assert.equal(settings.defaultSeoDescription.length, 320);
 assert.equal(settings.defaultOgMediaId, "MEDIA-SEO");
@@ -89,5 +93,6 @@ assert.equal(settings.faviconMediaId, "MEDIA-FAVICON");
 const fallbackSettings = normalizeSettings({});
 assert.equal(fallbackSettings.companyName, DEFAULT_SETTINGS.companyName);
 assert.equal(fallbackSettings.publicEmail, DEFAULT_SETTINGS.publicEmail);
+assert.equal(fallbackSettings.linkedinUrl, DEFAULT_SETTINGS.linkedinUrl);
 
 console.log("admin-v1 unit tests passed");

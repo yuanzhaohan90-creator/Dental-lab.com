@@ -90,20 +90,108 @@ function applyContactInformation(settings) {
   const publicEmail = settings.publicEmail || "";
   const whatsappUrl = settings.whatsappUrl || "";
   const phone = settings.phone || "";
+  const linkedinUrl = settings.linkedinUrl || "";
   document.querySelectorAll('a[href^="mailto:"]').forEach((link) => { link.href = `mailto:${publicEmail}`; link.textContent = publicEmail; });
   document.querySelectorAll('a[href*="wa.me"]').forEach((link) => {
     link.href = whatsappUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
     if (link.closest(".site-footer")) link.textContent = `WhatsApp: ${settings.whatsapp || phone}`;
   });
   document.querySelectorAll('a[href^="tel:"]').forEach((link) => { link.href = `tel:${phone.replace(/[^+\d]/g, "")}`; link.textContent = `Phone: ${phone}`; });
-  document.querySelectorAll(".site-footer .footer-grid > div:last-child").forEach((contact) => {
+  document.querySelectorAll(".site-footer .footer-grid > div:nth-of-type(4)").forEach((contact) => {
     if (phone && !contact.querySelector('a[href^="tel:"]')) {
       const link = document.createElement("a");
       link.href = `tel:${phone.replace(/[^+\d]/g, "")}`;
       link.textContent = `Phone: ${phone}`;
       contact.append(link);
     }
+    let linkedIn = contact.querySelector('[data-contact-linkedin],a[href*="linkedin.com"]');
+    if (linkedinUrl) {
+      if (!linkedIn) {
+        linkedIn = document.createElement("a");
+        linkedIn.dataset.contactLinkedin = "";
+        contact.append(linkedIn);
+      }
+      linkedIn.href = linkedinUrl;
+      linkedIn.target = "_blank";
+      linkedIn.rel = "noopener noreferrer";
+      linkedIn.textContent = "LinkedIn";
+      linkedIn.dataset.contactLinkedin = "";
+    } else linkedIn?.remove();
+    if (publicEmail && !contact.querySelector("[data-copy-email]")) {
+      const copy = document.createElement("button");
+      copy.type = "button";
+      copy.className = "contact-copy-link";
+      copy.dataset.copyEmail = publicEmail;
+      copy.textContent = "Copy Email";
+      contact.append(copy);
+    }
   });
+
+  const addContactRow = (container) => {
+    if (!container || container.querySelector("[data-central-contact-row]")) return;
+    const row = document.createElement("div");
+    row.className = "central-contact-row";
+    row.dataset.centralContactRow = "";
+    if (publicEmail) {
+      if (!container.querySelector('a[href^="mailto:"]')) {
+        const email = document.createElement("a");
+        email.href = `mailto:${publicEmail}`;
+        email.textContent = "Email";
+        row.append(email);
+      }
+      const copy = document.createElement("button");
+      copy.type = "button";
+      copy.className = "contact-copy-link";
+      copy.dataset.copyEmail = publicEmail;
+      copy.textContent = "Copy Email";
+      row.append(copy);
+    }
+    if (phone && !container.querySelector('a[href^="tel:"]')) {
+      const phoneLink = document.createElement("a");
+      phoneLink.href = `tel:${phone.replace(/[^+\d]/g, "")}`;
+      phoneLink.textContent = "Phone";
+      row.append(phoneLink);
+    }
+    if (linkedinUrl && !container.querySelector('[data-contact-linkedin],a[href*="linkedin.com"]')) {
+      const linkedIn = document.createElement("a");
+      linkedIn.href = linkedinUrl;
+      linkedIn.target = "_blank";
+      linkedIn.rel = "noopener noreferrer";
+      linkedIn.textContent = "LinkedIn";
+      linkedIn.dataset.contactLinkedin = "";
+      row.append(linkedIn);
+    }
+    if (row.children.length) container.append(row);
+  };
+  if (location.pathname === "/about" || location.pathname === "/about.html") addContactRow(document.querySelector(".trial .cta-panel"));
+  if (location.pathname === "/submit-case" || location.pathname === "/submit-case.html") addContactRow(document.querySelector(".contact-links"));
+
+  if (!document.documentElement.dataset.copyEmailBound) {
+    document.documentElement.dataset.copyEmailBound = "true";
+    document.addEventListener("click", async (event) => {
+      const button = event.target.closest("[data-copy-email]");
+      if (!button) return;
+      const email = button.dataset.copyEmail || publicEmail;
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+        await navigator.clipboard.writeText(email);
+      } catch {
+        const field = document.createElement("textarea");
+        field.value = email;
+        field.setAttribute("readonly", "");
+        field.className = "copy-email-fallback";
+        document.body.append(field);
+        field.select();
+        document.execCommand("copy");
+        field.remove();
+      }
+      const original = button.textContent;
+      button.textContent = "Copied";
+      setTimeout(() => { button.textContent = original; }, 1600);
+    });
+  }
 }
 
 function makeCaseCard(item, index) {
