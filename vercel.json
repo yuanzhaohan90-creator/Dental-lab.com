@@ -5,8 +5,7 @@
   },
   "functions": {
     "api/video-process.js": {
-      "maxDuration": 300,
-      "memory": 2048
+      "maxDuration": 300
     }
   },
   "cleanUrls": true,
