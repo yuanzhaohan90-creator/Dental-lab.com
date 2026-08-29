@@ -78,6 +78,13 @@ async function seedConfig(name, config) {
   await store.restoreMedia(await store.getMedia(unused.id));
   assert.equal(Boolean((await store.getMedia(unused.id)).trashedAt), false);
 
+  const logo = await media("logo.jpg", "image/jpeg", jpeg);
+  const settings = { ...store.DEFAULT_SETTINGS, primaryLogoMediaId: logo.id, faviconMediaId: logo.id };
+  await seedConfig("settings", { draft: structuredClone(settings), published: structuredClone(settings), previous: null });
+  const brandingUsage = await store.mediaUsage(logo.id);
+  assert.equal(brandingUsage.some((item) => item.label.includes("网站设置 → 主 Logo")), true);
+  assert.equal(brandingUsage.some((item) => item.label.includes("网站设置 → 浏览器图标")), true);
+
   const mp4 = await media("sample.mp4", "video/mp4", isoVideo("avc1"));
   const mov = await media("sample.mov", "video/quicktime", isoVideo("hvc1"));
   await store.saveMedia({ ...mp4, posterMediaId: oldMedia.id });

@@ -30,6 +30,23 @@ function showMessage(element, message, type = "") {
   element.textContent = message;
 }
 
+async function applyAdminBranding() {
+  try {
+    const response = await fetch("/api/admin?module=public-site", { cache: "no-store" });
+    const data = await response.json();
+    const settings = data.settings || {};
+    document.querySelectorAll(".brand").forEach((brand) => {
+      if (!settings.primaryLogoUrl) return;
+      const logo = document.createElement("img");
+      logo.className = "brand-logo";
+      logo.src = settings.primaryLogoUrl;
+      logo.alt = settings.companyName || "YZH Dental Lab";
+      brand.querySelector(".brand-mark")?.setAttribute("hidden", "");
+      brand.prepend(logo);
+    });
+  } catch {}
+}
+
 function adminErrorMessage(message) {
   const translations = {
     "Invalid password.": "密码错误，请重新输入。",
@@ -127,6 +144,9 @@ function openEditor(item = null, requestedType = "quick_work") {
   const contentType = item?.contentType === "case_study" || requestedType === "case_study" ? "case_study" : "quick_work";
   document.getElementById("editorMode").textContent = item ? "编辑作品" : (contentType === "case_study" ? "创建重点案例研究" : "添加快速作品");
   document.getElementById("editorTitle").textContent = item ? item.title : (contentType === "case_study" ? "新重点案例研究" : "新快速作品");
+  const publishState = document.getElementById("casePublishState");
+  publishState.textContent = item?.status === "published" ? "LIVE / 已上线" : "DRAFT / 草稿";
+  publishState.classList.toggle("live", item?.status === "published");
   editor.elements.category.innerHTML = '<option value="">请选择分类</option>' + optionMarkup(state.categories, item?.category, categoryLabel);
   const names = ["title", "category", "shortNote", "restorationType", "material", "implantSystem", "platform", "shade", "caseOverview", "challenge", "recordsReceived", "technicalReview", "cadDesign", "provisional", "framework", "finalRestoration", "qc", "technicalOutcome", "status"];
   names.forEach((name) => { editor.elements[name].value = item?.[name] || (name === "status" ? "draft" : ""); });
@@ -280,6 +300,7 @@ function handleInitialAction() {
   if (action === "featured") openEditor(null, "case_study");
 }
 
+applyAdminBranding();
 api("/api/admin-auth").then(async (data) => {
   setAuthenticated(data.authenticated);
   if (data.authenticated) {

@@ -71,6 +71,9 @@ const settings = normalizeSettings({
   defaultSeoTitle: long,
   defaultSeoDescription: long,
   defaultOgMediaId: "MEDIA-SEO",
+  primaryLogoMediaId: "MEDIA-LOGO",
+  darkLogoMediaId: "MEDIA-DARK-LOGO",
+  faviconMediaId: "MEDIA-FAVICON",
   defaultOgImagePath: "/assets/seo.webp"
 });
 
@@ -79,6 +82,9 @@ assert.equal(settings.publicEmail, "owner@example.com");
 assert.equal(settings.defaultSeoTitle.length, 180);
 assert.equal(settings.defaultSeoDescription.length, 320);
 assert.equal(settings.defaultOgMediaId, "MEDIA-SEO");
+assert.equal(settings.primaryLogoMediaId, "MEDIA-LOGO");
+assert.equal(settings.darkLogoMediaId, "MEDIA-DARK-LOGO");
+assert.equal(settings.faviconMediaId, "MEDIA-FAVICON");
 
 const fallbackSettings = normalizeSettings({});
 assert.equal(fallbackSettings.companyName, DEFAULT_SETTINGS.companyName);

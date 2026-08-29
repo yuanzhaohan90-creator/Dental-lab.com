@@ -32,6 +32,12 @@ assert.equal(m4v.contentType, "video/x-m4v");
 const missingMime = validateMediaFile({ filename: "来自照片.mp4", contentType: "", size: 4096, bytes: isoBmff("avc1") });
 assert.equal(missingMime.contentType, "video/mp4");
 
+const safeSvgBytes = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40"><path d="M0 0h100v40H0z"/></svg>');
+const svg = validateMediaFile({ filename: "yzh-logo.svg", contentType: "image/svg+xml", size: safeSvgBytes.length, bytes: safeSvgBytes });
+assert.equal(svg.format, "SVG");
+assert.equal(svg.contentType, "image/svg+xml");
+assert.throws(() => validateMediaFile({ filename: "unsafe.svg", contentType: "image/svg+xml", size: 100, bytes: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>') }), /Unable to read this image file/);
+
 assert.throws(() => validateMediaFile({ filename: "renamed.mov", contentType: "video/quicktime", size: 20, bytes: Buffer.from("not a video") }), /Unable to read this video file/);
 assert.throws(() => validateMediaFile({ filename: "large.mov", contentType: "video/quicktime", size: MAX_MEDIA_BYTES + 1, bytes: isoBmff("hvc1") }), /larger than 100 MB/);
 

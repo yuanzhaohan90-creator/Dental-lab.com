@@ -360,7 +360,7 @@ async function handleMediaManage(req, res) {
   await updateMediaReferences({ mediaId: record.id, usageIds, replacementId: body.replacementId, mode: action === "replace-delete" ? "replace" : "remove" });
   const remaining = await mediaUsage(record.id);
   if (remaining.length) return reply(res, 409, { ok: false, error: "Some media usages still need review.", usedIn: remaining });
-  return reply(res, 200, { ok: true, media: await adminMedia(await trashMedia(record)) });
+  return reply(res, 200, { ok: true, media: await adminMedia(await trashMedia(record, usedIn)) });
 }
 
 async function handleMediaUpload(req, res) {
@@ -378,7 +378,7 @@ async function handleMediaUpload(req, res) {
       const size = Number(metadata.size) || 0;
       if (size > MAX_MEDIA_BYTES) throw Object.assign(new Error("Video is larger than 100 MB."), { statusCode: 413 });
       return {
-        allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "video/mp4", "video/quicktime", "video/x-m4v", "application/octet-stream"],
+        allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/svg+xml", "video/mp4", "video/quicktime", "video/x-m4v", "application/octet-stream"],
         maximumSizeInBytes: MAX_MEDIA_BYTES,
         addRandomSuffix: true,
         allowOverwrite: false,
@@ -448,6 +448,7 @@ async function handleMediaImage(req, res) {
   }
   res.statusCode = 200;
   res.setHeader("Content-Type", record.contentType);
+  if (record.contentType === "image/svg+xml") res.setHeader("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox");
   if (record.size) res.setHeader("Content-Length", String(record.size));
   res.setHeader("Content-Disposition", "inline");
   res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
@@ -520,7 +521,13 @@ async function handlePageEditor(req, res) {
 async function handleSettings(req, res) {
   if (req.method === "GET") return reply(res, 200, { ok: true, settings: await getConfig("settings", DEFAULT_SETTINGS) });
   if (req.method === "PUT") {
-    const saved = await saveConfigDraft("settings", DEFAULT_SETTINGS, await readJson(req), normalizeSettings);
+    const body = await readJson(req);
+    for (const key of ["primaryLogoMediaId", "darkLogoMediaId", "faviconMediaId", "defaultOgMediaId"]) {
+      if (!body[key]) continue;
+      const media = await getMedia(body[key]);
+      if (!media || media.trashedAt || String(media.contentType || "").startsWith("video/")) throw Object.assign(new Error("Branding and social images must use an active image from Media Library."), { statusCode: 400 });
+    }
+    const saved = await saveConfigDraft("settings", DEFAULT_SETTINGS, body, normalizeSettings);
     return reply(res, 200, { ok: true, settings: saved });
   }
   if (req.method === "POST") {
@@ -553,6 +560,9 @@ async function handlePublicSite(req, res) {
   const settings = structuredClone(settingsConfig.published || DEFAULT_SETTINGS);
   const resolvedHomepage = await resolvePageMedia(homepage);
   const resolvedPages = await resolvePageMedia(pages);
+  settings.primaryLogoUrl = await mediaUrl(settings.primaryLogoMediaId, "");
+  settings.darkLogoUrl = await mediaUrl(settings.darkLogoMediaId, "");
+  settings.faviconUrl = await mediaUrl(settings.faviconMediaId, "/favicon.svg");
   settings.defaultOgImageUrl = await mediaUrl(settings.defaultOgMediaId, settings.defaultOgImagePath);
   const orderedIds = homepage.selectedWork.caseIds || [];
   const featured = cases.filter((item) => item.status === "published" && item.featured).sort((a, b) => {

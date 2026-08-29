@@ -1,5 +1,28 @@
 const menuButton = document.querySelector(".menu-toggle");
 const nav = document.getElementById("primaryNav");
+
+function normalizePublicNavigation() {
+  if (!nav) return;
+  const links = [
+    ["/", "Home"],
+    ["/implant-restorations", "Implant"],
+    ["/full-arch-all-on-x", "Full Arch"],
+    ["/cases", "Cases"],
+    ["/about", "About"],
+    ["/submit-case", "Submit Case"]
+  ];
+  nav.innerHTML = links.map(([href, label]) => `<a href="${href}">${label}</a>`).join("");
+  const path = location.pathname.replace(/\/$/, "") || "/";
+  nav.querySelectorAll("a").forEach((link) => {
+    const target = link.getAttribute("href");
+    const active = target === "/cases" ? path === "/cases" || path.startsWith("/cases/") : path === target;
+    link.classList.toggle("active", active);
+    if (active) link.setAttribute("aria-current", "page");
+  });
+}
+
+normalizePublicNavigation();
+requestAnimationFrame(normalizePublicNavigation);
 if (menuButton && nav) {
   nav.innerHTML = '<a href="/">Home</a><a href="/implant-restorations">Implant</a><a href="/full-arch-all-on-x">Full Arch</a><a href="/cases">Cases</a><a href="/about">About</a><a href="/submit-case">Submit Case</a>';
   menuButton.addEventListener("click", () => {
@@ -23,6 +46,64 @@ function applyHref(selector, value, label) {
 function setMeta(selector, value) {
   const element = document.querySelector(selector);
   if (element && value) element.setAttribute("content", value);
+}
+
+function applyBranding(settings) {
+  const company = settings.companyName || "YZH Dental Lab";
+  document.querySelectorAll(".brand").forEach((brand) => {
+    const mark = brand.querySelector(".brand-mark");
+    const text = brand.querySelector("span:last-child");
+    if (text) text.textContent = company;
+    let logo = brand.querySelector(".brand-logo");
+    if (settings.primaryLogoUrl) {
+      if (!logo) {
+        logo = document.createElement("img");
+        logo.className = "brand-logo";
+        logo.alt = company;
+        brand.prepend(logo);
+      }
+      logo.src = settings.primaryLogoUrl;
+      if (mark) mark.hidden = true;
+    } else {
+      logo?.remove();
+      if (mark) mark.hidden = false;
+    }
+  });
+  const footerTitle = document.querySelector(".site-footer .footer-grid > div:first-child h3");
+  if (footerTitle) {
+    const logoUrl = settings.darkLogoUrl || settings.primaryLogoUrl;
+    footerTitle.innerHTML = `<a class="footer-brand" href="/">${logoUrl ? `<img src="${escapeAttr(logoUrl)}" alt="${escapeAttr(company)}">` : '<span class="brand-mark">Y</span>'}<span>${escapeHtml(company)}</span></a>`;
+  }
+  const footerWrap = document.querySelector(".site-footer > .wrap");
+  if (footerWrap && !footerWrap.querySelector(".footer-copyright")) {
+    const copyright = document.createElement("p");
+    copyright.className = "footer-copyright";
+    copyright.textContent = `© ${new Date().getFullYear()} ${company}. All rights reserved.`;
+    footerWrap.append(copyright);
+  }
+  const favicon = document.querySelector('link[rel="icon"]') || document.head.appendChild(document.createElement("link"));
+  favicon.rel = "icon";
+  favicon.href = settings.faviconUrl || "/favicon.svg";
+}
+
+function applyContactInformation(settings) {
+  const publicEmail = settings.publicEmail || "";
+  const whatsappUrl = settings.whatsappUrl || "";
+  const phone = settings.phone || "";
+  document.querySelectorAll('a[href^="mailto:"]').forEach((link) => { link.href = `mailto:${publicEmail}`; link.textContent = publicEmail; });
+  document.querySelectorAll('a[href*="wa.me"]').forEach((link) => {
+    link.href = whatsappUrl;
+    if (link.closest(".site-footer")) link.textContent = `WhatsApp: ${settings.whatsapp || phone}`;
+  });
+  document.querySelectorAll('a[href^="tel:"]').forEach((link) => { link.href = `tel:${phone.replace(/[^+\d]/g, "")}`; link.textContent = `Phone: ${phone}`; });
+  document.querySelectorAll(".site-footer .footer-grid > div:last-child").forEach((contact) => {
+    if (phone && !contact.querySelector('a[href^="tel:"]')) {
+      const link = document.createElement("a");
+      link.href = `tel:${phone.replace(/[^+\d]/g, "")}`;
+      link.textContent = `Phone: ${phone}`;
+      contact.append(link);
+    }
+  });
 }
 
 function makeCaseCard(item, index) {
@@ -80,6 +161,9 @@ async function loadPublicSiteData() {
     const settingsData = await settingsResponse.json();
     if (!settingsResponse.ok || !settingsData.ok) throw new Error(settingsData.error || "Settings preview unavailable.");
     data.settings = settingsData.settings.draft;
+    if (data.settings.primaryLogoMediaId) data.settings.primaryLogoUrl = `/api/admin?module=media-image&id=${encodeURIComponent(data.settings.primaryLogoMediaId)}`;
+    if (data.settings.darkLogoMediaId) data.settings.darkLogoUrl = `/api/admin?module=media-image&id=${encodeURIComponent(data.settings.darkLogoMediaId)}`;
+    if (data.settings.faviconMediaId) data.settings.faviconUrl = `/api/admin?module=media-image&id=${encodeURIComponent(data.settings.faviconMediaId)}`;
     if (data.settings.defaultOgMediaId) data.settings.defaultOgImageUrl = `/api/admin?module=media-image&id=${encodeURIComponent(data.settings.defaultOgMediaId)}`;
     data.preview = "settings";
   }
@@ -160,14 +244,14 @@ async function applyPublicSiteData() {
     if (data.preview) showPreviewBanner(data.preview);
     const { homepage, settings, selectedCases, publishedCases, pages } = data;
     if (settings) {
+      window.yzhPublicSettings = settings;
       document.title = settings.defaultSeoTitle || document.title;
       setMeta('meta[name="description"]', settings.defaultSeoDescription);
       setMeta('meta[property="og:title"]', settings.defaultSeoTitle);
       setMeta('meta[property="og:description"]', settings.defaultSeoDescription);
       setMeta('meta[property="og:image"]', settings.defaultOgImageUrl || settings.defaultOgImagePath);
-      applyText(".site-footer h3", settings.companyName);
-      document.querySelectorAll('a[href^="mailto:"]').forEach((link) => { link.href = `mailto:${settings.publicEmail}`; link.textContent = settings.publicEmail; });
-      document.querySelectorAll('a[href*="wa.me"]').forEach((link) => { link.href = settings.whatsappUrl; if (link.textContent.includes("WhatsApp")) link.textContent = link.classList.contains("floating") ? "WhatsApp Technical Team" : "WhatsApp Technical Team"; });
+      applyBranding(settings);
+      applyContactInformation(settings);
     }
     if ((location.pathname === "/" || location.pathname === "") && homepage) {
       applyManagedPage(homepage);
@@ -193,6 +277,8 @@ async function applyPublicSiteData() {
     if (location.pathname === "/about") applyManagedPage(pages?.about);
   } catch (error) {
     console.warn("public_site_data_skipped", error);
+  } finally {
+    normalizePublicNavigation();
   }
 }
 
@@ -247,7 +333,11 @@ if (form) {
       setStatus("success", `<strong>Case received.</strong><br>Case ID: <b>${data.caseId}</b><br>Your files were uploaded successfully. Our technical team will review the submission and reply by email or WhatsApp.`);
       form.reset();
     } catch (error) {
-      setStatus("error", `<strong>We could not complete the upload.</strong><br>Your files were not submitted. Please try again, or send them by WhatsApp/email.<br>WhatsApp: <a href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">+86 137 1473 0109</a><br>Email: <a href="mailto:yzhdentallab@gmail.com">yzhdentallab@gmail.com</a>`);
+      const contact = window.yzhPublicSettings || {};
+      const whatsappUrl = contact.whatsappUrl || "https://wa.me/8613714730109";
+      const whatsapp = contact.whatsapp || "+86 137 1473 0109";
+      const email = contact.publicEmail || "yzhdentallab@gmail.com";
+      setStatus("error", `<strong>We could not complete the upload.</strong><br>Your files were not submitted. Please try again, or send them by WhatsApp/email.<br>WhatsApp: <a href="${escapeAttr(whatsappUrl)}" target="_blank" rel="noreferrer">${escapeHtml(whatsapp)}</a><br>Email: <a href="mailto:${escapeAttr(email)}">${escapeHtml(email)}</a>`);
     } finally {
       form.dataset.submitting = "false";
       if (submitButton) {

@@ -82,7 +82,10 @@ async function inspectMedia(file) {
   const mime = String(file.type || "").toLowerCase();
   const bytes = await readDetectionBytes(file);
   const videoSignal = VIDEO_EXTENSIONS.has(extension) || VIDEO_MIME_TYPES.has(mime) || mime === "" || mime === "application/octet-stream";
-  if (!videoSignal) return { mediaType: "image", format: extension.toUpperCase(), codec: "", contentType: mime, duration: 0, width: 0, height: 0, browserPlayable: true, webCompatible: true };
+  if (!videoSignal) {
+    const contentType = extension === "svg" || mime === "image/svg+xml" ? "image/svg+xml" : mime;
+    return { mediaType: "image", format: extension.toUpperCase(), codec: "", contentType, duration: 0, width: 0, height: 0, browserPlayable: true, webCompatible: true };
+  }
   if (!VIDEO_EXTENSIONS.has(extension) && !VIDEO_MIME_TYPES.has(mime)) throw new Error("Unable to read this video file.");
   if (!isIsoBmff(bytes)) throw new Error("Unable to read this video file.");
   const format = extension === "mov" || mime === "video/quicktime" ? "MOV" : extension === "m4v" || mime === "video/x-m4v" ? "M4V" : "MP4";

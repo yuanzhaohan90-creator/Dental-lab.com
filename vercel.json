@@ -73,19 +73,19 @@
     },
     {
       "source": "/admin/home",
-      "destination": "/admin/home.html"
+      "destination": "/admin/index.html"
     },
     {
       "source": "/admin/implant",
-      "destination": "/admin/implant.html"
+      "destination": "/admin/index.html"
     },
     {
       "source": "/admin/full-arch",
-      "destination": "/admin/full-arch.html"
+      "destination": "/admin/index.html"
     },
     {
       "source": "/admin/about",
-      "destination": "/admin/about.html"
+      "destination": "/admin/index.html"
     },
     {
       "source": "/admin/submissions",

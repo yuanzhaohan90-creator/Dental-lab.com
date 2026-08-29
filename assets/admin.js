@@ -30,6 +30,7 @@ function adminErrorMessage(message) {
     "This image is currently in use.": "该媒体正在被页面使用。",
     "This media is currently in use.": "该媒体正在被页面使用，请先替换或移除引用。",
     "A published section requires replacement media.": "已上线区块没有备用图，必须选择替换媒体。",
+    "Branding and social images must use an active image from Media Library.": "品牌和社交分享图片必须选择媒体库中的有效图片。",
     "Move media to Trash before permanent deletion.": "请先把媒体移入回收站，再永久删除。",
     "Move the submission to Trash before permanent deletion.": "请先把客户提交移入回收站，再永久删除。",
     "Submission not found.": "未找到该客户提交。",
@@ -85,7 +86,25 @@ function showShell() {
   if (view === "settings") loadSettings();
 }
 
+async function applyAdminBranding() {
+  try {
+    const response = await fetch("/api/admin?module=public-site", { cache: "no-store" });
+    const data = await response.json();
+    const settings = data.settings || {};
+    document.querySelectorAll(".brand").forEach((brand) => {
+      const mark = brand.querySelector(".brand-mark");
+      let logo = brand.querySelector(".brand-logo");
+      if (!settings.primaryLogoUrl) return;
+      if (!logo) { logo = document.createElement("img"); logo.className = "brand-logo"; brand.prepend(logo); }
+      logo.src = settings.primaryLogoUrl;
+      logo.alt = settings.companyName || "YZH Dental Lab";
+      if (mark) mark.hidden = true;
+    });
+  } catch {}
+}
+
 async function initialize() {
+  applyAdminBranding();
   try {
     const auth = await api("/api/admin-auth");
     if (auth.authenticated) return showShell();
@@ -235,6 +254,7 @@ async function openSubmission(id) {
 let mediaItems = [];
 let mediaTypeFilter = "";
 let mediaTrashView = false;
+let mediaSort = "newest";
 const selectedMediaIds = new Set();
 const VIDEO_ACCEPT = "video/*,.mp4,.mov,.m4v";
 const processingLabels = { uploading: "正在上传", processing: "处理中", ready: "可使用", failed: "处理失败" };
@@ -274,7 +294,11 @@ function mediaPreview(item, className = "") {
 
 function renderMedia() {
   const category = document.getElementById("mediaCategoryFilter").value;
-  const filtered = mediaItems.filter((item) => (!mediaTypeFilter || item.mediaType === mediaTypeFilter) && (!category || item.category === category));
+  const filtered = mediaItems.filter((item) => (!mediaTypeFilter || item.mediaType === mediaTypeFilter) && (!category || item.category === category)).sort((a, b) => {
+    if (mediaSort === "largest") return (Number(b.size) || 0) - (Number(a.size) || 0);
+    if (mediaSort === "name") return String(a.displayName || a.originalFilename || "").localeCompare(String(b.displayName || b.originalFilename || ""), "zh-CN");
+    return new Date(b.createdAt || b.uploadedAt || 0) - new Date(a.createdAt || a.uploadedAt || 0);
+  });
   document.getElementById("mediaBulkActions").hidden = mediaTrashView;
   document.getElementById("showMediaUpload").hidden = mediaTrashView;
   document.getElementById("mediaUploadForm").hidden = mediaTrashView;
@@ -283,8 +307,8 @@ function renderMedia() {
     const usage = item.usedIn.length
       ? `<ul class="admin-used-in">${item.usedIn.map((place) => `<li><a href="${escapeHtml(place.editorUrl)}">${escapeHtml(place.label)}</a>${place.required ? "<small>需要替换</small>" : ""}</li>`).join("")}</ul>`
       : '<p class="admin-media-usage">当前未使用</p>';
-    if (mediaTrashView) return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}">${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><p class="admin-trash-meta">删除时间：${formatDate(item.trashedAt)}<br>原位置：${escapeHtml(categoryLabel(item.originalLocation || item.category))}<br>30 天后自动清理</p><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-restore>恢复</button><button class="btn admin-danger" type="button" data-media-permanent>永久删除</button></div><div class="admin-message" role="status"></div></div></article>`;
-    return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}"><label class="admin-media-select"><input type="checkbox" data-media-select ${selectedMediaIds.has(item.id) ? "checked" : ""}> 选择</label>${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><label class="field">显示名称<input data-media-key="displayName" value="${escapeHtml(item.displayName)}"></label><label class="field">图片说明（ALT）<input data-media-key="altText" value="${escapeHtml(item.altText)}"></label><label class="field">分类<select data-media-key="category">${["Cases", "Homepage", "Implant", "Full-Arch", "Lab", "Products", "Other"].map((value) => `<option value="${value}" ${value === item.category ? "selected" : ""}>${categoryLabel(value)}</option>`).join("")}</select></label>${item.mediaType === "video" ? `<label class="field">视频海报<select data-media-key="posterMediaId">${mediaOptions(item.posterMediaId, "image")}</select></label>${item.processingMessage ? `<p class="admin-helper">${escapeHtml(item.processingMessage)}</p>` : ""}` : ""}<div class="admin-media-usage"><strong>使用位置</strong>${usage}</div><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-use ${item.mediaType === "video" && item.processingStatus !== "ready" ? "disabled" : ""}>使用到页面</button><button class="btn btn-secondary" type="button" data-media-save>保存信息</button><button class="btn admin-danger" type="button" data-media-delete>删除</button></div><div class="media-use-menu" hidden><a href="/admin/home">网站首页</a><a href="/admin/implant">种植修复</a><a href="/admin/full-arch">全口修复</a><a href="/admin/about">关于我们</a></div><div class="admin-message" role="status"></div></div></article>`;
+    if (mediaTrashView) return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}">${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><p class="admin-trash-meta">删除时间：${formatDate(item.trashedAt)}<br>原分类：${escapeHtml(categoryLabel(item.originalLocation || item.category))}<br>${item.originalUsage?.length ? `原使用位置：${item.originalUsage.map(escapeHtml).join("；")}<br>` : ""}30 天后自动清理</p><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-restore>恢复</button><button class="btn admin-danger" type="button" data-media-permanent>永久删除</button></div><div class="admin-message" role="status"></div></div></article>`;
+    return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}"><label class="admin-media-select"><input type="checkbox" data-media-select ${selectedMediaIds.has(item.id) ? "checked" : ""}> 选择</label>${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><label class="field">显示名称<input data-media-key="displayName" value="${escapeHtml(item.displayName)}"></label><label class="field">图片说明（ALT）<input data-media-key="altText" value="${escapeHtml(item.altText)}"></label><label class="field">分类<select data-media-key="category">${["Cases", "Homepage", "Implant", "Full-Arch", "Lab", "Products", "Other"].map((value) => `<option value="${value}" ${value === item.category ? "selected" : ""}>${categoryLabel(value)}</option>`).join("")}</select></label>${item.mediaType === "video" ? `<label class="field">视频海报<select data-media-key="posterMediaId">${mediaOptions(item.posterMediaId, "image")}</select></label>${item.processingMessage ? `<p class="admin-helper">${escapeHtml(item.processingMessage)}</p>` : ""}` : ""}<div class="admin-media-usage"><strong>使用位置</strong>${usage}</div><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-use ${item.mediaType === "video" && item.processingStatus !== "ready" ? "disabled" : ""}>使用到页面</button><button class="btn btn-secondary" type="button" data-media-replace>替换文件</button><button class="btn btn-secondary" type="button" data-media-save>保存信息</button><button class="btn admin-danger" type="button" data-media-delete>删除</button></div><input class="visually-hidden" type="file" data-media-replace-file accept="image/jpeg,image/png,image/webp,image/svg+xml,${VIDEO_ACCEPT}"><div class="media-use-menu" hidden><a href="/admin/home">网站首页</a><a href="/admin/implant">种植修复</a><a href="/admin/full-arch">全口修复</a><a href="/admin/about">关于我们</a></div><div class="admin-message" role="status"></div></div></article>`;
   }).join("") : `<p class="admin-empty">${mediaTrashView ? "回收站为空。" : "没有符合当前筛选条件的媒体。"}</p>`;
 }
 
@@ -303,6 +327,7 @@ document.getElementById("mediaViewTabs").addEventListener("click", async (event)
   await loadMedia();
 });
 document.getElementById("mediaCategoryFilter").addEventListener("change", renderMedia);
+document.getElementById("mediaSort").addEventListener("change", (event) => { mediaSort = event.target.value; renderMedia(); });
 document.getElementById("showMediaUpload").addEventListener("click", () => document.getElementById("mediaUploadForm").scrollIntoView({ behavior: "smooth", block: "start" }));
 document.getElementById("mediaSelectAll").addEventListener("change", (event) => {
   const category = document.getElementById("mediaCategoryFilter").value;
@@ -334,7 +359,7 @@ async function uploadMediaFile(file, metadata, onProgress) {
 
 const mediaUploadForm = document.getElementById("mediaUploadForm");
 const mediaFileInput = mediaUploadForm.elements.file;
-mediaFileInput.accept = `image/jpeg,image/png,image/webp,${VIDEO_ACCEPT}`;
+mediaFileInput.accept = `image/jpeg,image/png,image/webp,image/svg+xml,${VIDEO_ACCEPT}`;
 const mediaFileInfo = document.createElement("div");
 mediaFileInfo.className = "admin-file-selection";
 mediaFileInfo.innerHTML = "<strong>最大视频大小：100 MB</strong><span>支持 MP4、MOV、M4V，包括从 iPhone 照片中选择的视频。</span>";
@@ -407,6 +432,7 @@ document.getElementById("mediaList").addEventListener("click", async (event) => 
       return;
     }
     if (event.target.closest("[data-media-use]")) card.querySelector(".media-use-menu").hidden = !card.querySelector(".media-use-menu").hidden;
+    if (event.target.closest("[data-media-replace]")) card.querySelector("[data-media-replace-file]").click();
     if (event.target.closest("[data-media-save]")) {
       const body = { id: card.dataset.mediaId };
       card.querySelectorAll("[data-media-key]").forEach((field) => { body[field.dataset.mediaKey] = field.value; });
@@ -638,7 +664,9 @@ async function loadPageEditor(key) {
   try {
     const [page, media] = await Promise.all([api(`/api/admin?module=page-editor&page=${encodeURIComponent(key)}`), api("/api/admin?module=media")]);
     pageData = page; mediaItems = media.media;
-    document.getElementById("pageDraftState").textContent = page.config.updatedAt ? `草稿 · ${formatDate(page.config.updatedAt)}` : "草稿";
+    const hasDraftChanges = JSON.stringify(page.config.draft) !== JSON.stringify(page.config.published);
+    document.getElementById("pageLiveState").textContent = page.config.publishedAt ? `LIVE / 已上线 · ${formatDate(page.config.publishedAt)}` : "LIVE / 使用默认内容";
+    document.getElementById("pageDraftState").textContent = hasDraftChanges ? `DRAFT / 有未发布修改 · ${formatDate(page.config.updatedAt)}` : "DRAFT / 无未发布修改";
     document.getElementById("restorePage").disabled = !page.config.previous;
     renderPageEditor();
   } catch (error) { document.getElementById("pageSections").innerHTML = `<p class="admin-empty">${escapeHtml(error.message)}</p>`; }
@@ -717,6 +745,21 @@ function mediaOptionsSimple(items, selected, fallbackLabel) {
 }
 
 let settingsData;
+
+function brandingField(name, label, hint) {
+  const selected = settingsData.settings.draft[name] || "";
+  const item = mediaItems.find((entry) => entry.id === selected);
+  return `<article class="branding-field" data-branding-field="${name}"><div class="branding-preview">${item ? `<img src="${item.url}" alt="${escapeHtml(label)}">` : '<span>使用当前文字品牌</span>'}</div><div><h3>${escapeHtml(label)}</h3><p>${escapeHtml(hint)}</p><label class="field">从媒体库选择<select name="${name}">${mediaOptionsSimple(mediaItems, selected, "使用文字品牌 / 当前图标")}</select></label><div class="media-action-row"><button class="btn btn-secondary" type="button" data-brand-upload="${name}">上传并选择</button><button class="btn btn-secondary" type="button" data-brand-remove="${name}" ${selected ? "" : "disabled"}>移除</button><a class="btn btn-secondary" href="/admin/media">打开媒体库</a></div><input class="visually-hidden" type="file" data-brand-file="${name}" accept="image/svg+xml,image/png,image/webp"></div></article>`;
+}
+
+function renderBrandingFields() {
+  document.getElementById("brandingFields").innerHTML = [
+    brandingField("primaryLogoMediaId", "主 Logo", "用于桌面、手机页头和后台。建议透明背景横版 Logo。"),
+    brandingField("darkLogoMediaId", "深色背景 Logo（可选）", "用于页脚等深色背景；留空时使用主 Logo。"),
+    brandingField("faviconMediaId", "Favicon", "用于浏览器标签页。建议方形 PNG、WebP 或 SVG。")
+  ].join("");
+}
+
 async function loadSettings() {
   const form = document.getElementById("settingsForm");
   try {
@@ -725,14 +768,18 @@ async function loadSettings() {
     const draft = settings.settings.draft;
     ["companyName", "publicEmail", "whatsapp", "whatsappUrl", "phone", "location", "defaultSeoTitle", "defaultSeoDescription"].forEach((name) => { form.elements[name].value = draft[name]; });
     form.elements.defaultOgMediaId.innerHTML = mediaOptionsSimple(media.media, draft.defaultOgMediaId, "使用当前社交分享图片");
-    document.getElementById("settingsState").textContent = settings.settings.publishedAt ? `已上线 · ${formatDate(settings.settings.publishedAt)}` : "草稿";
+    renderBrandingFields();
+    const hasDraftChanges = JSON.stringify(settings.settings.draft) !== JSON.stringify(settings.settings.published);
+    document.getElementById("settingsLiveState").textContent = settings.settings.publishedAt ? `LIVE / 已上线 · ${formatDate(settings.settings.publishedAt)}` : "LIVE / 使用默认设置";
+    document.getElementById("settingsState").textContent = hasDraftChanges ? `DRAFT / 有未发布修改 · ${formatDate(settings.settings.updatedAt)}` : "DRAFT / 无未发布修改";
+    document.getElementById("restoreSettings").disabled = !settings.settings.previous;
   } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); }
 }
 
 function settingsPayload() {
   const form = document.getElementById("settingsForm");
   const payload = {};
-  ["companyName", "publicEmail", "whatsapp", "whatsappUrl", "phone", "location", "defaultSeoTitle", "defaultSeoDescription", "defaultOgMediaId"].forEach((name) => { payload[name] = form.elements[name].value; });
+  ["companyName", "primaryLogoMediaId", "darkLogoMediaId", "faviconMediaId", "publicEmail", "whatsapp", "whatsappUrl", "phone", "location", "defaultSeoTitle", "defaultSeoDescription", "defaultOgMediaId"].forEach((name) => { payload[name] = form.elements[name].value; });
   payload.defaultOgImagePath = settingsData.settings.draft.defaultOgImagePath;
   return payload;
 }
@@ -743,7 +790,56 @@ async function saveSettingsDraft() {
 }
 
 document.getElementById("settingsForm").addEventListener("submit", async (event) => { event.preventDefault(); try { await saveSettingsDraft(); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
+document.getElementById("brandingFields").addEventListener("click", (event) => {
+  const upload = event.target.closest("[data-brand-upload]");
+  if (upload) document.querySelector(`[data-brand-file="${upload.dataset.brandUpload}"]`).click();
+  const remove = event.target.closest("[data-brand-remove]");
+  if (remove) {
+    settingsData.settings.draft[remove.dataset.brandRemove] = "";
+    renderBrandingFields();
+  }
+});
+document.getElementById("brandingFields").addEventListener("change", async (event) => {
+  if (event.target.matches("select[name]")) {
+    settingsData.settings.draft[event.target.name] = event.target.value;
+    renderBrandingFields();
+    return;
+  }
+  const input = event.target.closest("[data-brand-file]");
+  if (!input?.files?.[0]) return;
+  const file = input.files[0];
+  const message = document.getElementById("settingsMessage");
+  showMessage(message, `正在上传 ${file.name}...`);
+  try {
+    const media = await uploadMediaFile(file, { category: "Other", displayName: file.name.replace(/\.[^.]+$/, ""), altText: "YZH Dental Lab logo" });
+    mediaItems.unshift(media);
+    settingsData.settings.draft[input.dataset.brandFile] = media.id;
+    renderBrandingFields();
+    showMessage(message, "品牌图片已上传并选中，请保存草稿后预览。", "success");
+  } catch (error) { showMessage(message, error.message, "error"); }
+});
+
+document.getElementById("mediaList").addEventListener("change", async (event) => {
+  const input = event.target.closest("[data-media-replace-file]");
+  if (!input?.files?.[0]) return;
+  const card = input.closest("[data-media-id]");
+  const item = mediaItems.find((entry) => entry.id === card.dataset.mediaId);
+  const file = input.files[0];
+  const message = card.querySelector(".admin-message");
+  if (!confirm(`用 ${file.name} 替换“${item.displayName || item.originalFilename}”？\n\n现有使用位置会更新，旧文件进入回收站。`)) { input.value = ""; return; }
+  showMessage(message, `正在上传 ${file.name}...`);
+  try {
+    const replacement = await uploadMediaFile(file, { category: item.category, displayName: item.displayName || file.name.replace(/\.[^.]+$/, ""), altText: item.altText || "" }, (percentage) => showMessage(message, `正在上传 ${file.name} · ${percentage}%`));
+    if (item.usedIn.length) {
+      await api("/api/admin?module=media-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "replace-delete", id: item.id, replacementId: replacement.id, usageIds: item.usedIn.map((place) => place.id) }) });
+    } else {
+      await api("/api/admin?module=media-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "trash", id: item.id }) });
+    }
+    await loadMedia();
+  } catch (error) { showMessage(message, `${error.message} 新上传文件已保留在媒体库，旧文件和页面引用未删除。`, "error"); }
+});
 document.getElementById("previewSettings").addEventListener("click", async () => { try { await saveSettingsDraft(); window.open("/?adminPreview=settings", "_blank", "noopener"); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
 document.getElementById("publishSettings").addEventListener("click", async () => { if (!confirm("确定发布这些公开网站设置吗？")) return; try { await saveSettingsDraft(); await api("/api/admin?module=settings&action=publish", { method: "POST" }); showMessage(document.getElementById("settingsMessage"), "网站设置已发布。", "success"); await loadSettings(); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
+document.getElementById("restoreSettings").addEventListener("click", async () => { if (!confirm("确定恢复上一版已发布设置吗？")) return; try { await api("/api/admin?module=settings&action=restore", { method: "POST" }); showMessage(document.getElementById("settingsMessage"), "已恢复上一版设置。", "success"); await loadSettings(); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
 
 initialize();
