@@ -57,10 +57,6 @@
       "destination": "/full-arch-all-on-x.html"
     },
     {
-      "source": "/cases/dual-arch-all-on-x",
-      "destination": "/cases/dual-arch-all-on-x/index.html"
-    },
-    {
       "source": "/cases",
       "destination": "/cases.html"
     },
@@ -107,26 +103,6 @@
     {
       "source": "/admin/settings",
       "destination": "/admin/index.html"
-    },
-    {
-      "source": "/full-arch/zirconia-titanium-workflow",
-      "destination": "/full-arch/zirconia-titanium-workflow/index.html"
-    },
-    {
-      "source": "/full-arch/immediate-load-pmma",
-      "destination": "/full-arch/immediate-load-pmma/index.html"
-    },
-    {
-      "source": "/full-arch/photogrammetry-workflow",
-      "destination": "/full-arch/photogrammetry-workflow/index.html"
-    },
-    {
-      "source": "/full-arch/fp1-full-arch-zirconia",
-      "destination": "/full-arch/fp1-full-arch-zirconia/index.html"
-    },
-    {
-      "source": "/full-arch/complex-zygomatic-workflow",
-      "destination": "/full-arch/complex-zygomatic-workflow/index.html"
     },
     {
       "source": "/crown-bridge",

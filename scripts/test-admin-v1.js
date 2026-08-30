@@ -53,6 +53,15 @@ assert.equal(fullArch.restorationOptions[0].media.mediaType, "video");
 assert.equal(fullArch.restorationOptions[0].media.fit, "cover");
 assert.equal(fullArch.hero.heading, DEFAULT_PAGE_CONFIGS.fullArch.hero.heading);
 
+const cleanedFullArch = normalizePageConfig("fullArch", {
+  framework: { destination: "/full-arch/zirconia-titanium-workflow" },
+  workflow: { destination: "/full-arch/photogrammetry-workflow" },
+  qc: { destination: "/cases/dual-arch-all-on-x" }
+});
+assert.equal(cleanedFullArch.framework.destination, "/full-arch-all-on-x");
+assert.equal(cleanedFullArch.workflow.destination, "/full-arch-all-on-x");
+assert.equal(cleanedFullArch.qc.destination, "/full-arch-all-on-x");
+
 const about = normalizePageConfig("about", { packing: { media: { mediaId: "MEDIA-PACKING" } } });
 assert.equal(about.packing.media.mediaId, "MEDIA-PACKING");
 assert.equal(about.production.media.fit, "contain");

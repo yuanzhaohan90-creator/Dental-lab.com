@@ -120,11 +120,6 @@ h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .fullarch-hero h1{max-width:15ch}
 .fullarch-proof{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:28px}
 .fullarch-proof span{min-height:58px;display:flex;align-items:center;background:rgba(255,255,255,.78);border:1px solid #d4e2ed;border-radius:8px;padding:12px 14px;font-size:13px;font-weight:850;color:#36516c}
-.source-note{align-items:start}
-.reference-panel{background:#fff;border:1px solid rgba(216,228,238,.9);border-radius:8px;box-shadow:var(--shadow);padding:24px}
-.reference-panel h3{margin-bottom:14px}
-.reference-panel a{display:block;padding:13px 0;border-top:1px solid var(--line);color:var(--blue);font-weight:850}
-.reference-panel a:first-of-type{border-top:0;padding-top:0}
 .fullarch-library{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
 .fullarch-card{position:relative;display:grid;grid-template-columns:minmax(230px,.88fr) minmax(0,1.12fr);background:#fff;border:1px solid rgba(216,228,238,.9);border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
 .card-main-link{position:absolute;inset:0;z-index:1;cursor:pointer}
@@ -231,7 +226,7 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   .hero-visual figcaption{font-size:13px;padding:12px}
   .proof-strip,.service-feature-grid,.service-grid,.tick-list,.case-grid,.case-grid.three,.lab-grid,.steps,.content-grid,.form-grid,.footer-grid,.qc-list{grid-template-columns:1fr}
   .process-grid,.technical-points,.case-meta,.fullarch-proof,.verification-grid{grid-template-columns:1fr}
-  .fullarch-card div,.reference-panel{padding:20px}
+  .fullarch-card div{padding:20px}
   .section{padding:56px 0}
   .priority-case.large{grid-row:auto}
   .priority-case img,.priority-case.large img,.split-feature img{aspect-ratio:16/11}

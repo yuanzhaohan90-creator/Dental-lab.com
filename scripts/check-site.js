@@ -7,12 +7,6 @@ const pages = [
   "implant-restorations.html",
   "full-arch-all-on-x.html",
   "cases.html",
-  "cases/dual-arch-all-on-x/index.html",
-  "full-arch/zirconia-titanium-workflow/index.html",
-  "full-arch/immediate-load-pmma/index.html",
-  "full-arch/photogrammetry-workflow/index.html",
-  "full-arch/fp1-full-arch-zirconia/index.html",
-  "full-arch/complex-zygomatic-workflow/index.html",
   "crown-bridge.html",
   "digital-dentistry.html",
   "surgical-guides.html",
@@ -41,7 +35,15 @@ const forbidden = [
   "Our Facility",
   "Real Work",
   "Real Case",
-  "Testimonials"
+  "Testimonials",
+  "External Reference",
+  "Reference Case",
+  "Reference Library",
+  "Published Clinical Reference",
+  "Open Published Reference",
+  "third-party case",
+  "externalCase",
+  "external case metadata"
 ];
 
 const routeTargets = {
@@ -49,12 +51,6 @@ const routeTargets = {
   "/implant-restorations": "implant-restorations.html",
   "/full-arch-all-on-x": "full-arch-all-on-x.html",
   "/cases": "cases.html",
-  "/cases/dual-arch-all-on-x": "cases/dual-arch-all-on-x/index.html",
-  "/full-arch/zirconia-titanium-workflow": "full-arch/zirconia-titanium-workflow/index.html",
-  "/full-arch/immediate-load-pmma": "full-arch/immediate-load-pmma/index.html",
-  "/full-arch/photogrammetry-workflow": "full-arch/photogrammetry-workflow/index.html",
-  "/full-arch/fp1-full-arch-zirconia": "full-arch/fp1-full-arch-zirconia/index.html",
-  "/full-arch/complex-zygomatic-workflow": "full-arch/complex-zygomatic-workflow/index.html",
   "/crown-bridge": "crown-bridge.html",
   "/digital-dentistry": "digital-dentistry.html",
   "/surgical-guides": "surgical-guides.html",
