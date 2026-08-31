@@ -9,7 +9,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="About YZH Dental Lab">
 <meta property="og:description" content="A digital dental lab built for overseas partners.">
-<meta property="og:image" content="https://yzhdentallab.com/assets/real/cad-design-workstation-02.jpg">
+<meta property="og:image" content="https://yzhdentallab.com/assets/real/hero-production-floor-03.jpg">
 <link rel="stylesheet" href="/assets/site.css?v=manager-linkedin-1">
 </head>
 <body>
@@ -26,7 +26,7 @@
           <a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a>
         </div>
       </div>
-      <img src="/assets/real/cad-design-workstation-02.jpg" alt="CAD workstation used for digital dental design workflow" fetchpriority="high" data-manager-media="hero.media">
+      <img src="/assets/real/hero-production-floor-03.jpg" alt="YZH Dental Lab production floor" fetchpriority="high" data-manager-media="hero.media">
     </div>
   </section>
 

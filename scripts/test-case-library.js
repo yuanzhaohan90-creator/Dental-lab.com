@@ -2,6 +2,7 @@ const assert = require("assert");
 const crypto = require("crypto");
 const { createSession, isAdmin, verifyPassword, verifySession } = require("../lib/case-auth");
 const { CATEGORIES, IMAGE_TYPES, duplicateRecordData, normalizeFields, validateRecord } = require("../lib/case-store");
+const { CANONICAL_CASE_SLUG, canonicalPublicRecords, canonicalSlugFor, normalizePublicCase } = require("../lib/public-cases");
 
 const password = "test-admin-password";
 const salt = "unit-test-salt";
@@ -75,5 +76,14 @@ assert.equal(duplicate.caseOverview, source.caseOverview);
 assert.equal(duplicate.images[0].pathname, source.images[0].pathname);
 assert.equal(duplicate.images[0].caption, source.images[0].caption);
 assert.notEqual(duplicate.images[0].id, source.images[0].id);
+
+const publicRecords = canonicalPublicRecords([
+  { status: "published", slug: CANONICAL_CASE_SLUG },
+  { status: "published", slug: "4-unit-anterior-zirconia-esthetic-restoration" },
+  { status: "published", slug: "copy-of-4-unit-anterior-zirconia-esthetic-restoration" }
+]);
+assert.deepEqual(publicRecords.map((item) => item.slug), [CANONICAL_CASE_SLUG]);
+assert.equal(canonicalSlugFor("4-unit-anterior-zirconia-esthetic-restoration"), CANONICAL_CASE_SLUG);
+assert.deepEqual(normalizePublicCase({ title: "Copy of Anterior Zirconia", shade: "a3" }), { title: "Anterior Zirconia", shade: "A3" });
 
 console.log("case-library unit tests passed");

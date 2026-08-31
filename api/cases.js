@@ -1,4 +1,5 @@
 const { getRecordBySlug, listRecords, publicRecord } = require("../lib/case-store");
+const { canonicalPublicRecords, canonicalSlugFor, normalizePublicCase } = require("../lib/public-cases");
 
 function reply(res, statusCode, payload) {
   res.statusCode = statusCode;
@@ -20,12 +21,12 @@ module.exports = async function handler(req, res) {
   try {
     const slug = query(req, "slug");
     if (slug) {
-      const record = await getRecordBySlug(slug);
+      const record = await getRecordBySlug(canonicalSlugFor(slug));
       if (!record || record.status !== "published") return reply(res, 404, { ok: false, error: "Case not found." });
-      return reply(res, 200, { ok: true, case: publicRecord(record, true) });
+      return reply(res, 200, { ok: true, case: normalizePublicCase(publicRecord(record, true)) });
     }
-    const records = (await listRecords()).filter((record) => record.status === "published");
-    return reply(res, 200, { ok: true, cases: records.map((record) => publicRecord(record)) });
+    const records = canonicalPublicRecords(await listRecords());
+    return reply(res, 200, { ok: true, cases: records.map((record) => normalizePublicCase(publicRecord(record))) });
   } catch (error) {
     console.error("public_cases_error", error);
     return reply(res, 500, { ok: false, error: "The case library is temporarily unavailable." });

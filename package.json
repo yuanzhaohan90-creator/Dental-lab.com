@@ -8,6 +8,7 @@
     "check": "node scripts/check-site.js",
     "test:submit-case": "node scripts/test-submit-case.js",
     "test:case-library": "node scripts/test-case-library.js",
+    "test:public-render": "node scripts/test-public-render.js",
     "test:admin": "node scripts/test-admin-v1.js",
     "test:media-upload": "node scripts/test-media-upload.js",
     "test:video-transcode": "node scripts/test-video-transcode.js",
@@ -17,6 +18,7 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@vercel/blob": "^2.8.0",
     "@vercel/functions": "^3.9.5",
-    "busboy": "^1.6.0"
+    "busboy": "^1.6.0",
+    "cheerio": "^1.1.2"
   }
 }

@@ -2,6 +2,7 @@ const Busboy = require("busboy");
 const { isAdmin } = require("../lib/case-auth");
 const { protect, query, readJson, reply } = require("../lib/admin-http");
 const { MAX_MEDIA_BYTES } = require("../lib/media-validation");
+const { getPublicSiteData } = require("../lib/public-site-data");
 const {
   DEFAULT_HOMEPAGE,
   DEFAULT_PAGE_CONFIGS,
@@ -569,37 +570,11 @@ async function handlePublicSite(req, res) {
     res.statusCode = 405;
     return res.end("GET required");
   }
-  const [homepageConfig, implantConfig, fullArchConfig, aboutConfig, settingsConfig, cases] = await Promise.all([
-    getConfig("homepage", DEFAULT_HOMEPAGE),
-    getConfig("page-implant", DEFAULT_PAGE_CONFIGS.implant),
-    getConfig("page-fullArch", DEFAULT_PAGE_CONFIGS.fullArch),
-    getConfig("page-about", DEFAULT_PAGE_CONFIGS.about),
-    getConfig("settings", DEFAULT_SETTINGS),
-    listRecords()
-  ]);
-  const homepage = normalizeHomepage(homepageConfig.published || DEFAULT_HOMEPAGE);
-  const pages = {
-    implant: normalizePageConfig("implant", implantConfig.published || DEFAULT_PAGE_CONFIGS.implant),
-    fullArch: normalizePageConfig("fullArch", fullArchConfig.published || DEFAULT_PAGE_CONFIGS.fullArch),
-    about: normalizePageConfig("about", aboutConfig.published || DEFAULT_PAGE_CONFIGS.about)
-  };
-  const settings = normalizeSettings(settingsConfig.published || DEFAULT_SETTINGS);
-  const resolvedHomepage = await resolvePageMedia(homepage);
-  const resolvedPages = await resolvePageMedia(pages);
-  settings.primaryLogoUrl = await mediaUrl(settings.primaryLogoMediaId, "");
-  settings.darkLogoUrl = await mediaUrl(settings.darkLogoMediaId, "");
-  settings.faviconUrl = await mediaUrl(settings.faviconMediaId, "/favicon.svg");
-  settings.defaultOgImageUrl = await mediaUrl(settings.defaultOgMediaId, settings.defaultOgImagePath);
-  const orderedIds = homepage.selectedWork.caseIds || [];
-  const featured = cases.filter((item) => item.status === "published" && item.featured).sort((a, b) => {
-    const left = orderedIds.indexOf(a.id);
-    const right = orderedIds.indexOf(b.id);
-    return (left === -1 ? 999 : left) - (right === -1 ? 999 : right);
-  });
+  const data = await getPublicSiteData();
   res.statusCode = 200;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");
-  return res.end(JSON.stringify({ ok: true, homepage: resolvedHomepage, pages: resolvedPages, settings, selectedCases: featured.slice(0, 3).map((item) => publicRecord(item)), publishedCases: cases.filter((item) => item.status === "published").map((item) => publicRecord(item)) }));
+  return res.end(JSON.stringify(data));
 }
 
 module.exports = async function handler(req, res) {

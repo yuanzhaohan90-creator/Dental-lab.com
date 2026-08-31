@@ -64,9 +64,9 @@
   <section class="section" id="featured-cases">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Selected Complex Implant & Full-Arch Work</p>
-        <h2>Three areas where technical review matters most.</h2>
-        <p class="copy">Large implant and full-arch cases need clear records, component matching and design decisions before production starts.</p>
+        <p class="eyebrow">Core Technical Capabilities</p>
+        <h2>Three workflows where technical review matters most.</h2>
+        <p class="copy">These are YZH laboratory capability visuals, not patient case studies. Published owner-approved work appears in the Case Library.</p>
       </div>
       <div class="priority-case-grid">
         <a class="priority-case large" href="/full-arch-all-on-x">

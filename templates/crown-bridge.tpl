@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crown & Bridge Lab Support | YZH Dental Lab</title>
+<meta name="description" content="Crown and bridge outsourcing support for dental laboratories, including zirconia, PFM, veneers, inlays, onlays, shade communication and CAD/CAM quality control.">
+<link rel="canonical" href="https://yzhdentallab.com/crown-bridge">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website"><meta property="og:url" content="https://yzhdentallab.com/crown-bridge">
+<meta property="og:title" content="Crown & Bridge Lab Support | YZH Dental Lab"><meta property="og:description" content="Restorative CAD/CAM and production support for partner dental laboratories.">
+<meta property="og:image" content="https://yzhdentallab.com/assets/real/posterior-zirconia-crowns-07.png">
+<link rel="stylesheet" href="/assets/site.css?v=professional-1">
+</head>
+<body>
+<header class="site-header"><div class="wrap nav"><a class="brand" href="/"><img class="brand-logo" src="/assets/brand/yzh-mark.svg" alt=""><span>YZH Dental Lab</span></a><button class="menu-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button><nav class="navlinks" id="primaryNav"><a href="/">Home</a><a href="/implant-restorations">Implant</a><a href="/full-arch-all-on-x">Full Arch</a><a href="/cases">Cases</a><a href="/about">About</a></nav><a class="btn btn-primary nav-cta" href="/submit-case">Send a Trial Case</a></div></header>
+<main>
+  <section class="page-hero"><div class="wrap page-hero-grid"><div><p class="eyebrow">Crown & Bridge</p><h1>Restorative Support for Partner Dental Labs</h1><p class="lead">CAD/CAM and production support for crown, bridge and esthetic restorative work, with clear review of files, shade, contacts, occlusion and finish requirements.</p><div class="cta-row"><a class="btn btn-primary" href="/submit-case">Send a Crown & Bridge Case</a><a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noopener noreferrer">WhatsApp Technical Team</a></div></div><img src="/assets/real/posterior-zirconia-crowns-07.png" alt="Posterior zirconia crown and bridge restorations produced by YZH Dental Lab" width="1600" height="900" loading="eager" fetchpriority="high"></div></section>
+  <section class="section"><div class="wrap"><div class="section-head"><p class="eyebrow">Restorative Capabilities</p><h2>Clear support for routine and overflow restorative work.</h2><p class="copy">Start with one controlled case. The requested material, shade and technical records are reviewed before production.</p></div><div class="content-grid"><a class="text-panel" href="/cases"><h3>Zirconia Crowns & Bridges</h3><p>Anterior and posterior zirconia work with attention to margin fit, contacts, occlusion and surface finish.</p></a><a class="text-panel" href="/submit-case"><h3>PFM</h3><p>PFM restorative support based on the submitted prescription, design requirements and shade information.</p></a><a class="text-panel" href="/submit-case"><h3>Veneers / Inlays / Onlays</h3><p>Esthetic and partial-coverage restorations reviewed around available scans, preparation design and requested finish.</p></a><a class="text-panel" href="/submit-case"><h3>Shade & Surface Finish</h3><p>Shade, characterization and finish requirements can be included with photos and case instructions.</p></a><a class="text-panel" href="/submit-case"><h3>Contacts & Occlusion</h3><p>Proximal contacts, opposing records and occlusal requirements are checked from the submitted data.</p></a><a class="text-panel" href="/submit-case"><h3>Lab-to-Lab Overflow Support</h3><p>Suitable for partner laboratories that need additional digital design or production capacity without moving their full workload.</p></a></div></div></section>
+  <section class="section trial"><div class="wrap two-col"><div><p class="eyebrow">Trial Case First</p><h2>Send one crown or bridge case.</h2><p class="copy">Include the scan or model file, restoration request, material, shade, photos when relevant and any design approval requirements.</p></div><div class="cta-panel"><a class="btn btn-primary" href="/submit-case">Send a Trial Case</a><a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noopener noreferrer">WhatsApp Technical Team</a></div></div></section>
+</main>
+<footer class="site-footer"><div class="wrap"><p>YZH Dental Lab</p></div></footer><script src="/assets/site.js?v=professional-1" defer></script>
+</body></html>

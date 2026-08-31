@@ -3,16 +3,16 @@ const path = require("path");
 
 const root = process.cwd();
 const pages = [
-  "index.html",
-  "implant-restorations.html",
-  "full-arch-all-on-x.html",
-  "cases.html",
-  "crown-bridge.html",
-  "digital-dentistry.html",
-  "surgical-guides.html",
-  "about.html",
-  "submit-case.html",
-  "privacy-policy.html"
+  "templates/index.tpl",
+  "templates/implant-restorations.tpl",
+  "templates/full-arch-all-on-x.tpl",
+  "templates/cases.tpl",
+  "templates/crown-bridge.tpl",
+  "templates/digital-dentistry.tpl",
+  "templates/surgical-guides.tpl",
+  "templates/about.tpl",
+  "templates/submit-case.tpl",
+  "templates/privacy-policy.tpl"
 ];
 const failures = [];
 
@@ -47,16 +47,16 @@ const forbidden = [
 ];
 
 const routeTargets = {
-  "/": "index.html",
-  "/implant-restorations": "implant-restorations.html",
-  "/full-arch-all-on-x": "full-arch-all-on-x.html",
-  "/cases": "cases.html",
-  "/crown-bridge": "crown-bridge.html",
-  "/digital-dentistry": "digital-dentistry.html",
-  "/surgical-guides": "surgical-guides.html",
-  "/about": "about.html",
-  "/submit-case": "submit-case.html",
-  "/privacy-policy": "privacy-policy.html"
+  "/": "templates/index.tpl",
+  "/implant-restorations": "templates/implant-restorations.tpl",
+  "/full-arch-all-on-x": "templates/full-arch-all-on-x.tpl",
+  "/cases": "templates/cases.tpl",
+  "/crown-bridge": "templates/crown-bridge.tpl",
+  "/digital-dentistry": "templates/digital-dentistry.tpl",
+  "/surgical-guides": "templates/surgical-guides.tpl",
+  "/about": "templates/about.tpl",
+  "/submit-case": "templates/submit-case.tpl",
+  "/privacy-policy": "templates/privacy-policy.tpl"
 };
 
 for (const page of pages) {

@@ -3,15 +3,6 @@ const nav = document.getElementById("primaryNav");
 
 function normalizePublicNavigation() {
   if (!nav) return;
-  const links = [
-    ["/", "Home"],
-    ["/implant-restorations", "Implant"],
-    ["/full-arch-all-on-x", "Full Arch"],
-    ["/cases", "Cases"],
-    ["/about", "About"],
-    ["/submit-case", "Submit Case"]
-  ];
-  nav.innerHTML = links.map(([href, label]) => `<a href="${href}">${label}</a>`).join("");
   const path = location.pathname.replace(/\/$/, "") || "/";
   nav.querySelectorAll("a").forEach((link) => {
     const target = link.getAttribute("href");
@@ -19,15 +10,41 @@ function normalizePublicNavigation() {
     link.classList.toggle("active", active);
     if (active) link.setAttribute("aria-current", "page");
   });
+  const services = nav.querySelector(".nav-dropdown");
+  if (services) services.classList.toggle("active", ["/implant-restorations", "/full-arch-all-on-x", "/crown-bridge", "/digital-dentistry", "/surgical-guides"].includes(path));
+}
+
+function closeNavigation() {
+  nav?.classList.remove("open");
+  menuButton?.setAttribute("aria-expanded", "false");
+  const dropdown = nav?.querySelector(".nav-dropdown");
+  dropdown?.classList.remove("open");
+  dropdown?.querySelector(".nav-dropdown-toggle")?.setAttribute("aria-expanded", "false");
 }
 
 normalizePublicNavigation();
-requestAnimationFrame(normalizePublicNavigation);
 if (menuButton && nav) {
-  nav.innerHTML = '<a href="/">Home</a><a href="/implant-restorations">Implant</a><a href="/full-arch-all-on-x">Full Arch</a><a href="/cases">Cases</a><a href="/about">About</a><a href="/submit-case">Submit Case</a>';
   menuButton.addEventListener("click", () => {
     const open = nav.classList.toggle("open");
     menuButton.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  const dropdown = nav.querySelector(".nav-dropdown");
+  const dropdownButton = dropdown?.querySelector(".nav-dropdown-toggle");
+  dropdownButton?.addEventListener("click", () => {
+    const open = dropdown.classList.toggle("open");
+    dropdownButton.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  nav.addEventListener("click", (event) => {
+    if (event.target.closest("a")) closeNavigation();
+  });
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".site-header")) closeNavigation();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeNavigation();
+      menuButton.focus();
+    }
   });
 }
 
@@ -65,14 +82,20 @@ function applyBranding(settings) {
       logo.src = settings.primaryLogoUrl;
       if (mark) mark.hidden = true;
     } else {
-      logo?.remove();
-      if (mark) mark.hidden = false;
+      if (!logo) {
+        logo = document.createElement("img");
+        logo.className = "brand-logo";
+        logo.alt = "";
+        brand.prepend(logo);
+      }
+      logo.src = "/assets/brand/yzh-mark.svg";
+      if (mark) mark.hidden = true;
     }
   });
   const footerTitle = document.querySelector(".site-footer .footer-grid > div:first-child h3");
   if (footerTitle) {
     const logoUrl = settings.darkLogoUrl || settings.primaryLogoUrl;
-    footerTitle.innerHTML = `<a class="footer-brand" href="/">${logoUrl ? `<img src="${escapeAttr(logoUrl)}" alt="${escapeAttr(company)}">` : '<span class="brand-mark">Y</span>'}<span>${escapeHtml(company)}</span></a>`;
+    footerTitle.innerHTML = `<a class="footer-brand" href="/"><img src="${escapeAttr(logoUrl || "/assets/brand/yzh-mark.svg")}" alt=""><span>${escapeHtml(company)}</span></a>`;
   }
   const footerWrap = document.querySelector(".site-footer > .wrap");
   if (footerWrap && !footerWrap.querySelector(".footer-copyright")) {
@@ -168,6 +191,10 @@ function applyContactInformation(settings) {
   if (location.pathname === "/about" || location.pathname === "/about.html") addContactRow(document.querySelector(".trial .cta-panel"));
   if (location.pathname === "/submit-case" || location.pathname === "/submit-case.html") addContactRow(document.querySelector(".contact-links"));
 
+  bindCopyEmailActions(publicEmail);
+}
+
+function bindCopyEmailActions(publicEmail = "") {
   if (!document.documentElement.dataset.copyEmailBound) {
     document.documentElement.dataset.copyEmailBound = "true";
     document.addEventListener("click", async (event) => {
@@ -333,11 +360,13 @@ async function applyPublicSiteData() {
     const { homepage, settings, selectedCases, publishedCases, pages } = data;
     if (settings) {
       window.yzhPublicSettings = settings;
-      document.title = settings.defaultSeoTitle || document.title;
-      setMeta('meta[name="description"]', settings.defaultSeoDescription);
-      setMeta('meta[property="og:title"]', settings.defaultSeoTitle);
-      setMeta('meta[property="og:description"]', settings.defaultSeoDescription);
-      setMeta('meta[property="og:image"]', settings.defaultOgImageUrl || settings.defaultOgImagePath);
+      if (location.pathname === "/" || location.pathname === "") {
+        document.title = settings.defaultSeoTitle || document.title;
+        setMeta('meta[name="description"]', settings.defaultSeoDescription);
+        setMeta('meta[property="og:title"]', settings.defaultSeoTitle);
+        setMeta('meta[property="og:description"]', settings.defaultSeoDescription);
+        setMeta('meta[property="og:image"]', settings.defaultOgImageUrl || settings.defaultOgImagePath);
+      }
       applyBranding(settings);
       applyContactInformation(settings);
     }
@@ -370,7 +399,9 @@ async function applyPublicSiteData() {
   }
 }
 
-applyPublicSiteData();
+const serverRendered = document.documentElement.dataset.serverRendered === "true" && !new URLSearchParams(location.search).has("adminPreview");
+bindCopyEmailActions();
+if (!serverRendered) applyPublicSiteData();
 
 const form = document.getElementById("caseForm");
 const statusBox = document.getElementById("formStatus");
@@ -400,7 +431,7 @@ if (form) {
       return;
     }
     if (invalid) {
-      setStatus("error", "Please upload only STL, PLY, ZIP, PDF, JPG or PNG files.");
+      setStatus("error", `The file <strong>${escapeHtml(invalid.name)}</strong> is not supported. Please upload STL, PLY, ZIP, PDF, JPG, JPEG or PNG files.`);
       return;
     }
     if (totalBytes > maxBytes) {
@@ -425,7 +456,8 @@ if (form) {
       const whatsappUrl = contact.whatsappUrl || "https://wa.me/8613714730109";
       const whatsapp = contact.whatsapp || "+86 137 1473 0109";
       const email = contact.publicEmail || "yzhdentallab@gmail.com";
-      setStatus("error", `<strong>We could not complete the upload.</strong><br>Your files were not submitted. Please try again, or send them by WhatsApp/email.<br>WhatsApp: <a href="${escapeAttr(whatsappUrl)}" target="_blank" rel="noreferrer">${escapeHtml(whatsapp)}</a><br>Email: <a href="mailto:${escapeAttr(email)}">${escapeHtml(email)}</a>`);
+      const reason = error.message === "Failed to fetch" ? "Upload interrupted. Please check your connection and try again." : (error.message || "We could not complete the upload.");
+      setStatus("error", `<strong>${escapeHtml(reason)}</strong><br>Your files were not submitted. Please try again, or send them by WhatsApp/email.<br>WhatsApp: <a href="${escapeAttr(whatsappUrl)}" target="_blank" rel="noreferrer">${escapeHtml(whatsapp)}</a><br>Email: <a href="mailto:${escapeAttr(email)}">${escapeHtml(email)}</a>`);
     } finally {
       form.dataset.submitting = "false";
       if (submitButton) {

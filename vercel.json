@@ -4,6 +4,9 @@
     "deploymentEnabled": false
   },
   "functions": {
+    "api/public-page.js": {
+      "includeFiles": "templates/**"
+    },
     "api/video-process.js": {
       "maxDuration": 300
     }
@@ -45,20 +48,42 @@
           "value": "strict-origin-when-cross-origin"
         }
       ]
+    },
+    {
+      "source": "/admin/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
     }
   ],
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/api/public-page?page=home"
+    },
+    {
       "source": "/implant-restorations",
-      "destination": "/implant-restorations.html"
+      "destination": "/api/public-page?page=implant"
     },
     {
       "source": "/full-arch-all-on-x",
-      "destination": "/full-arch-all-on-x.html"
+      "destination": "/api/public-page?page=fullArch"
     },
     {
       "source": "/cases",
-      "destination": "/cases.html"
+      "destination": "/api/public-page?page=cases"
     },
     {
       "source": "/cases/:slug",
@@ -106,27 +131,27 @@
     },
     {
       "source": "/crown-bridge",
-      "destination": "/crown-bridge.html"
+      "destination": "/api/public-page?page=crownBridge"
     },
     {
       "source": "/digital-dentistry",
-      "destination": "/digital-dentistry.html"
+      "destination": "/api/public-page?page=digital"
     },
     {
       "source": "/surgical-guides",
-      "destination": "/surgical-guides.html"
+      "destination": "/api/public-page?page=surgicalGuides"
     },
     {
       "source": "/about",
-      "destination": "/about.html"
+      "destination": "/api/public-page?page=about"
     },
     {
       "source": "/submit-case",
-      "destination": "/submit-case.html"
+      "destination": "/api/public-page?page=submitCase"
     },
     {
       "source": "/privacy-policy",
-      "destination": "/privacy-policy.html"
+      "destination": "/api/public-page?page=privacy"
     }
   ]
 }

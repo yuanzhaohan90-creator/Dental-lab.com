@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" role="img" aria-labelledby="title">
+  <title id="title">YZH Dental Lab</title>
   <rect width="72" height="72" rx="14" fill="#145da7"/>
   <path d="M11 21l7 10 7-10M18 31v20M31 21h14L31 51h14M51 21v30M63 21v30M51 36h12" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

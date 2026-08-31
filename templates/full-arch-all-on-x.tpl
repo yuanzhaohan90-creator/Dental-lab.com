@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Full-Arch & All-on-X Case Library | YZH Dental Lab</title>
-<meta name="description" content="Full-Arch and All-on-X outsourcing support for dental laboratories, including dual-arch, titanium bar, PMMA provisional, zirconia and complex restorative workflows.">
+<title>Full-Arch & All-on-X Lab Support | YZH Dental Lab</title>
+<meta name="description" content="Full-Arch and All-on-X lab support for PMMA provisionals, final zirconia, titanium bars, MUA or Ti-base information, design approval and passive-fit review.">
 <link rel="canonical" href="https://yzhdentallab.com/full-arch-all-on-x">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://yzhdentallab.com/full-arch-all-on-x">
-<meta property="og:title" content="Full-Arch & All-on-X Case Library">
-<meta property="og:description" content="Six practical full-arch workflow modules for overseas dental laboratories that need digital design, titanium frameworks, zirconia restorations and passive-fit focused QC.">
+<meta property="og:title" content="Full-Arch & All-on-X Lab Support | YZH Dental Lab">
+<meta property="og:description" content="PMMA, zirconia and titanium-supported full-arch workflows with design approval and passive-fit focused review.">
 <meta property="og:image" content="https://yzhdentallab.com/assets/real/full-arch-titanium-framework-10.jpg">
 <link rel="stylesheet" href="/assets/site.css?v=manager-linkedin-1">
 </head>
@@ -21,8 +21,8 @@
     <div class="wrap page-hero-grid">
       <div>
         <p class="eyebrow" data-manager-text="hero.eyebrow">Full-Arch / All-on-X Outsourcing</p>
-        <h1 data-manager-text="hero.heading">Six Full-Arch workflows your lab can send to YZH.</h1>
-        <p class="lead" data-manager-text="hero.description">A practical case library for dental laboratories that need digital full-arch design, titanium support, provisional-to-final workflows, zirconia restorations and careful verification before manufacturing.</p>
+        <h1 data-manager-text="hero.heading">Full-Arch & All-on-X Restorations</h1>
+        <p class="lead" data-manager-text="hero.description">Digital laboratory support for provisional and definitive full-arch restorations, including zirconia, PMMA and titanium-supported workflows.</p>
         <div class="cta-row">
           <a class="btn btn-primary" href="/submit-case" data-manager-text="hero.primaryLabel" data-manager-href="hero.primaryDestination">Submit a Full-Arch Case</a>
           <a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Our Technical Team</a>
@@ -31,11 +31,11 @@
       <img src="/assets/real/hero-full-arch-premium-02.jpg" alt="Full-arch implant restoration capability visual from YZH Dental Lab" data-manager-media="hero.media">
     </div>
     <div class="wrap fullarch-proof">
-      <span>Exocad full-arch design</span>
-      <span>Titanium bar planning</span>
-      <span>PMMA provisional support</span>
-      <span>Zirconia final restorations</span>
-      <span>Passive-fit focused review</span>
+      <span>PMMA provisional</span>
+      <span>Final zirconia</span>
+      <span>Titanium bar / framework</span>
+      <span>MUA / Ti-base information</span>
+      <span>Verification and passive-fit review</span>
     </div>
   </section>
   <section class="section managed-featured-section" data-featured-case="fullArch" hidden></section>
@@ -43,32 +43,16 @@
   <section class="section soft">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Six Full-Arch Modules</p>
-        <h2>Built for cases that need more than routine production.</h2>
-        <p class="copy">Each module describes a workflow your lab can outsource to YZH. For complex clinical situations, the clinician remains responsible for diagnosis, surgery and patient treatment decisions.</p>
+        <p class="eyebrow">Full-Arch Restoration Workflows</p>
+        <h2>Three production paths with technical review before manufacturing.</h2>
+        <p class="copy">These are laboratory capabilities, not patient cases. The clinician remains responsible for diagnosis, surgery and patient treatment decisions.</p>
       </div>
       <div class="fullarch-library">
-        <article class="fullarch-card">
-          <a class="card-main-link" href="/submit-case" aria-label="Send a Dual-Arch All-on-X case for review"></a>
-          <img src="/assets/real/full-arch-final-comparison-12.jpg" alt="Dual-arch All-on-X full-arch restoration capability visual from YZH Dental Lab" loading="lazy">
-          <div>
-            <span class="module-number">01</span>
-            <h3>Dual-Arch All-on-X Rehabilitation</h3>
-            <p>For upper and lower fixed full-arch cases where the lab needs coordinated esthetics, bite records, arch form and screw-access review.</p>
-            <ul>
-              <li>Upper and lower arch design coordination</li>
-              <li>Midline, smile curve and vertical dimension review</li>
-              <li>Manufacturing notes before final approval</li>
-            </ul>
-            <p class="visual-label">Visual: YZH laboratory capability image.</p>
-          </div>
-        </article>
-
         <article class="fullarch-card">
           <a class="card-main-link" href="/submit-case" aria-label="Send a Zirconia on Titanium Bar case for review" data-option-case="2"></a>
           <img src="/assets/real/titanium-bar-all-on-x-01.png" alt="Titanium bar All-on-X workflow capability visual from YZH Dental Lab" loading="lazy" data-manager-media="restorationOptions.2.media">
           <div>
-            <span class="module-number">02</span>
+            <span class="module-number">01</span>
             <h3>Zirconia on Titanium Bar</h3>
             <p>For demanding full-arch cases where a titanium support structure is planned under zirconia or hybrid restorative designs.</p>
             <ul>
@@ -84,7 +68,7 @@
           <a class="card-main-link" href="/submit-case" aria-label="Send an Immediate-Load PMMA case for review" data-option-case="0"></a>
           <img src="/assets/real/full-arch-premium-final-11.jpg" alt="PMMA provisional to final zirconia full-arch workflow capability visual from YZH Dental Lab" loading="lazy" data-manager-media="restorationOptions.0.media">
           <div>
-            <span class="module-number">03</span>
+            <span class="module-number">02</span>
             <h3>Immediate-Load PMMA to Final Zirconia</h3>
             <p>For labs that receive provisional records first and need a controlled path toward a definitive zirconia restoration after tissue and bite confirmation.</p>
             <ul>
@@ -97,50 +81,18 @@
         </article>
 
         <article class="fullarch-card">
-          <a class="card-main-link" href="/submit-case" aria-label="Send an FP1 Full-Arch Zirconia case for review"></a>
-          <img src="/assets/real/full-arch-intaglio-08.jpg" alt="FP1 full-arch zirconia restoration support capability visual from YZH Dental Lab" loading="lazy" data-manager-media="restorationOptions.1.media">
+          <a class="card-main-link" href="/submit-case" aria-label="Send a final zirconia Full-Arch case for review" data-option-case="1"></a>
+          <img src="/assets/real/full-arch-intaglio-08.jpg" alt="Final zirconia full-arch restoration support capability visual from YZH Dental Lab" loading="lazy" data-manager-media="restorationOptions.1.media">
           <div>
-            <span class="module-number">04</span>
-            <h3>FP1 Full-Arch Zirconia</h3>
-            <p>For cases where the final restoration should preserve an FP1-style tooth-only appearance and requires strong control of emergence, contours and implant access.</p>
+            <span class="module-number">03</span>
+            <h3>Final Zirconia</h3>
+            <p>Definitive full-arch zirconia based on confirmed restorative space, approved records and the selected implant component workflow.</p>
             <ul>
-              <li>Tooth-only restorative contour planning</li>
-              <li>Ti-base and screw-retained workflow support</li>
-              <li>Design review around submitted records</li>
+              <li>Restorative contour and screw-access review</li>
+              <li>MUA or Ti-base information confirmation</li>
+              <li>Design approval before final production</li>
             </ul>
-            <p class="visual-label">Visual: YZH laboratory capability image.</p>
-          </div>
-        </article>
-
-        <article class="fullarch-card">
-          <a class="card-main-link" href="/submit-case" aria-label="Send a photogrammetry-compatible Full-Arch case for review"></a>
-          <img src="/assets/real/full-arch-cad-design-05.jpg" alt="Photogrammetry-compatible full-arch digital design capability visual from YZH Dental Lab" loading="lazy" data-manager-media="workflow.media">
-          <div>
-            <span class="module-number">05</span>
-            <h3>Photogrammetry-Compatible Full-Arch Workflow</h3>
-            <p>For labs using photogrammetry, scan flags or verified implant-position records and needing a remote design and manufacturing partner.</p>
-            <ul>
-              <li>Compatibility review for implant-position files</li>
-              <li>Digital design around verified full-arch records</li>
-              <li>Try-in and final restoration planning support</li>
-            </ul>
-            <p class="visual-label">Visual: YZH digital full-arch workflow image.</p>
-          </div>
-        </article>
-
-        <article class="fullarch-card">
-          <a class="card-main-link" href="/submit-case" aria-label="Send a complex Full-Arch case for review"></a>
-          <img src="/assets/real/implant-planning-bar-design-06.jpg" alt="Complex zygomatic full-arch support planning capability visual from YZH Dental Lab" loading="lazy">
-          <div>
-            <span class="module-number">06</span>
-            <h3>Complex / Zygomatic Full-Arch Support</h3>
-            <p>For advanced maxillary full-arch workflows where the clinical team needs laboratory support for prosthetic planning, verification and final restoration execution.</p>
-            <ul>
-              <li>Prosthetic space and screw-access discussion</li>
-              <li>Bar or framework feasibility review</li>
-              <li>Complex-case communication before production</li>
-            </ul>
-            <p class="visual-label">Visual: YZH laboratory planning capability image.</p>
+            <p class="visual-label">Visual: YZH full-arch restoration capability image.</p>
           </div>
         </article>
       </div>
@@ -178,7 +130,7 @@
           <li>Preferred material path: PMMA, zirconia, titanium bar or hybrid</li>
         </ul>
       </div>
-      <img src="/assets/real/cad-design-workstation-02.jpg" alt="Digital dental design workstation used for YZH laboratory case review" loading="lazy" data-manager-media="framework.media">
+      <img src="/assets/real/full-arch-cad-design-05.jpg" alt="Full-arch CAD design view used for technical review" loading="lazy" data-manager-media="framework.media">
     </div>
   </section>
 
@@ -192,7 +144,7 @@
       <div><div class="managed-cta-media" data-manager-media="cta.media" data-hide-when-empty hidden></div><div class="cta-panel">
         <a class="btn btn-primary" href="/submit-case" data-manager-text="cta.primaryLabel" data-manager-href="cta.primaryDestination">Submit Full-Arch Files</a>
         <a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp: +86 137 1473 0109</a>
-        <p>Best first cases: implant bridge, All-on-X provisional, titanium bar, final zirconia or photogrammetry-compatible full-arch records.</p>
+        <p>Suitable first cases include a PMMA provisional, titanium bar or final zirconia full-arch restoration with complete technical records.</p>
       </div></div>
     </div>
   </section>
