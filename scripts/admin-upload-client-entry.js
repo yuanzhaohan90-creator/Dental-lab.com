@@ -1,5 +1,3 @@
-import { upload } from "@vercel/blob/client";
-
 const MAX_MEDIA_BYTES = 100 * 1024 * 1024;
 const VIDEO_ACCEPT = "video/*,.mp4,.mov,.m4v";
 const VIDEO_EXTENSIONS = new Set(["mp4", "mov", "m4v"]);
@@ -107,6 +105,38 @@ function friendlyUploadError(error) {
   return new Error(message || "Upload interrupted. Please try again.");
 }
 
+async function createR2Upload(file, inspection) {
+  const response = await fetch("/api/admin?module=media-upload", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ filename: file.name, size: file.size, contentType: inspection.contentType || "application/octet-stream" })
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error || "Upload interrupted. Please try again.");
+  return payload;
+}
+
+function putDirectlyToR2(uploadUrl, file, contentType, onProgress) {
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("PUT", uploadUrl);
+    request.setRequestHeader("Content-Type", contentType || "application/octet-stream");
+    request.upload.addEventListener("progress", (event) => {
+      if (event.lengthComputable) onProgress?.(Math.round((event.loaded / event.total) * 100));
+    });
+    request.addEventListener("load", () => {
+      if (request.status >= 200 && request.status < 300) {
+        onProgress?.(100);
+        resolve();
+      } else reject(new Error(`Upload interrupted (${request.status}). Please try again.`));
+    });
+    request.addEventListener("error", () => reject(new Error("Upload interrupted. Please try again.")));
+    request.addEventListener("abort", () => reject(new Error("Upload interrupted. Please try again.")));
+    request.send(file);
+  });
+}
+
 window.YZH_VIDEO_ACCEPT = VIDEO_ACCEPT;
 window.yzhInspectMedia = inspectMedia;
 window.yzhUploadMedia = async function yzhUploadMedia(file, metadata, onProgress, suppliedInspection) {
@@ -119,15 +149,9 @@ window.yzhUploadMedia = async function yzhUploadMedia(file, metadata, onProgress
   const currentExtension = extensionOf(safeName);
   if (currentExtension !== expectedExtension && !(expectedExtension === "jpg" && currentExtension === "jpeg")) safeName = `${safeName}.${expectedExtension}`;
   try {
-    const blob = await upload(`admin/media/files/${Date.now()}-${safeName}`, uploadFile, {
-      access: "private",
-      contentType: inspection.contentType || undefined,
-      handleUploadUrl: "/api/admin?module=media-upload",
-      multipart: file.size > 8 * 1024 * 1024,
-      clientPayload: JSON.stringify({ ...(metadata || {}), ...inspection, originalFilename: file.name, size: file.size }),
-      onUploadProgress: ({ percentage }) => onProgress?.(Math.round(percentage))
-    });
-    return { blob, inspection };
+    const directUpload = await createR2Upload(new File([uploadFile], safeName, { type: uploadFile.type, lastModified: uploadFile.lastModified }), inspection);
+    await putDirectlyToR2(directUpload.uploadUrl, uploadFile, inspection.contentType, onProgress);
+    return { blob: directUpload.blob, inspection };
   } catch (error) {
     throw friendlyUploadError(error);
   }

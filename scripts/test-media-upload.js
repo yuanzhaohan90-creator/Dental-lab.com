@@ -1,4 +1,6 @@
 const assert = require("assert");
+const fs = require("node:fs");
+const path = require("node:path");
 const { MAX_MEDIA_BYTES, validateMediaFile } = require("../lib/media-validation");
 
 function isoBmff(codec = "avc1") {
@@ -40,5 +42,13 @@ assert.throws(() => validateMediaFile({ filename: "unsafe.svg", contentType: "im
 
 assert.throws(() => validateMediaFile({ filename: "renamed.mov", contentType: "video/quicktime", size: 20, bytes: Buffer.from("not a video") }), /Unable to read this video file/);
 assert.throws(() => validateMediaFile({ filename: "large.mov", contentType: "video/quicktime", size: MAX_MEDIA_BYTES + 1, bytes: isoBmff("hvc1") }), /larger than 100 MB/);
+
+const uploadClient = fs.readFileSync(path.join(__dirname, "admin-upload-client-entry.js"), "utf8");
+const adminApi = fs.readFileSync(path.join(__dirname, "../api/admin.js"), "utf8");
+assert.equal(uploadClient.includes("@vercel/blob/client"), false);
+assert.equal(adminApi.includes("@vercel/blob/client"), false);
+assert.match(uploadClient, /XMLHttpRequest/);
+assert.match(uploadClient, /request\.open\("PUT", uploadUrl\)/);
+assert.match(adminApi, /createR2UploadUrl/);
 
 console.log("media upload compatibility tests passed");

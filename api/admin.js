@@ -1,9 +1,10 @@
 const Busboy = require("busboy");
+const crypto = require("node:crypto");
 const { isAdmin } = require("../lib/case-auth");
 const { protect, query, readJson, reply } = require("../lib/admin-http");
 const { MAX_MEDIA_BYTES } = require("../lib/media-validation");
 const { getPublicSiteData } = require("../lib/public-site-data");
-const { isR2Backend, storageClient } = require("../lib/object-store");
+const { createR2UploadUrl, isR2Backend, storageClient } = require("../lib/object-store");
 const {
   DEFAULT_HOMEPAGE,
   DEFAULT_PAGE_CONFIGS,
@@ -374,37 +375,41 @@ async function handleMediaManage(req, res) {
 async function handleMediaUpload(req, res) {
   if (req.method !== "POST") return reply(res, 405, { ok: false, error: "Method not allowed." });
   const body = await readJson(req);
-  const { handleUpload } = require("@vercel/blob/client");
-  const result = await handleUpload({
-    request: req,
-    body,
-    onBeforeGenerateToken: async (pathname, clientPayload) => {
-      if (!isAdmin(req)) throw Object.assign(new Error("Authentication required."), { statusCode: 401 });
-      if (!String(pathname || "").startsWith("admin/media/files/")) throw Object.assign(new Error("Invalid media path."), { statusCode: 400 });
-      let metadata = {};
-      try { metadata = JSON.parse(clientPayload || "{}"); } catch { metadata = {}; }
-      const size = Number(metadata.size) || 0;
-      if (size > MAX_MEDIA_BYTES) throw Object.assign(new Error("Video is larger than 100 MB."), { statusCode: 413 });
-      return {
-        allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/svg+xml", "video/mp4", "video/quicktime", "video/x-m4v", "application/octet-stream"],
-        maximumSizeInBytes: MAX_MEDIA_BYTES,
-        addRandomSuffix: true,
-        allowOverwrite: false,
-        cacheControlMaxAge: 31536000
-      };
-    }
+  if (!isR2Backend()) throw Object.assign(new Error("Direct media uploads require the R2 storage backend."), { statusCode: 503 });
+  const size = Math.max(0, Number(body.size) || 0);
+  if (!size) throw Object.assign(new Error("Unable to read this media file."), { statusCode: 400 });
+  if (size > MAX_MEDIA_BYTES) throw Object.assign(new Error("Video is larger than 100 MB."), { statusCode: 413 });
+  const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/svg+xml", "video/mp4", "video/quicktime", "video/x-m4v", "application/octet-stream"]);
+  const contentType = String(body.contentType || "application/octet-stream").toLowerCase();
+  if (!allowedTypes.has(contentType)) throw Object.assign(new Error("Unable to read this media file."), { statusCode: 400 });
+  const safeName = String(body.filename || "media")
+    .normalize("NFKD")
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120) || "media";
+  const pathname = `admin/media/files/${Date.now()}-${crypto.randomBytes(6).toString("hex")}-${safeName}`;
+  const uploadUrl = await createR2UploadUrl(pathname, contentType);
+  return reply(res, 200, {
+    ok: true,
+    uploadUrl,
+    blob: { pathname, contentType, size, url: `r2://${process.env.R2_BUCKET_NAME}/${pathname}` }
   });
-  return reply(res, 200, result);
 }
 
 async function handleMediaFinalize(req, res) {
   if (req.method !== "POST") return reply(res, 405, { ok: false, error: "Method not allowed." });
   const body = await readJson(req);
-  const { get } = await import("@vercel/blob");
   const pathname = String(body?.blob?.pathname || "");
   if (!pathname.startsWith("admin/media/files/")) throw Object.assign(new Error("Uploaded media is not valid."), { statusCode: 400 });
+  const destination = await storageClient();
+  const { get } = destination;
   const stored = await get(pathname, { access: "private", useCache: false });
   if (!stored || stored.statusCode !== 200) throw Object.assign(new Error("Uploaded media could not be verified."), { statusCode: 400 });
+  const expectedSize = Math.max(0, Number(body?.blob?.size) || Number(body?.metadata?.size) || 0);
+  if (!expectedSize || Number(stored.blob.size) !== expectedSize) {
+    await destination.del(pathname).catch(() => {});
+    throw Object.assign(new Error("Uploaded media size could not be verified."), { statusCode: 400 });
+  }
   const reader = stored.stream.getReader();
   const chunks = [];
   let total = 0;
@@ -418,29 +423,10 @@ async function handleMediaFinalize(req, res) {
   }
   await reader.cancel().catch(() => {});
   try {
-    if (isR2Backend()) {
-      const source = await get(pathname, { access: "private", useCache: false });
-      if (!source?.stream) throw Object.assign(new Error("Uploaded media could not be copied to R2."), { statusCode: 502 });
-      const destination = await storageClient();
-      await destination.put(pathname, source.stream, {
-        access: "private",
-        addRandomSuffix: false,
-        allowOverwrite: true,
-        contentLength: stored.blob.size,
-        contentType: stored.blob.contentType,
-        cacheControlMaxAge: 31536000
-      });
-    }
     const record = await storeClientMedia(body.blob, body.metadata || {}, { bytes: Buffer.concat(chunks), size: stored.blob.size, contentType: stored.blob.contentType });
     return reply(res, 201, { ok: true, media: await adminMedia(record) });
   } catch (error) {
-    if (isR2Backend()) {
-      const destination = await storageClient();
-      await destination.del(pathname).catch(() => {});
-    } else {
-      const { del } = await import("@vercel/blob");
-      await del(pathname).catch(() => {});
-    }
+    await destination.del(pathname).catch(() => {});
     throw error;
   }
 }
