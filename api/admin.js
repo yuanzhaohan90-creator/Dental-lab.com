@@ -3,6 +3,7 @@ const { isAdmin } = require("../lib/case-auth");
 const { protect, query, readJson, reply } = require("../lib/admin-http");
 const { MAX_MEDIA_BYTES } = require("../lib/media-validation");
 const { getPublicSiteData } = require("../lib/public-site-data");
+const { isR2Backend, storageClient } = require("../lib/object-store");
 const {
   DEFAULT_HOMEPAGE,
   DEFAULT_PAGE_CONFIGS,
@@ -268,7 +269,7 @@ async function handleSubmissionFile(req, res) {
     res.statusCode = 404;
     return res.end("File not found");
   }
-  const { get } = await import("@vercel/blob");
+  const { get } = await storageClient();
   const result = await get(file.pathname, { access: "private", useCache: false });
   if (!result || result.statusCode !== 200 || !result.stream) {
     res.statusCode = 404;
@@ -417,11 +418,29 @@ async function handleMediaFinalize(req, res) {
   }
   await reader.cancel().catch(() => {});
   try {
+    if (isR2Backend()) {
+      const source = await get(pathname, { access: "private", useCache: false });
+      if (!source?.stream) throw Object.assign(new Error("Uploaded media could not be copied to R2."), { statusCode: 502 });
+      const destination = await storageClient();
+      await destination.put(pathname, source.stream, {
+        access: "private",
+        addRandomSuffix: false,
+        allowOverwrite: true,
+        contentLength: stored.blob.size,
+        contentType: stored.blob.contentType,
+        cacheControlMaxAge: 31536000
+      });
+    }
     const record = await storeClientMedia(body.blob, body.metadata || {}, { bytes: Buffer.concat(chunks), size: stored.blob.size, contentType: stored.blob.contentType });
     return reply(res, 201, { ok: true, media: await adminMedia(record) });
   } catch (error) {
-    const { del } = await import("@vercel/blob");
-    await del(pathname).catch(() => {});
+    if (isR2Backend()) {
+      const destination = await storageClient();
+      await destination.del(pathname).catch(() => {});
+    } else {
+      const { del } = await import("@vercel/blob");
+      await del(pathname).catch(() => {});
+    }
     throw error;
   }
 }
@@ -454,7 +473,7 @@ async function handleMediaImage(req, res) {
   const pathname = posterRequest
     ? record.posterPathname
     : isVideo ? (record.playbackPathname || (isReady ? record.pathname : record.originalPathname || record.pathname)) : record.pathname;
-  const { get } = await import("@vercel/blob");
+  const { get } = await storageClient();
   const result = await get(pathname, { access: "private" });
   if (!result || result.statusCode !== 200 || !result.stream) {
     res.statusCode = 404;

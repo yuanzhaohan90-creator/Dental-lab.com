@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const { storageClient } = require("../lib/object-store");
 
 function timingSafeEqual(a, b) {
   const left = Buffer.from(String(a || ""), "hex");
@@ -34,7 +35,7 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const { get } = await import("@vercel/blob");
+    const { get } = await storageClient();
     const result = await get(pathname, { access: "private", useCache: false });
     if (result.statusCode !== 200 || !result.stream) {
       res.statusCode = 404;

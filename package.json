@@ -15,6 +15,7 @@
     "test:admin-deletion": "node scripts/test-admin-deletion.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1123.0",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@vercel/blob": "^2.8.0",
     "@vercel/functions": "^3.9.5",

@@ -1,6 +1,7 @@
 const { Readable } = require("stream");
 const { isAdmin } = require("../lib/case-auth");
 const { getRecord } = require("../lib/case-store");
+const { storageClient } = require("../lib/object-store");
 
 function query(req, key) {
   if (req.query && req.query[key]) return String(req.query[key]);
@@ -24,7 +25,7 @@ module.exports = async function handler(req, res) {
       res.statusCode = 404;
       return res.end("Not found");
     }
-    const { get } = await import("@vercel/blob");
+    const { get } = await storageClient();
     const result = await get(image.pathname, { access: "private" });
     if (!result || result.statusCode !== 200 || !result.stream) {
       res.statusCode = 404;
