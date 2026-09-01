@@ -12,6 +12,8 @@
     "test:admin": "node scripts/test-admin-v1.js",
     "test:media-upload": "node scripts/test-media-upload.js",
     "qa:r2-direct-upload": "node scripts/qa-r2-direct-upload.js",
+    "qa:r2-admin-flow": "node scripts/qa-r2-admin-flow.js",
+    "qa:local-api": "node scripts/qa-local-api-server.js",
     "test:video-transcode": "node scripts/test-video-transcode.js",
     "test:admin-deletion": "node scripts/test-admin-deletion.js"
   },
