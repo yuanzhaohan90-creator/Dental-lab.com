@@ -18,6 +18,7 @@ verify-cleanup*.png
 verify-check*.png
 verify-desktop*.png
 verify-mobile*.png
+tmp-*.png
 tsconfig.tsbuildinfo
 dns-and-launch-checklist.md
 secure-upload-architecture.md
