@@ -67,6 +67,7 @@ async function main() {
   process.env.R2_ENDPOINT = required("R2_ENDPOINT").replace(/^Https:/, "https:");
   const bucket = required("R2_BUCKET_NAME");
   const agent = cloudflareDnsAgent();
+  const sessionToken = String(process.env.R2_SESSION_TOKEN || "").trim();
   const client = new S3Client({
     region: "auto",
     endpoint: process.env.R2_ENDPOINT,
@@ -75,6 +76,7 @@ async function main() {
     credentials: {
       accessKeyId: required("R2_ACCESS_KEY_ID"),
       secretAccessKey: required("R2_SECRET_ACCESS_KEY"),
+      ...(sessionToken ? { sessionToken } : {}),
     },
   });
 

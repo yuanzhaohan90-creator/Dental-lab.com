@@ -2,8 +2,22 @@ const { Readable } = require("stream");
 const crypto = require("crypto");
 const assert = require("assert");
 const fs = require("fs");
-const http = require("http");
 
+const testStored = new Map();
+const objectStore = require("../lib/object-store");
+objectStore.storageClient = async () => ({
+  async put(pathname, body, options = {}) {
+    const value = Buffer.isBuffer(body) ? body : Buffer.from(body);
+    testStored.set(pathname, value);
+    return {
+      pathname,
+      url: `r2://test-bucket/${pathname}`,
+      downloadUrl: `r2://test-bucket/${pathname}`,
+      contentType: options.contentType || "application/octet-stream",
+      size: value.length
+    };
+  }
+});
 const handler = require("../api/submit-case");
 
 const originalFetch = global.fetch;
@@ -62,39 +76,6 @@ function baseFields(extra = {}) {
   };
 }
 
-function startBlobMock({ blobOk = true } = {}) {
-  const stored = new Map();
-  const server = http.createServer((req, res) => {
-    if (!blobOk) {
-      res.writeHead(500, { "content-type": "application/json" });
-      res.end(JSON.stringify({ error: { code: "internal_server_error", message: "mock blob failure" } }));
-      return;
-    }
-    const parsed = new URL(req.url, "http://127.0.0.1");
-    const pathname = parsed.searchParams.get("pathname") || "unknown";
-    const chunks = [];
-    req.on("data", (chunk) => chunks.push(chunk));
-    req.on("end", () => {
-      stored.set(pathname, Buffer.concat(chunks));
-      res.writeHead(200, { "content-type": "application/json" });
-      res.end(JSON.stringify({
-        url: `https://mock.private.blob.vercel-storage.com/${pathname}`,
-        downloadUrl: `https://mock.private.blob.vercel-storage.com/${pathname}?download=1`,
-        pathname,
-        contentType: req.headers["x-content-type"] || "application/octet-stream",
-        contentDisposition: `attachment; filename="${pathname.split("/").pop()}"`,
-        etag: "mock-etag"
-      }));
-    });
-  });
-  return new Promise((resolve) => {
-    server.listen(0, "127.0.0.1", () => {
-      const { port } = server.address();
-      resolve({ server, stored, url: `http://127.0.0.1:${port}` });
-    });
-  });
-}
-
 function installMockFetch({ emailOk = true } = {}) {
   global.fetch = async (input, init = {}) => {
     const url = String(input);
@@ -109,10 +90,9 @@ function installMockFetch({ emailOk = true } = {}) {
 }
 
 async function callApi({ fields = baseFields(), files = [], mock = {} }) {
-  const blobMock = await startBlobMock(mock);
+  testStored.clear();
   installMockFetch(mock);
-  process.env.BLOB_READ_WRITE_TOKEN = "vercel_blob_rw_test_store_mock_123";
-  process.env.VERCEL_BLOB_API_URL = blobMock.url;
+  process.env.STORAGE_BACKEND = "r2";
   process.env.RESEND_API_KEY = "re_mock";
   process.env.CASE_FROM_EMAIL = "YZH Dental Lab <case@yzhdentallab.com>";
   process.env.CASE_DOWNLOAD_SECRET = "test-download-secret";
@@ -130,12 +110,8 @@ async function callApi({ fields = baseFields(), files = [], mock = {} }) {
 
   const req = makeReq({ fields, files });
   const res = makeRes();
-  try {
-    await handler(req, res);
-    return { status: res.statusCode, data: JSON.parse(res.body), stored: blobMock.stored };
-  } finally {
-    await new Promise((resolve) => blobMock.server.close(resolve));
-  }
+  await handler(req, res);
+  return { status: res.statusCode, data: JSON.parse(res.body), stored: new Map(testStored) };
 }
 
 async function run() {

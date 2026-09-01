@@ -47,6 +47,10 @@ const uploadClient = fs.readFileSync(path.join(__dirname, "admin-upload-client-e
 const adminApi = fs.readFileSync(path.join(__dirname, "../api/admin.js"), "utf8");
 assert.equal(uploadClient.includes("@vercel/blob/client"), false);
 assert.equal(adminApi.includes("@vercel/blob/client"), false);
+const objectStore = fs.readFileSync(path.join(__dirname, "../lib/object-store.js"), "utf8");
+assert.equal(objectStore.includes("@vercel/blob"), false);
+assert.equal(objectStore.includes("BLOB_READ_WRITE_TOKEN"), false);
+assert.match(objectStore, /Unsupported storage backend/);
 assert.match(uploadClient, /XMLHttpRequest/);
 assert.match(uploadClient, /request\.open\("PUT", uploadUrl\)/);
 assert.match(adminApi, /createR2UploadUrl/);

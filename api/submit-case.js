@@ -198,7 +198,7 @@ function validateSubmission(fields, files) {
 }
 
 async function storeSubmission(caseId, fields, files, submittedAt) {
-  if (!isR2Backend() && !process.env.BLOB_READ_WRITE_TOKEN) throw makeHttpError(500, "BLOB_READ_WRITE_TOKEN is not configured.");
+  if (!isR2Backend()) throw makeHttpError(500, "R2 storage is not configured.");
   if (process.env.SIMULATE_STORAGE_FAILURE === "1") throw makeHttpError(500, "Simulated storage failure.");
 
   const { put } = await storageClient();
