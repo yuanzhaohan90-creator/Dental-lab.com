@@ -41,6 +41,13 @@ caseFilters?.addEventListener("click", (event) => {
 const serverCaseData = document.getElementById("publicCaseData");
 if (serverCaseData) {
   try { publishedCases = JSON.parse(serverCaseData.textContent || "[]"); } catch { publishedCases = []; }
+  const requestedCategory = new URLSearchParams(location.search).get("category") || "";
+  const requestedButton = [...(caseFilters?.querySelectorAll("button[data-category]") || [])]
+    .find((button) => button.dataset.category === requestedCategory);
+  if (requestedButton) {
+    caseFilters.querySelectorAll("button").forEach((button) => button.classList.toggle("active", button === requestedButton));
+    renderCases(requestedCategory);
+  }
 } else {
   fetch("/api/cases")
     .then((response) => response.json().then((data) => ({ response, data })))

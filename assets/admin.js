@@ -78,7 +78,12 @@ function showShell() {
   const view = currentView();
   const route = routePart();
   document.querySelectorAll("[data-view]").forEach((section) => { section.hidden = section.dataset.view !== view; });
-  document.querySelectorAll("[data-admin-route]").forEach((link) => link.classList.toggle("active", link.dataset.adminRoute === route));
+  document.querySelectorAll("[data-admin-route]").forEach((link) => {
+    const active = link.dataset.adminRoute === route;
+    link.classList.toggle("active", active);
+    if (active) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
   if (view === "dashboard") loadDashboard();
   if (view === "page") loadPageEditor(route);
   if (view === "submissions") loadSubmissions();
@@ -134,9 +139,31 @@ document.getElementById("ownerLogout").addEventListener("click", async () => {
   location.assign("/admin");
 });
 
-navToggle.addEventListener("click", () => {
+function toggleAdminNavigation() {
   const open = nav.classList.toggle("open");
   navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+}
+navToggle.addEventListener("click", toggleAdminNavigation);
+navToggle.addEventListener("keydown", (event) => {
+  if (!["Enter", " "].includes(event.key)) return;
+  event.preventDefault();
+  toggleAdminNavigation();
+});
+nav.addEventListener("click", (event) => {
+  if (!event.target.closest("a")) return;
+  nav.classList.remove("open");
+  navToggle.setAttribute("aria-expanded", "false");
+});
+document.addEventListener("click", (event) => {
+  if (!nav.classList.contains("open") || event.target.closest("#adminNav,#adminNavToggle")) return;
+  nav.classList.remove("open");
+  navToggle.setAttribute("aria-expanded", "false");
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || !nav.classList.contains("open")) return;
+  nav.classList.remove("open");
+  navToggle.setAttribute("aria-expanded", "false");
+  navToggle.focus();
 });
 
 function formatDate(value) {

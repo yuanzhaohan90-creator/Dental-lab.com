@@ -12,7 +12,7 @@
 <meta property="og:title" content="Full-Arch & All-on-X Lab Support | YZH Dental Lab">
 <meta property="og:description" content="PMMA, zirconia and titanium-supported full-arch workflows with design approval and passive-fit focused review.">
 <meta property="og:image" content="https://yzhdentallab.com/assets/real/full-arch-titanium-framework-10.jpg">
-<link rel="stylesheet" href="/assets/site.css?v=manager-linkedin-1">
+<link rel="stylesheet" href="/assets/site.css?v=interaction-qa-3">
 </head>
 <body>
 <header class="site-header"><div class="wrap nav"><a class="brand" href="/"><span class="brand-mark">Y</span><span>YZH Dental Lab</span></a><button class="menu-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button><nav class="navlinks" id="primaryNav"><a href="/">Home</a><a href="/implant-restorations">Implant</a><a href="/full-arch-all-on-x">Full Arch</a><a href="/crown-bridge">Crown & Bridge</a><a href="/digital-dentistry">Digital Workflow</a><a href="/about">About</a><a href="/submit-case">Contact</a></nav><a class="btn btn-primary nav-cta" href="/submit-case">Send a Trial Case</a></div></header>
@@ -48,8 +48,7 @@
         <p class="copy">These are laboratory capabilities, not patient cases. The clinician remains responsible for diagnosis, surgery and patient treatment decisions.</p>
       </div>
       <div class="fullarch-library">
-        <article class="fullarch-card">
-          <a class="card-main-link" href="/submit-case" aria-label="Send a Zirconia on Titanium Bar case for review" data-option-case="2"></a>
+        <a class="fullarch-card" href="/submit-case?case_type=Full-Arch%20%2F%20All-on-X&amp;focus=Zirconia%20on%20Titanium%20Bar" aria-label="Send a Zirconia on Titanium Bar case for review" data-option-case="2">
           <img src="/assets/real/titanium-bar-all-on-x-01.png" alt="Titanium bar All-on-X workflow capability visual from YZH Dental Lab" loading="lazy" data-manager-media="restorationOptions.2.media">
           <div>
             <span class="module-number">01</span>
@@ -61,11 +60,11 @@
               <li>CAD screenshots for lab-to-lab approval</li>
             </ul>
             <p class="visual-label">Visual: YZH titanium bar capability image.</p>
+            <span class="text-link">Start this case review</span>
           </div>
-        </article>
+        </a>
 
-        <article class="fullarch-card">
-          <a class="card-main-link" href="/submit-case" aria-label="Send an Immediate-Load PMMA case for review" data-option-case="0"></a>
+        <a class="fullarch-card" href="/submit-case?case_type=Full-Arch%20%2F%20All-on-X&amp;focus=Immediate-Load%20PMMA" aria-label="Send an Immediate-Load PMMA case for review" data-option-case="0">
           <img src="/assets/real/full-arch-premium-final-11.jpg" alt="PMMA provisional to final zirconia full-arch workflow capability visual from YZH Dental Lab" loading="lazy" data-manager-media="restorationOptions.0.media">
           <div>
             <span class="module-number">02</span>
@@ -77,11 +76,11 @@
               <li>Clear handoff between temporary and final phases</li>
             </ul>
             <p class="visual-label">Visual: YZH full-arch restoration capability image.</p>
+            <span class="text-link">Start this case review</span>
           </div>
-        </article>
+        </a>
 
-        <article class="fullarch-card">
-          <a class="card-main-link" href="/submit-case" aria-label="Send a final zirconia Full-Arch case for review" data-option-case="1"></a>
+        <a class="fullarch-card" href="/submit-case?case_type=Full-Arch%20%2F%20All-on-X&amp;focus=Final%20Zirconia" aria-label="Send a final zirconia Full-Arch case for review" data-option-case="1">
           <img src="/assets/real/full-arch-intaglio-08.jpg" alt="Final zirconia full-arch restoration support capability visual from YZH Dental Lab" loading="lazy" data-manager-media="restorationOptions.1.media">
           <div>
             <span class="module-number">03</span>
@@ -93,8 +92,9 @@
               <li>Design approval before final production</li>
             </ul>
             <p class="visual-label">Visual: YZH full-arch restoration capability image.</p>
+            <span class="text-link">Start this case review</span>
           </div>
-        </article>
+        </a>
       </div>
     </div>
   </section>
@@ -150,6 +150,6 @@
   </section>
 </main>
 <footer class="site-footer"><div class="wrap footer-grid"><div><h3>YZH Dental Lab</h3><p>Digital dental laboratory in China for implant, full-arch and CAD/CAM restorative workflows.</p></div><div><h3>Services</h3><a href="/implant-restorations">Implant Restorations</a><a href="/full-arch-all-on-x">Full Arch / All-on-X</a><a href="/crown-bridge">Crown & Bridge</a><a href="/digital-dentistry">Digital Dentistry</a><a href="/surgical-guides">Surgical Guides</a></div><div><h3>Company</h3><a href="/about">About</a><a href="/submit-case">Submit a Case</a><a href="/privacy-policy">Privacy Policy</a></div><div><h3>Contact</h3><a href="mailto:yzhdentallab@gmail.com">yzhdentallab@gmail.com</a><a href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp: +86 137 1473 0109</a></div></div></footer>
-<script src="/assets/site.js?v=manager-linkedin-1" defer></script>
+<script src="/assets/site.js?v=interaction-qa-3" defer></script>
 </body>
 </html>

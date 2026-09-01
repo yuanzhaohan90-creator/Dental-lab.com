@@ -37,3 +37,22 @@
 .media-view-toolbar,.media-bulk-actions,.admin-destructive-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px}.media-view-toolbar{justify-content:space-between;margin:18px 0}.media-bulk-actions{padding:12px 14px;margin-bottom:16px;background:#fff;border:1px solid #d8e4ee;border-radius:7px}.media-bulk-actions label{display:flex;align-items:center;gap:7px;font-weight:850}.media-bulk-actions input,.admin-media-select input,.admin-conflict-list input{width:auto}.media-bulk-actions span{margin-left:auto;color:#62758a;font-size:13px}.admin-storage-summary{margin:0;color:#52677d;font-size:13px;font-weight:750}.admin-media-item{position:relative}.admin-media-select{position:absolute;z-index:2;top:9px;left:9px;display:flex;align-items:center;gap:5px;padding:7px 9px;background:rgba(255,255,255,.94);border:1px solid #c8d7e4;border-radius:6px;font-size:12px;font-weight:850}.admin-used-in{display:grid;gap:5px;list-style:none;padding:0;margin:8px 0 0}.admin-used-in li{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.admin-used-in a{color:#145da7;text-decoration:underline;font-weight:800}.admin-used-in small{color:#a02c2c;font-weight:800}.admin-trash-meta{padding:10px 12px;background:#f7fafc;border:1px solid #d8e4ee;border-radius:6px;color:#52677d;font-size:13px;line-height:1.55}.admin-destructive-actions{margin-top:20px;padding-top:18px;border-top:1px solid #e3ebf1}.admin-modal-backdrop{position:fixed;inset:0;z-index:100;background:rgba(16,32,51,.62);display:grid;place-items:center;padding:18px;overflow-y:auto}.admin-modal{width:min(100%,620px);max-height:calc(100vh - 36px);overflow-y:auto;background:#fff;border-radius:8px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.28)}.admin-modal h2{margin:0 0 12px}.admin-conflict-list{display:grid;gap:8px;margin:16px 0}.admin-conflict-list label{display:flex;align-items:flex-start;gap:9px;padding:10px;border:1px solid #d8e4ee;border-radius:6px}.admin-conflict-list span{display:grid;gap:3px}.admin-conflict-list a{color:#145da7;text-decoration:underline;font-weight:850}.admin-conflict-list small{color:#a02c2c}.admin-warning{padding:11px 13px;background:#fff3e6;border-left:4px solid #bd6a11;color:#71400d}.admin-modal-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}.admin-modal-actions .btn:disabled,.admin-destructive-actions .btn:disabled{opacity:.5;cursor:not-allowed}
 .submission-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}.submission-tabs button{white-space:nowrap}
 @media(max-width:560px){.media-view-toolbar,.media-bulk-actions,.admin-destructive-actions,.admin-modal-actions{align-items:stretch;display:grid;grid-template-columns:1fr}.media-view-toolbar .segmented{grid-template-columns:repeat(2,1fr)}.submission-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}.submission-tabs button{padding:9px 4px}.media-bulk-actions span{margin-left:0}.admin-destructive-actions .btn,.admin-modal-actions .btn{width:100%}.admin-modal-backdrop{padding:8px}.admin-modal{padding:16px;max-height:calc(100vh - 16px)}}
+
+/* Interaction and contrast cleanup for the existing manager UI. */
+.admin-v1-sidebar nav a.active,.admin-v1-sidebar nav a[aria-current="page"]{background:#1b3957;color:#fff}
+.admin-v1-sidebar nav a:active{background:#0a1b2d}
+.admin-v1-sidebar nav a:focus-visible,.admin-view-site:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.admin-view-site{color:#d2dee7}
+.manager-entry-list a:active,.admin-record-button:active{background:#e7eef4}
+.admin-record-button:hover{border-color:#8eb6d2;background:#f7fafc}
+.admin-record-button.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(11,95,165,.12)}
+.admin-record-meta,.manager-entry-list small{color:#52677d}
+.manager-entry-list b,.admin-status-pill{color:var(--blue)}
+.segmented button{color:#304c65;cursor:pointer}
+.segmented button:hover{background:#f0f5f8;color:var(--blue-hover)}
+.segmented button:active{background:#dfe8ef}
+.segmented button.active{background:var(--navy);color:#fff}
+.admin-danger{color:#922b2b;border-color:#d49a9a}
+.admin-danger:hover{background:#fff1f1;border-color:#b84a4a}
+.admin-danger:active{background:#f8dede}
+.admin-danger:disabled{color:#6b7d90;border-color:#cbd9e5;background:#eef3f6}

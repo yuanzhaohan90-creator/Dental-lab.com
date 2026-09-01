@@ -31,4 +31,30 @@ assert.doesNotMatch(cases, /id="featuredCaseSection"/);
 assert.doesNotMatch(cases, /Crown &amp; Bridge · Crown &amp; Bridge/);
 assert.match(cases, /Zirconia · A3/);
 
+const featuredRecord = {
+  id: "CASE-FEATURED",
+  slug: "owner-approved-full-arch-work",
+  title: "Owner Approved Full-Arch Work",
+  status: "published",
+  contentType: "case_study",
+  category: "Full-Arch / All-on-X",
+  shortNote: "Technical review and final restoration.",
+  coverImage: { url: "/assets/real/full-arch-titanium-framework-10.jpg" }
+};
+const fullArch = renderPublicPage("fullArch", {
+  ...data,
+  publishedCases: [featuredRecord],
+  pages: {
+    ...data.pages,
+    fullArch: {
+      ...data.pages.fullArch,
+      featuredCase: { ...data.pages.fullArch.featuredCase, caseId: featuredRecord.id },
+      restorationOptions: data.pages.fullArch.restorationOptions.map((option, index) => ({ ...option, caseId: index === 0 ? featuredRecord.id : "" }))
+    }
+  }
+});
+assert.match(fullArch, /Featured Full-Arch Case/);
+assert.match(fullArch, /href="\/cases\/owner-approved-full-arch-work"/);
+assert.doesNotMatch(fullArch, /data-featured-case="fullArch" hidden/);
+
 console.log("public SSR render tests passed");

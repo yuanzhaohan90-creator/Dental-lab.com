@@ -14,25 +14,38 @@ function normalizePublicNavigation() {
   if (services) services.classList.toggle("active", ["/implant-restorations", "/full-arch-all-on-x", "/crown-bridge", "/digital-dentistry", "/surgical-guides"].includes(path));
 }
 
-function closeNavigation() {
+function closeNavigation(focusTarget = null) {
   nav?.classList.remove("open");
   menuButton?.setAttribute("aria-expanded", "false");
   const dropdown = nav?.querySelector(".nav-dropdown");
   dropdown?.classList.remove("open");
   dropdown?.querySelector(".nav-dropdown-toggle")?.setAttribute("aria-expanded", "false");
+  focusTarget?.focus();
 }
 
 normalizePublicNavigation();
 if (menuButton && nav) {
-  menuButton.addEventListener("click", () => {
+  const toggleMainNavigation = () => {
     const open = nav.classList.toggle("open");
     menuButton.setAttribute("aria-expanded", open ? "true" : "false");
+  };
+  menuButton.addEventListener("click", toggleMainNavigation);
+  menuButton.addEventListener("keydown", (event) => {
+    if (!['Enter', ' '].includes(event.key)) return;
+    event.preventDefault();
+    toggleMainNavigation();
   });
   const dropdown = nav.querySelector(".nav-dropdown");
   const dropdownButton = dropdown?.querySelector(".nav-dropdown-toggle");
-  dropdownButton?.addEventListener("click", () => {
+  const toggleServices = () => {
     const open = dropdown.classList.toggle("open");
     dropdownButton.setAttribute("aria-expanded", open ? "true" : "false");
+  };
+  dropdownButton?.addEventListener("click", toggleServices);
+  dropdownButton?.addEventListener("keydown", (event) => {
+    if (!['Enter', ' '].includes(event.key)) return;
+    event.preventDefault();
+    toggleServices();
   });
   nav.addEventListener("click", (event) => {
     if (event.target.closest("a")) closeNavigation();
@@ -42,11 +55,32 @@ if (menuButton && nav) {
   });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      closeNavigation();
-      menuButton.focus();
+      const dropdownWasOpen = dropdown?.classList.contains("open");
+      const navigationWasOpen = nav.classList.contains("open");
+      closeNavigation(dropdownWasOpen ? dropdownButton : (navigationWasOpen ? menuButton : null));
     }
   });
 }
+
+const cardLinkSelector = [
+  ".priority-case",
+  ".proof-strip a",
+  ".tick-list a",
+  ".workflow-step",
+  ".implant-module",
+  ".image-mosaic a",
+  ".text-panel[href]",
+  ".fullarch-card[href]",
+  ".managed-featured-case[href]",
+  ".featured-public-case > a",
+  ".public-case-card > a"
+].join(",");
+document.addEventListener("keydown", (event) => {
+  const link = event.target.closest?.(cardLinkSelector);
+  if (!link || !["Enter", " "].includes(event.key)) return;
+  event.preventDefault();
+  link.click();
+});
 
 function applyText(selector, value) {
   const element = document.querySelector(selector);
@@ -415,6 +449,19 @@ function setStatus(type, html) {
 }
 
 if (form) {
+  const params = new URLSearchParams(location.search);
+  const requestedCaseType = params.get("case_type");
+  const normalizedCaseType = { "Full-Arch / All-on-X": "Full Arch / All-on-X" }[requestedCaseType] || requestedCaseType;
+  const requestedFocus = params.get("focus");
+  const caseType = form.elements.case_type;
+  const instructions = form.elements.instructions;
+  if (normalizedCaseType && caseType && [...caseType.options].some((option) => option.value === normalizedCaseType)) {
+    caseType.value = normalizedCaseType;
+  }
+  if (requestedFocus && instructions) {
+    instructions.placeholder = `Tell us about your ${requestedFocus} case, files available, due date, risk points or approval needs.`;
+  }
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (form.dataset.submitting === "true") return;

@@ -13,7 +13,7 @@
 <meta property="og:description" content="Implant restorations, full-arch and CAD/CAM support for overseas dental laboratories and clinics.">
 <meta property="og:image" content="https://yzhdentallab.com/assets/real/hero-full-arch-premium-01.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/assets/site.css?v=manager-linkedin-1">
+<link rel="stylesheet" href="/assets/site.css?v=interaction-qa-3">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Organization","name":"YZH Dental Lab","url":"https://yzhdentallab.com/","email":"yzhdentallab@gmail.com","contactPoint":{"@type":"ContactPoint","contactType":"sales","email":"yzhdentallab@gmail.com","telephone":"+86-137-1473-0109","availableLanguage":["English","Chinese"]},"knowsAbout":["Digital dental lab China","Dental lab outsourcing China","Implant restorations","Full arch dental lab","All-on-X dental lab","Custom abutment dental lab","CAD/CAM dental laboratory"]}
 </script>
@@ -87,13 +87,13 @@
             <span class="text-link">View Implant Support</span>
           </div>
         </a>
-        <a class="priority-case" href="/submit-case">
+        <a class="priority-case" href="/implant-restorations#implant-case-information">
           <img src="/assets/real/custom-abutment-crown-assembly-03.jpg" alt="Custom implant abutment and crown assembly">
           <div>
             <p class="case-category">Custom Abutment / Implant Restoration</p>
             <h3>Custom Implant Workflow</h3>
             <p>Emergence profile, margin position, tissue support and crown coordination are reviewed before milling.</p>
-            <span class="text-link">Send a Case for Review</span>
+            <span class="text-link">View Custom Implant Support</span>
           </div>
         </a>
       </div>
@@ -145,6 +145,6 @@
   </div>
 </footer>
 <a class="floating btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a>
-<script src="/assets/site.js?v=manager-linkedin-1" defer></script>
+<script src="/assets/site.js?v=interaction-qa-3" defer></script>
 </body>
 </html>

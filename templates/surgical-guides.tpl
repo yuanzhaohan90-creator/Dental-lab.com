@@ -6,7 +6,7 @@
 <meta name="description" content="Surgical guide design and printed guide support using STL or PLY surface scans, CBCT data, implant system and sleeve information.">
 <link rel="canonical" href="https://yzhdentallab.com/surgical-guides"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website"><meta property="og:url" content="https://yzhdentallab.com/surgical-guides"><meta property="og:title" content="Surgical Guide Design & Production Support | YZH Dental Lab"><meta property="og:description" content="Clear records and implant component information for surgical guide workflows."><meta property="og:image" content="https://yzhdentallab.com/assets/real/surgical-guide-workflow-poster-03.jpg">
-<link rel="stylesheet" href="/assets/site.css?v=professional-1">
+<link rel="stylesheet" href="/assets/site.css?v=interaction-qa-3">
 </head>
 <body>
 <header class="site-header"><div class="wrap nav"><a class="brand" href="/"><img class="brand-logo" src="/assets/brand/yzh-mark.svg" alt=""><span>YZH Dental Lab</span></a><button class="menu-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button><nav class="navlinks" id="primaryNav"><a href="/">Home</a><a href="/cases">Cases</a><a href="/about">About</a></nav><a class="btn btn-primary nav-cta" href="/submit-case">Send a Trial Case</a></div></header>
@@ -16,5 +16,5 @@
   <section class="section soft"><div class="wrap"><div class="section-head"><p class="eyebrow">Workflow</p><h2>Review first, then design and production.</h2></div><div class="steps informational-steps"><article><span>01</span><h3>Record Check</h3><p>Surface scans, CBCT data and case instructions are reviewed.</p></article><article><span>02</span><h3>Planning Information</h3><p>Implant and sleeve details are confirmed.</p></article><article><span>03</span><h3>Guide Design</h3><p>The guide is designed around the approved plan and records.</p></article><article><span>04</span><h3>Approval</h3><p>Required design communication is completed before production.</p></article><article><span>05</span><h3>Print & QC</h3><p>Printed guide workflow proceeds when requested and confirmed.</p></article></div></div></section>
   <section class="section trial"><div class="wrap two-col"><div><p class="eyebrow">Start With One Case</p><h2>Send the available guide records.</h2><p class="copy">ZIP large DICOM datasets or include a secure file-sharing link in the case message.</p></div><div class="cta-panel"><a class="btn btn-primary" href="/submit-case">Send Guide Records</a><a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noopener noreferrer">WhatsApp Technical Team</a></div></div></section>
 </main>
-<footer class="site-footer"><div class="wrap"><p>YZH Dental Lab</p></div></footer><script src="/assets/site.js?v=professional-1" defer></script>
+<footer class="site-footer"><div class="wrap"><p>YZH Dental Lab</p></div></footer><script src="/assets/site.js?v=interaction-qa-3" defer></script>
 </body></html>

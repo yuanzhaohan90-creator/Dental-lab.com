@@ -6,7 +6,7 @@
 <meta name="description" content="Exocad design, digital file review, design approval and CAD/CAM manufacturing support for overseas dental laboratories.">
 <link rel="canonical" href="https://yzhdentallab.com/digital-dentistry"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website"><meta property="og:url" content="https://yzhdentallab.com/digital-dentistry"><meta property="og:title" content="Digital Dentistry & Exocad Workflow | YZH Dental Lab"><meta property="og:description" content="Design-only and design-plus-manufacturing support for digital dental workflows."><meta property="og:image" content="https://yzhdentallab.com/assets/real/full-arch-cad-design-05.jpg">
-<link rel="stylesheet" href="/assets/site.css?v=professional-1">
+<link rel="stylesheet" href="/assets/site.css?v=interaction-qa-3">
 </head>
 <body>
 <header class="site-header"><div class="wrap nav"><a class="brand" href="/"><img class="brand-logo" src="/assets/brand/yzh-mark.svg" alt=""><span>YZH Dental Lab</span></a><button class="menu-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button><nav class="navlinks" id="primaryNav"><a href="/">Home</a><a href="/cases">Cases</a><a href="/about">About</a></nav><a class="btn btn-primary nav-cta" href="/submit-case">Send a Trial Case</a></div></header>
@@ -16,5 +16,5 @@
   <section class="section soft"><div class="wrap"><div class="section-head"><p class="eyebrow">Digital Workflow</p><h2>One technical path from file check to delivery.</h2></div><div class="steps informational-steps"><article><span>01</span><h3>File Check</h3><p>Files and required case information are reviewed.</p></article><article><span>02</span><h3>Exocad Design</h3><p>The restoration is designed around the confirmed records.</p></article><article><span>03</span><h3>Design Approval</h3><p>Design views are shared when approval is part of the requested workflow.</p></article><article><span>04</span><h3>Production</h3><p>Manufacturing begins only after the required details are clear.</p></article><article><span>05</span><h3>QC & Delivery</h3><p>Case details are checked and communicated before dispatch.</p></article></div></div></section>
   <section class="section trial"><div class="wrap two-col"><div><p class="eyebrow">Technical Case Review</p><h2>Start with one digital case.</h2><p class="copy">Tell us whether you need design only or design plus manufacturing, and include the files already available.</p></div><div class="cta-panel"><a class="btn btn-primary" href="/submit-case">Send Digital Files</a><a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noopener noreferrer">WhatsApp Technical Team</a></div></div></section>
 </main>
-<footer class="site-footer"><div class="wrap"><p>YZH Dental Lab</p></div></footer><script src="/assets/site.js?v=professional-1" defer></script>
+<footer class="site-footer"><div class="wrap"><p>YZH Dental Lab</p></div></footer><script src="/assets/site.js?v=interaction-qa-3" defer></script>
 </body></html>
