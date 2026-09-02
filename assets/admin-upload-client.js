@@ -1,5 +1,5 @@
 const MAX_MEDIA_BYTES = 100 * 1024 * 1024;
-const VIDEO_ACCEPT = "video/*,.mp4,.mov,.m4v";
+const UPLOAD_VIDEO_ACCEPT = "video/*,.mp4,.mov,.m4v";
 const VIDEO_EXTENSIONS = new Set(["mp4", "mov", "m4v"]);
 const VIDEO_MIME_TYPES = new Set(["video/mp4", "video/quicktime", "video/x-m4v"]);
 
@@ -137,7 +137,7 @@ function putDirectlyToR2(uploadUrl, file, contentType, onProgress) {
   });
 }
 
-window.YZH_VIDEO_ACCEPT = VIDEO_ACCEPT;
+window.YZH_VIDEO_ACCEPT = UPLOAD_VIDEO_ACCEPT;
 window.yzhInspectMedia = inspectMedia;
 window.yzhUploadMedia = async function yzhUploadMedia(file, metadata, onProgress, suppliedInspection) {
   const inspection = suppliedInspection || await inspectMedia(file);
