@@ -1,0 +1,17 @@
+{
+  "rules": [
+    {
+    "allowed": {
+      "origins": [
+      "https://migration-preview.yzh-dental-lab-cloudflare-preview.pages.dev",
+      "https://yzh-dental-lab-cloudflare-preview.pages.dev",
+      "http://localhost:8788"
+      ],
+      "methods": ["PUT", "GET", "HEAD"],
+      "headers": ["Content-Type"]
+    },
+    "exposeHeaders": ["ETag"],
+    "maxAgeSeconds": 3600
+    }
+  ]
+}
