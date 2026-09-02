@@ -10,6 +10,8 @@ preview-desktop.png
 preview-mobile.png
 joydenta-extracted/
 .gitstore/
+.wrangler/
+.wrangler-dry-run*/
 
 .vercel
 .env*

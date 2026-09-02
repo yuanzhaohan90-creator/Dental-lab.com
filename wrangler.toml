@@ -1,0 +1,16 @@
+name = "yzh-dental-lab-cloudflare-preview"
+compatibility_date = "2026-09-03"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./cloudflare-public"
+
+[vars]
+STORAGE_BACKEND = "r2"
+R2_ENDPOINT = "https://1ce2d7630efa6c5c079bf1e6905af7f8.r2.cloudflarestorage.com"
+R2_BUCKET_NAME = "yzh-dental-lab-media"
+SITE_URL = "https://migration-preview.yzh-dental-lab-cloudflare-preview.pages.dev"
+CASE_NOTIFICATION_EMAIL = "yzhdentallab@gmail.com"
+
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "yzh-dental-lab-media"
+preview_bucket_name = "yzh-dental-lab-media"
