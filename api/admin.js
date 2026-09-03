@@ -1,5 +1,6 @@
 const Busboy = require("busboy");
 const crypto = require("node:crypto");
+const { Readable } = require("node:stream");
 const { isAdmin } = require("../lib/case-auth");
 const { protect, query, readJson, reply } = require("../lib/admin-http");
 const { MAX_MEDIA_BYTES } = require("../lib/media-validation");
@@ -373,6 +374,7 @@ async function handleMediaManage(req, res) {
 }
 
 async function handleMediaUpload(req, res) {
+  if (req.method === "PUT") return await handleMediaUploadPut(req, res);
   if (req.method !== "POST") return reply(res, 405, { ok: false, error: "Method not allowed." });
   const body = await readJson(req);
   if (!isR2Backend()) throw Object.assign(new Error("Direct media uploads require the R2 storage backend."), { statusCode: 503 });
@@ -388,12 +390,52 @@ async function handleMediaUpload(req, res) {
     .replace(/^-+|-+$/g, "")
     .slice(0, 120) || "media";
   const pathname = `admin/media/files/${Date.now()}-${crypto.randomBytes(6).toString("hex")}-${safeName}`;
-  const uploadUrl = await createR2UploadUrl(pathname, contentType);
+  const binding = globalThis.__YZH_CF_ENV?.MEDIA_BUCKET;
+  const requestHost = String(req.headers.host || "").split(",")[0].trim();
+  const uploadUrl = binding
+    ? `https://${requestHost || "yzhdentallab.com"}/api/admin?module=media-upload&upload=1&pathname=${encodeURIComponent(pathname)}&token=${encodeURIComponent(createMediaUploadToken(pathname, contentType, size))}`
+    : await createR2UploadUrl(pathname, contentType);
   return reply(res, 200, {
     ok: true,
     uploadUrl,
     blob: { pathname, contentType, size, url: `r2://${process.env.R2_BUCKET_NAME}/${pathname}` }
   });
+}
+
+function createMediaUploadToken(pathname, contentType, size, now = Date.now()) {
+  const expiresAt = now + 10 * 60 * 1000;
+  const payload = Buffer.from(JSON.stringify({ pathname, contentType, size, expiresAt })).toString("base64url");
+  const signature = crypto.createHmac("sha256", process.env.CASE_SESSION_SECRET).update(payload).digest("base64url");
+  return `${payload}.${signature}`;
+}
+
+function verifyMediaUploadToken(token, pathname, contentType, size, now = Date.now()) {
+  try {
+    const [payload, signature] = String(token || "").split(".");
+    if (!payload || !signature) return false;
+    const expected = crypto.createHmac("sha256", process.env.CASE_SESSION_SECRET).update(payload).digest("base64url");
+    if (signature.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return false;
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    return data.pathname === pathname && Number(data.expiresAt) > now ? data : null;
+  } catch {
+    return false;
+  }
+}
+
+async function handleMediaUploadPut(req, res) {
+  const binding = globalThis.__YZH_CF_ENV?.MEDIA_BUCKET;
+  if (!binding) return reply(res, 503, { ok: false, error: "Direct Preview R2 upload is unavailable." });
+  const url = new URL(req.url, "https://yzhdentallab.com");
+  const pathname = url.searchParams.get("pathname") || "";
+  const contentType = String(req.headers["content-type"] || "application/octet-stream").toLowerCase();
+  const size = Math.max(0, Number(req.headers["content-length"]) || 0);
+  const tokenData = verifyMediaUploadToken(url.searchParams.get("token"), pathname, contentType, size);
+  if (!pathname.startsWith("admin/media/files/") || !tokenData) {
+    return reply(res, 401, { ok: false, error: "Upload authorization expired. Please try again." });
+  }
+  const uploadBody = req.webBody || Readable.toWeb(req);
+  await binding.put(pathname, uploadBody, { httpMetadata: { contentType: tokenData.contentType, cacheControl: "private, no-store" } });
+  return reply(res, 200, { ok: true });
 }
 
 async function handleMediaFinalize(req, res) {
@@ -585,7 +627,8 @@ async function handlePublicSite(req, res) {
 module.exports = async function handler(req, res) {
   const moduleName = route(req);
   const publicModules = new Set(["public-site", "media-image"]);
-  if (!publicModules.has(moduleName) && !protect(req, res)) return;
+  const isDirectMediaUpload = moduleName === "media-upload" && req.method === "PUT";
+  if (!isDirectMediaUpload && !publicModules.has(moduleName) && !protect(req, res)) return;
   if (moduleName === "submission-file" && !isAdmin(req)) {
     res.statusCode = 401;
     return res.end("Authentication required");

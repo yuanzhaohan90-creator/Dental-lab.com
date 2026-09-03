@@ -17,8 +17,13 @@ function requestStream(request) {
 }
 
 function makeNodeRequest(request) {
-  const stream = requestStream(request);
+  const requestUrl = new URL(request.url);
+  const isNativeMediaPut = request.method === "PUT" && requestUrl.pathname === "/api/admin" && requestUrl.searchParams.get("module") === "media-upload";
+  const stream = isNativeMediaPut ? null : requestStream(request);
   const req = stream || new ReadableStream();
+  // Preserve the native Worker body for R2 Binding uploads. The Node stream
+  // adapter is still used by the other legacy handlers.
+  req.webBody = request.body;
   req.method = request.method;
   req.url = new URL(request.url).pathname + new URL(request.url).search;
   req.headers = Object.fromEntries(request.headers.entries());
@@ -56,6 +61,19 @@ function videoUnsupported() {
 
 const publicPages = { "/": "home", "/implant-restorations": "implant", "/full-arch-all-on-x": "fullArch", "/cases": "cases", "/crown-bridge": "crownBridge", "/digital-dentistry": "digital", "/surgical-guides": "surgicalGuides", "/about": "about", "/submit-case": "submitCase", "/privacy-policy": "privacy" };
 const adminPages = { "/admin": "index.html", "/admin/": "index.html", "/admin/home": "home.html", "/admin/homepage": "homepage.html", "/admin/implant": "implant.html", "/admin/full-arch": "full-arch.html", "/admin/about": "about.html", "/admin/submissions": "submissions.html", "/admin/media": "media.html", "/admin/settings": "settings.html", "/admin/cases": "cases.html" };
+const templatePaths = ["index.tpl", "implant-restorations.tpl", "full-arch-all-on-x.tpl", "cases.tpl", "crown-bridge.tpl", "digital-dentistry.tpl", "surgical-guides.tpl", "about.tpl", "submit-case.tpl", "privacy-policy.tpl"];
+let templatesPromise;
+
+async function loadTemplates(request, env) {
+  if (!templatesPromise) {
+    templatesPromise = Promise.all(templatePaths.map(async (name) => {
+      const response = await env.ASSETS.fetch(new Request(new URL(`/__templates/${name}`, request.url)));
+      if (!response.ok) throw new Error(`Template asset unavailable: ${name}`);
+      return [name === "index.tpl" ? "templates/index.tpl" : `templates/${name}`, await response.text()];
+    })).then((entries) => Object.fromEntries(entries));
+  }
+  globalThis.__YZH_CF_TEMPLATES = await templatesPromise;
+}
 
 function routedRequest(request, path, params = {}) {
   const url = new URL(request.url);
@@ -71,7 +89,10 @@ export default {
     const handler = handlers[url.pathname];
     if (url.pathname === "/api/video-process") return videoUnsupported();
     if (handler) return invoke(request, env, handler);
-    if (publicPages[url.pathname]) return invoke(routedRequest(request, "/api/public-page", { page: publicPages[url.pathname] }), env, publicPage);
+    if (publicPages[url.pathname]) {
+      await loadTemplates(request, env);
+      return invoke(routedRequest(request, "/api/public-page", { page: publicPages[url.pathname] }), env, publicPage);
+    }
     if (url.pathname.startsWith("/cases/") && url.pathname.length > "/cases/".length) return invoke(routedRequest(request, "/api/case-page", { slug: decodeURIComponent(url.pathname.slice("/cases/".length)) }), env, casePage);
     if (adminPages[url.pathname]) return env.ASSETS.fetch(routedRequest(request, `/admin/${adminPages[url.pathname]}`));
     return env.ASSETS.fetch(request);
