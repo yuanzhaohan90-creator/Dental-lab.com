@@ -79,7 +79,9 @@ function routedRequest(request, path, params = {}) {
   const url = new URL(request.url);
   url.pathname = path;
   for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
-  return new Request(url, request);
+  const init = { method: request.method, headers: new Headers(request.headers), redirect: request.redirect };
+  if (!['GET', 'HEAD'].includes(request.method)) init.body = request.body;
+  return new Request(url, init);
 }
 
 export default {
