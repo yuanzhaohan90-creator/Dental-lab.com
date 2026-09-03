@@ -9,6 +9,7 @@ R2_ENDPOINT = "https://1ce2d7630efa6c5c079bf1e6905af7f8.r2.cloudflarestorage.com
 R2_BUCKET_NAME = "yzh-dental-lab-media-preview"
 SITE_URL = "https://yzh-dental-lab-preview.workers.dev"
 CASE_NOTIFICATION_EMAIL = "yzhdentallab@gmail.com"
+CASE_FROM_EMAIL = "cases@yzhdentallab.com"
 
 [assets]
 directory = "./cloudflare-public"
