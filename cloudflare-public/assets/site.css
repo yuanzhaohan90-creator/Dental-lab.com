@@ -170,6 +170,7 @@ h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .field{display:grid;gap:7px;font-size:14px;font-weight:850;color:#304960}
 .field input,.field select,.field textarea{width:100%;padding:13px;border-radius:8px;border:1px solid #c9d8e6;background:#fff;color:var(--text);font:inherit;outline:none}
+.field input::placeholder,.field textarea::placeholder{color:#52677d;opacity:1}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(11,95,165,.14)}
 .field textarea{min-height:136px;resize:vertical}
 .field input[type=file]{background:#f8fbfd}
