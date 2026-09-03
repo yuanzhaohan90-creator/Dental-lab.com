@@ -11,8 +11,10 @@ const {
   listRecords,
   makeId,
   normalizeFields,
+  restoreRecord,
   saveRecord,
   storeImage,
+  trashRecord,
   uniqueSlug
 } = require("../lib/case-store");
 
@@ -80,8 +82,10 @@ function adminRecord(record) {
 async function writeCase(req, isUpdate) {
   const { fields, files } = await parseMultipart(req);
   const input = safeJson(fields.case, {});
-  const existing = safeJson(fields.existingImages, []);
-  const newImageMeta = safeJson(fields.newImageMeta, []);
+  const existingValue = safeJson(fields.existingImages, []);
+  const newImageMetaValue = safeJson(fields.newImageMeta, []);
+  const existing = Array.isArray(existingValue) ? existingValue : [];
+  const newImageMeta = Array.isArray(newImageMetaValue) ? newImageMetaValue : [];
   const current = isUpdate ? await getRecord(input.id) : null;
   if (isUpdate && !current) throw Object.assign(new Error("Case not found."), { statusCode: 404 });
 
@@ -173,6 +177,12 @@ module.exports = async function handler(req, res) {
     if (req.method === "POST" && query(req, "action") === "duplicate") {
       const record = await duplicateCase(query(req, "id"));
       return reply(res, 201, { ok: true, case: adminRecord(record) });
+    }
+    if (req.method === "POST" && ["trash", "restore"].includes(query(req, "action"))) {
+      const record = await getRecord(query(req, "id"));
+      if (!record) return reply(res, 404, { ok: false, error: "Case not found." });
+      if (query(req, "action") === "trash") return reply(res, 200, { ok: true, case: adminRecord(await trashRecord(record)) });
+      return reply(res, 200, { ok: true, case: adminRecord(await restoreRecord(record)) });
     }
     if (req.method === "POST" || req.method === "PUT") {
       const record = await writeCase(req, req.method === "PUT");
