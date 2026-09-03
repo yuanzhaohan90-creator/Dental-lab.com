@@ -49,6 +49,26 @@ function makeReq({ fields, files }) {
   return req;
 }
 
+function makeOversizedReq() {
+  const boundary = `----yzh-test-${crypto.randomBytes(6).toString("hex")}`;
+  const declaredLength = 26 * 1024 * 1024;
+  const req = new Readable({
+    read() {
+      if (this.started) return;
+      this.started = true;
+      this.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="case_files"; filename="large.zip"\r\nContent-Type: application/zip\r\n\r\n`));
+      this.push(Buffer.from(`--${boundary}--\r\n`));
+      this.push(null);
+    }
+  });
+  req.method = "POST";
+  req.headers = {
+    "content-type": `multipart/form-data; boundary=${boundary}`,
+    "content-length": String(declaredLength)
+  };
+  return req;
+}
+
 function makeRes() {
   return {
     statusCode: 200,
@@ -140,7 +160,11 @@ async function run() {
   assert.equal(badExt.status, 400);
   assert.equal(badExt.data.ok, false);
 
-  const overLimit = await callApi({ files: [{ name: "large.zip", type: "application/zip", content: Buffer.alloc(26 * 1024 * 1024) }] });
+  const overLimitReq = makeOversizedReq();
+  process.env.STORAGE_BACKEND = "r2";
+  const overLimitRes = makeRes();
+  await handler(overLimitReq, overLimitRes);
+  const overLimit = { status: overLimitRes.statusCode, data: JSON.parse(overLimitRes.body) };
   assert.equal(overLimit.status, 413);
   assert.equal(overLimit.data.ok, false);
 

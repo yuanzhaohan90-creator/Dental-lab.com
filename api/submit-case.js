@@ -88,6 +88,11 @@ function parseMultipart(req) {
       reject(makeHttpError(400, "Multipart form data is required."));
       return;
     }
+    const declaredLength = Number(req.headers["content-length"]);
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+      reject(makeHttpError(413, "Request is larger than 25MB."));
+      return;
+    }
 
     const fields = {};
     const files = [];
