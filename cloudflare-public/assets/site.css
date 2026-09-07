@@ -58,7 +58,7 @@ h2{font-size:clamp(2rem,3vw,3rem);line-height:1.09;color:var(--ink);letter-spaci
 h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .service-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;margin-bottom:26px}
 .service-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
-.service-card,.case-card,.lab-grid article,.proof-list article,.steps article,.steps .workflow-step,.cta-panel,.text-panel{background:#fff;border:1px solid rgba(216,228,238,.9);border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
+.service-card,.case-card,.lab-grid article,.workflow-link-card,.proof-list article,.steps article,.steps .workflow-step,.cta-panel,.text-panel{background:#fff;border:1px solid rgba(216,228,238,.9);border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
 .service-card img{width:100%;aspect-ratio:4/3;object-fit:cover}
 .service-card div{padding:20px}
 .service-card p,.case-card p,.lab-grid p,.steps p,.text-panel p{color:#5e7185;font-size:14px;margin-bottom:12px}
@@ -111,11 +111,13 @@ h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .implant-module div{padding:24px;display:flex;flex-direction:column;justify-content:center}
 .implant-module p{color:#5e7185;margin-bottom:0}
 .lab-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
-.lab-grid article{box-shadow:none}
+.lab-grid article,.workflow-link-card{box-shadow:none}
+.workflow-link-card{display:flex;min-height:100%;min-width:0;flex-direction:column;color:inherit;text-decoration:none;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
 .lab-grid img{width:100%;aspect-ratio:16/11;object-fit:cover;background:#eef5fa}
-.lab-grid h3,.lab-grid p{padding-left:15px;padding-right:15px}
+.lab-grid h3,.lab-grid p,.lab-grid .text-link{padding-left:15px;padding-right:15px}
 .lab-grid h3{padding-top:15px;font-size:17px}
-.lab-grid p{padding-bottom:16px;margin-bottom:0}
+.lab-grid p{margin-bottom:0}
+.lab-grid .text-link{margin-top:auto;padding-top:14px;padding-bottom:16px}
 .workflow-block .section-head{margin-bottom:24px}
 .steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
 .steps article,.steps .workflow-step{padding:18px;min-height:174px}
@@ -142,14 +144,15 @@ h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .fullarch-card ul{display:grid;gap:8px;margin:6px 0 14px;padding:0;list-style:none}
 .fullarch-card li{padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#f8fbfd;color:#40566c;font-size:13px;font-weight:760}
 .visual-label{margin-top:auto;margin-bottom:0;padding-top:4px;font-size:12px!important;font-weight:850;color:#6b7d90!important}
-.proof-strip a,.workflow-step,.implant-module,.image-mosaic a,.text-panel:is(a),.managed-featured-case,.featured-public-case>a,.public-case-card>a{cursor:pointer;color:inherit;text-decoration:none}
+.proof-strip a,.workflow-link-card,.workflow-step,.implant-module,.image-mosaic a,.text-panel:is(a),.managed-featured-case,.featured-public-case>a,.public-case-card>a{cursor:pointer;color:inherit;text-decoration:none}
 .dark .tick-list a{cursor:pointer;color:#304c65;text-decoration:none}
 .text-panel:is(a),.featured-public-case>a,.public-case-card>a,.managed-featured-case{display:block}
-.priority-case:focus-visible,.proof-strip a:focus-visible,.tick-list a:focus-visible,.workflow-step:focus-visible,.implant-module:focus-visible,.image-mosaic a:focus-visible,.text-panel:focus-visible,.managed-featured-case:focus-visible,.featured-public-case>a:focus-visible,.public-case-card>a:focus-visible,.fullarch-card:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.priority-case:focus-visible,.proof-strip a:focus-visible,.tick-list a:focus-visible,.workflow-link-card:focus-visible,.workflow-step:focus-visible,.implant-module:focus-visible,.image-mosaic a:focus-visible,.text-panel:focus-visible,.managed-featured-case:focus-visible,.featured-public-case>a:focus-visible,.public-case-card>a:focus-visible,.fullarch-card:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
 @media (hover:hover){
-  .priority-case:hover,.proof-strip a:hover,.tick-list a:hover,.workflow-step:hover,.implant-module:hover,.image-mosaic a:hover,.text-panel:is(a):hover,.managed-featured-case:hover,.featured-public-case>a:hover,.public-case-card>a:hover,.fullarch-card:hover{border-color:#8eb6d2;box-shadow:0 15px 32px rgba(16,42,67,.12)}
+  .priority-case:hover,.proof-strip a:hover,.tick-list a:hover,.workflow-link-card:hover,.workflow-step:hover,.implant-module:hover,.image-mosaic a:hover,.text-panel:is(a):hover,.managed-featured-case:hover,.featured-public-case>a:hover,.public-case-card>a:hover,.fullarch-card:hover{border-color:var(--blue);box-shadow:0 15px 32px rgba(16,42,67,.12)}
+  .workflow-link-card:hover{transform:translateY(-3px)}
 }
-.priority-case:active,.workflow-step:active,.implant-module:active,.text-panel:is(a):active,.featured-public-case>a:active,.public-case-card>a:active,.fullarch-card:active{box-shadow:inset 0 0 0 2px rgba(11,95,165,.2)}
+.priority-case:active,.workflow-link-card:active,.workflow-step:active,.implant-module:active,.text-panel:is(a):active,.featured-public-case>a:active,.public-case-card>a:active,.fullarch-card:active{box-shadow:inset 0 0 0 2px rgba(11,95,165,.2)}
 .verification-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .verification-grid article{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:18px}
 .verification-grid span{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-weight:900;margin-bottom:13px}

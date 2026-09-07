@@ -11,7 +11,7 @@ function normalizePublicNavigation() {
     if (active) link.setAttribute("aria-current", "page");
   });
   const services = nav.querySelector(".nav-dropdown");
-  if (services) services.classList.toggle("active", ["/implant-restorations", "/full-arch-all-on-x", "/crown-bridge", "/digital-dentistry", "/surgical-guides"].includes(path));
+  if (services) services.classList.toggle("active", ["/implant-restorations", "/full-arch-all-on-x", "/crown-bridge", "/services/crown-bridge", "/digital-dentistry", "/services/digital-workflow", "/surgical-guides"].includes(path));
 }
 
 function closeNavigation(focusTarget = null) {
@@ -66,6 +66,7 @@ const cardLinkSelector = [
   ".priority-case",
   ".proof-strip a",
   ".tick-list a",
+  ".workflow-link-card",
   ".workflow-step",
   ".implant-module",
   ".image-mosaic a",
