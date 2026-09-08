@@ -9,10 +9,11 @@ img[src^="/assets/real/"]{object-fit:contain;object-position:center;background:#
 h1,h2,h3,p{margin-top:0}
 .wrap{width:100%;max-width:1400px;margin:0 auto;padding:0 clamp(40px,4vw,56px)}
 .site-header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}
+.wrap.nav{padding-left:16px}
 .nav{min-height:70px;display:flex;align-items:center;gap:18px}
 .brand{display:flex;align-items:center;gap:12px;font-weight:900;color:var(--ink);flex:0 0 auto}
 .brand-mark{width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--blue2));display:grid;place-items:center;color:#fff}
-.brand-logo{display:block;width:auto;height:48px;max-width:250px;object-fit:contain;object-position:left center;flex:0 1 250px}
+.brand-logo{display:block;width:auto;height:52px;max-width:288px;object-fit:contain;object-position:left center;flex:0 1 288px}
 .navlinks{display:flex;align-items:center;justify-content:center;gap:17px;margin-left:auto;font-size:14px;color:#435970}
 .navlinks a{white-space:nowrap}
 .navlinks a.active,.navlinks a[aria-current="page"]{color:var(--blue);font-weight:900}
@@ -225,7 +226,7 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   .nav{position:relative;min-height:62px;display:flex;align-items:center;gap:12px;padding:11px 82px 11px 16px;width:100%;max-width:100%}
   .wrap.nav{padding-left:16px;padding-right:16px}
   .brand-mark{width:36px;height:36px}
-  .brand-logo{height:40px;max-width:220px;object-fit:contain}
+  .brand-logo{height:42px;max-width:253px;object-fit:contain}
   .brand{font-size:15px;min-width:0;max-width:calc(100% - 76px)}
   .brand span:last-child{overflow:visible;text-overflow:clip;white-space:nowrap}
   .menu-toggle{position:fixed;left:min(calc(100vw - 74px),316px);right:auto;top:12px;z-index:80;display:inline-flex;align-items:center;justify-content:center;min-height:38px;width:58px;padding:8px 12px;border-radius:8px;border:1px solid #c7d7e6;background:#fff;color:var(--ink);font-weight:850;font-family:inherit}
@@ -312,7 +313,7 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
 @media(max-width:760px){
   body,main,section,header,footer{max-width:100%}
   .nav{padding:11px 16px}
-  .brand-logo{width:auto;height:40px;max-width:220px}
+  .brand-logo{width:auto;height:42px;max-width:253px}
   .menu-toggle{position:absolute;left:auto;right:16px;top:12px}
   .nav-dropdown{width:100%}
   .nav-dropdown-toggle{width:100%;justify-content:space-between;padding:11px 0;border-bottom:1px solid #edf3f7}
