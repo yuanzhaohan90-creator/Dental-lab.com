@@ -57,3 +57,25 @@
 .admin-danger:hover{background:#fff1f1;border-color:#b84a4a}
 .admin-danger:active{background:#f8dede}
 .admin-danger:disabled{color:#6b7d90;border-color:#cbd9e5;background:#eef3f6}
+
+/* Admin CMS V3 collection controls */
+.collection-editor{display:grid;gap:14px}
+.collection-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:14px;border:1px solid #d8e4ee;border-radius:8px;background:#f8fafc}
+.collection-toolbar span{margin-left:auto;color:#52677d;font-weight:850}
+.collection-list{display:grid;gap:16px}
+.collection-item{border:1px solid #d8e4ee;border-radius:8px;background:#fff;overflow:hidden}
+.collection-item[draggable=true]{cursor:grab}
+.collection-item:active{cursor:grabbing}
+.collection-item-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-bottom:1px solid #e3ebf1;background:#f8fafc}
+.drag-handle{display:inline-flex;align-items:center;min-height:34px;padding:7px 10px;border:1px solid #c8d7e4;border-radius:6px;background:#fff;color:#36516c;font-size:12px;font-weight:900;text-transform:uppercase}
+.collection-actions{display:flex;flex-wrap:wrap;gap:7px}
+.collection-actions .btn{min-height:36px;padding:8px 10px;font-size:12px}
+.collection-grid{display:grid;grid-template-columns:minmax(300px,.95fr) minmax(0,1.05fr);gap:18px;padding:16px}
+.collection-grid .media-position{margin:0}
+.collection-flags{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;padding:12px;border:1px solid #d8e4ee;border-radius:7px;background:#f8fafc}
+@media(max-width:900px){.collection-grid{grid-template-columns:1fr}.collection-toolbar,.collection-item-head{align-items:stretch;flex-direction:column}.collection-toolbar span{margin-left:0}.collection-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.collection-actions .btn{width:100%}}
+@media(max-width:560px){.collection-actions{grid-template-columns:1fr}.collection-grid{padding:12px}.collection-flags{display:grid;grid-template-columns:1fr}.collection-toolbar .btn{width:100%}}
+.admin-image-row[draggable=true]{cursor:grab}
+.admin-image-row[draggable=true]:active{cursor:grabbing}
+.admin-image-row .drag-handle{align-self:start}
+@media(max-width:560px){.admin-image-row .drag-handle{width:max-content;max-width:100%}}

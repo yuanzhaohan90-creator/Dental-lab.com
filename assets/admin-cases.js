@@ -108,8 +108,8 @@ function renderImages() {
   const cover = state.existing.find((image) => image.isCover);
   currentCover.innerHTML = cover ? `<figure class="admin-current-cover"><img src="${cover.url}" alt=""><figcaption>当前封面</figcaption></figure>` : '<p class="admin-empty">尚未上传封面。</p>';
   const gallery = state.existing.filter((image) => !image.isCover).sort((a, b) => a.sortOrder - b.sortOrder);
-  existingImages.innerHTML = gallery.map((image, index) => `<div class="admin-image-row" data-existing-id="${image.id}">${caseMediaPreview(image)}<div><label>说明 / Caption<input data-key="caption" value="${escapeHtml(image.caption)}" maxlength="240"></label><label>阶段类型<select data-key="imageType">${optionMarkup(state.imageTypes, image.imageType, imageTypeLabel)}</select></label></div><div class="admin-image-controls"><button type="button" data-move="up" aria-label="媒体上移">↑</button><button type="button" data-move="down" aria-label="媒体下移">↓</button><button type="button" data-remove aria-label="移除媒体">×</button></div></div>`).join("");
-  newImages.innerHTML = state.newFiles.map((item, index) => `<div class="admin-image-row" data-new-index="${index}">${caseMediaPreview(item)}<div><label>说明 / Caption<input data-key="caption" value="${escapeHtml(item.caption)}" maxlength="240"></label><label>阶段类型<select data-key="imageType">${optionMarkup(state.imageTypes, item.imageType, imageTypeLabel)}</select></label></div><div class="admin-image-controls"><button type="button" data-new-move="up" aria-label="媒体上移">↑</button><button type="button" data-new-move="down" aria-label="媒体下移">↓</button><button type="button" data-new-remove aria-label="移除媒体">×</button></div></div>`).join("");
+  existingImages.innerHTML = gallery.map((image, index) => `<div class="admin-image-row" draggable="true" data-drag-kind="existing" data-existing-id="${image.id}"><span class="drag-handle">Drag</span>${caseMediaPreview(image)}<div><label>说明 / Caption<input data-key="caption" value="${escapeHtml(image.caption)}" maxlength="240"></label><label>阶段类型<select data-key="imageType">${optionMarkup(state.imageTypes, image.imageType, imageTypeLabel)}</select></label></div><div class="admin-image-controls"><button type="button" data-move="up" aria-label="媒体上移">↑</button><button type="button" data-move="down" aria-label="媒体下移">↓</button><button type="button" data-remove aria-label="移除媒体">×</button></div></div>`).join("");
+  newImages.innerHTML = state.newFiles.map((item, index) => `<div class="admin-image-row" draggable="true" data-drag-kind="new" data-new-index="${index}"><span class="drag-handle">Drag</span>${caseMediaPreview(item)}<div><label>说明 / Caption<input data-key="caption" value="${escapeHtml(item.caption)}" maxlength="240"></label><label>阶段类型<select data-key="imageType">${optionMarkup(state.imageTypes, item.imageType, imageTypeLabel)}</select></label></div><div class="admin-image-controls"><button type="button" data-new-move="up" aria-label="媒体上移">↑</button><button type="button" data-new-move="down" aria-label="媒体下移">↓</button><button type="button" data-new-remove aria-label="移除媒体">×</button></div></div>`).join("");
 }
 
 function syncExistingInputs() {
@@ -137,7 +137,7 @@ function updateTypeUI() {
   document.getElementById("upgradeCaseButton").hidden = isCaseStudy;
   document.getElementById("imageLimitNote").textContent = isCaseStudy
     ? "重点案例研究支持较长的图片/视频序列，只添加这个案例真实具备的阶段。"
-    : "快速作品支持 0–6 张其他图片或 H.264/AAC MP4，可用箭头调整展示顺序。";
+    : "快速作品支持最多 30 张其他图片或 H.264/AAC MP4，可拖拽或用按钮调整展示顺序。";
 }
 
 function openEditor(item = null, requestedType = "quick_work") {
@@ -208,8 +208,8 @@ async function saveCase(statusOverride) {
   if (existingCover) existingCover.caption = editor.elements.coverCaption.value;
   if (!editor.reportValidity()) return null;
   const additionalCount = state.existing.filter((image) => !image.isCover).length + state.newFiles.length;
-  if (editor.elements.contentType.value === "quick_work" && additionalCount > 6) {
-    showMessage(editorMessage, "快速作品最多支持 6 张其他图片。", "error");
+  if (editor.elements.contentType.value === "quick_work" && additionalCount > 30) {
+    showMessage(editorMessage, "快速作品最多支持 30 张其他图片或视频。", "error");
     return null;
   }
   const nextStatus = statusOverride || editor.elements.status.value;
@@ -273,6 +273,46 @@ newImages.addEventListener("click", (event) => {
   if (event.target.closest('[data-new-move="down"]') && index < state.newFiles.length - 1) [state.newFiles[index + 1], state.newFiles[index]] = [state.newFiles[index], state.newFiles[index + 1]];
   renderImages();
 });
+
+function enableCaseDrag(container, kind) {
+  container.addEventListener("dragstart", (event) => {
+    const row = event.target.closest(`[data-drag-kind="${kind}"]`);
+    if (!row) return;
+    event.dataTransfer.setData("text/plain", kind === "existing" ? row.dataset.existingId : row.dataset.newIndex);
+    event.dataTransfer.effectAllowed = "move";
+  });
+  container.addEventListener("dragover", (event) => {
+    if (event.target.closest(`[data-drag-kind="${kind}"]`)) event.preventDefault();
+  });
+  container.addEventListener("drop", (event) => {
+    const row = event.target.closest(`[data-drag-kind="${kind}"]`);
+    if (!row) return;
+    event.preventDefault();
+    if (kind === "new") {
+      syncNewInputs();
+      const from = Number(event.dataTransfer.getData("text/plain"));
+      const to = Number(row.dataset.newIndex);
+      if (Number.isFinite(from) && Number.isFinite(to) && from !== to) {
+        const [item] = state.newFiles.splice(from, 1);
+        state.newFiles.splice(to, 0, item);
+      }
+    } else {
+      syncExistingInputs();
+      const fromId = event.dataTransfer.getData("text/plain");
+      const gallery = state.existing.filter((image) => !image.isCover).sort((a, b) => a.sortOrder - b.sortOrder);
+      const from = gallery.findIndex((image) => image.id === fromId);
+      const to = gallery.findIndex((image) => image.id === row.dataset.existingId);
+      if (from !== -1 && to !== -1 && from !== to) {
+        const [item] = gallery.splice(from, 1);
+        gallery.splice(to, 0, item);
+        gallery.forEach((image, index) => { image.sortOrder = index; });
+      }
+    }
+    renderImages();
+  });
+}
+enableCaseDrag(existingImages, "existing");
+enableCaseDrag(newImages, "new");
 
 editor.addEventListener("submit", async (event) => { event.preventDefault(); try { await saveCase(); } catch (error) { showMessage(editorMessage, error.message, "error"); } });
 document.getElementById("previewButton").addEventListener("click", () => { if (state.current) window.open(`/cases/${encodeURIComponent(state.current.slug)}?preview=1`, "_blank", "noopener"); });

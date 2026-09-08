@@ -18,7 +18,7 @@ const {
   uniqueSlug
 } = require("../lib/case-store");
 
-const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
+const MAX_TOTAL_BYTES = 90 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
 function reply(res, statusCode, payload) {
@@ -41,11 +41,11 @@ function parseMultipart(req) {
     const fields = {};
     const files = [];
     let total = 0;
-    const busboy = Busboy({ headers: req.headers, limits: { files: 30, fields: 20, fileSize: MAX_IMAGE_BYTES } });
+    const busboy = Busboy({ headers: req.headers, limits: { files: 45, fields: 24, fileSize: MAX_IMAGE_BYTES } });
     req.on("error", reject);
     req.on("data", (chunk) => {
       total += chunk.length;
-      if (total > MAX_TOTAL_BYTES) req.destroy(Object.assign(new Error("Upload is larger than 20MB."), { statusCode: 413 }));
+      if (total > MAX_TOTAL_BYTES) req.destroy(Object.assign(new Error("Upload is larger than 90MB."), { statusCode: 413 }));
     });
     busboy.on("field", (name, value) => { fields[name] = value; });
     busboy.on("file", (field, stream, info) => {

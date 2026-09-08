@@ -309,6 +309,10 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
 .submission-support h3{font-size:16px;margin-bottom:5px}
 .submission-support p{font-size:14px;margin:0;color:#5e7185}
 .upload-guidance{margin:8px 0 0;color:#5e7185;font-size:13px}
+.collection-media-empty{display:grid;place-items:center;aspect-ratio:4/3;background:#eef5fa;color:#52677d;font-weight:850;text-align:center;padding:18px}
+.lab-grid :is(article,.workflow-link-card)>:is(img,video){width:100%;aspect-ratio:4/3;object-fit:cover;background:#eef5fa}
+.lab-grid article small,.workflow-link-card small{display:block;padding:0 18px 18px;color:#52677d;font-size:13px}
+.workflow-step>:is(img,video){width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;margin-bottom:14px;background:#eef5fa}
 
 @media(max-width:760px){
   body,main,section,header,footer{max-width:100%}

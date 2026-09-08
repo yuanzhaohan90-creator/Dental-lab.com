@@ -558,12 +558,16 @@ const PAGE_SECTIONS = {
   ],
   about: [
     { key: "hero", label: "01 首屏主视觉", hint: "使用真实实验室或 CAD 工作站媒体。", media: true, video: true, eyebrow: true, cta: true, ratio: "16:9", mobileRatio: "4:5" },
-    { key: "laboratory", label: "02 实验室", hint: "上传真实实验室工作区照片或视频。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
-    { key: "cad", label: "03 CAD / 设计", hint: "上传真实 CAD 工作站照片或视频。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
-    { key: "production", label: "04 生产", hint: "上传真实切削或生产照片、视频。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
-    { key: "finishing", label: "05 修整", hint: "上传真实技师工作照片或视频。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
-    { key: "qc", label: "06 质量检查", hint: "上传真实质检照片或视频。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
-    { key: "packing", label: "07 包装 / 发货", hint: "上传真实包装或发货照片、视频；没有真实媒体时请留空。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" }
+    { key: "laboratoryGallery", label: "02 Laboratory Gallery", hint: "批量管理真实实验室照片和视频。支持 100+ 项、拖拽排序、封面、精选、隐藏。", collection: true, uploadCategory: "Lab", ratio: "4:3", mobileRatio: "4:3", allowVideo: true },
+    { key: "equipmentGallery", label: "03 Equipment Gallery", hint: "批量管理设备、工作站、生产线、质检区域媒体。", collection: true, uploadCategory: "Lab", ratio: "4:3", mobileRatio: "4:3", allowVideo: true },
+    { key: "workflowSteps", label: "04 Workflow Steps", hint: "动态增加流程步骤，不再固定四步。每一步都可配图、视频、标题、说明和链接。", collection: true, uploadCategory: "Lab", ratio: "4:3", mobileRatio: "4:3", allowVideo: true, destination: true },
+    { key: "qualityCollection", label: "05 Quality Control Collection", hint: "质检证明集合，可持续新增接口、模型就位、咬合、接触点、出货检查。", collection: true, uploadCategory: "Lab", ratio: "4:3", mobileRatio: "4:3", allowVideo: true },
+    { key: "laboratory", label: "Legacy: 单张实验室图", hint: "旧版兼容字段。V3 请优先使用上面的 Laboratory Gallery。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "cad", label: "Legacy: 单张 CAD 图", hint: "旧版兼容字段。后续会被动态 Gallery 替代。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "production", label: "Legacy: 单张生产图", hint: "旧版兼容字段。后续会被动态 Gallery 替代。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "finishing", label: "Legacy: 单张修整图", hint: "旧版兼容字段。后续会被动态 Gallery 替代。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "qc", label: "Legacy: 单张质检图", hint: "旧版兼容字段。后续会被动态 Collection 替代。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
+    { key: "packing", label: "Legacy: 单张包装 / 发货图", hint: "旧版兼容字段；没有真实媒体时请留空。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" }
   ]
 };
 
@@ -665,6 +669,51 @@ function restorationOptionsEditor(value) {
   return `<div class="restoration-option-editor">${value.map((option, index) => `<div class="restoration-option"><h3>方案 ${index + 1}</h3>${textFields(`restorationOptions.${index}`, option, {})}${renderMediaEditor(`restorationOptions.${index}.media`, option.media, false, "使用真实修复体图片。", { ratio: "4:3", mobileRatio: "4:3" })}<label class="field">链接目标 (Link Destination)：已发布案例（可选）<select data-path="restorationOptions.${index}.caseId">${caseOptions(option.caseId)}</select></label></div>`).join("")}</div>`;
 }
 
+function collectionEditor(key, value = [], section = {}) {
+  const items = Array.isArray(value) ? value : [];
+  return `<div class="collection-editor" data-collection="${key}">
+    <div class="collection-toolbar">
+      <button class="btn btn-primary" type="button" data-collection-add="${key}">+ Add Item</button>
+      <button class="btn btn-secondary" type="button" data-collection-batch="${key}">Batch Upload</button>
+      <input class="visually-hidden" type="file" data-collection-files="${key}" accept="image/jpeg,image/png,image/webp,${section.allowVideo ? VIDEO_ACCEPT : ""}" multiple>
+      <span>${items.length} item${items.length === 1 ? "" : "s"}</span>
+    </div>
+    <div class="collection-list" data-collection-list="${key}">
+      ${items.map((item, index) => collectionItemEditor(key, item, index, section)).join("")}
+    </div>
+  </div>`;
+}
+
+function collectionItemEditor(key, item, index, section) {
+  const base = `${key}.${index}`;
+  return `<article class="collection-item" draggable="true" data-collection-item="${key}" data-index="${index}">
+    <div class="collection-item-head">
+      <span class="drag-handle" aria-hidden="true">Drag</span>
+      <strong>${escapeHtml(item.title || `Item ${index + 1}`)}</strong>
+      <div class="collection-actions">
+        <button class="btn btn-secondary" type="button" data-collection-move="up" data-collection-key="${key}" ${index === 0 ? "disabled" : ""}>上移</button>
+        <button class="btn btn-secondary" type="button" data-collection-move="down" data-collection-key="${key}">下移</button>
+        <button class="btn admin-danger" type="button" data-collection-remove="${key}">删除</button>
+      </div>
+    </div>
+    <div class="collection-grid">
+      ${renderMediaEditor(`${base}.media`, item.media, section.allowVideo, "选择或上传这个项目的图片/视频。", section)}
+      <div>
+        <label class="field">Title<input data-path="${base}.title" value="${escapeHtml(item.title || "")}" maxlength="160"></label>
+        <label class="field">Description<textarea data-path="${base}.description" maxlength="800">${escapeHtml(item.description || "")}</textarea></label>
+        <label class="field">Caption<input data-path="${base}.caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label>
+        <label class="field">Alt Text<input data-path="${base}.altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label>
+        ${section.destination ? linkDestinationEditor(`${base}.destination`, item.destination) : ""}
+        <div class="collection-flags">
+          <label class="check-field"><input type="checkbox" data-path="${base}.featured" ${item.featured ? "checked" : ""}> Featured</label>
+          <label class="check-field"><input type="checkbox" data-path="${base}.cover" ${item.cover ? "checked" : ""}> Cover</label>
+          <label class="check-field"><input type="checkbox" data-path="${base}.hidden" ${item.hidden ? "checked" : ""}> Hide</label>
+        </div>
+      </div>
+    </div>
+  </article>`;
+}
+
 function renderPageEditor() {
   const draft = pageData.config.draft;
   const sections = PAGE_SECTIONS[pageKey];
@@ -675,6 +724,7 @@ function renderPageEditor() {
     else if (section.selectedCases) content = `${textFields(section.key, value, section)}${selectedWorkEditor(value)}`;
     else if (section.workflow) content = workflowEditor(value, section);
     else if (section.restorationOptions) content = restorationOptionsEditor(value);
+    else if (section.collection) content = collectionEditor(section.key, value, section);
     else if (section.featuredCase) content = `${textFields(section.key, value, section)}<label class="field">选择精选案例<select data-path="${section.key}.caseId">${caseOptions(value.caseId, section.caseStudyOnly)}</select></label>`;
     else content = `${textFields(section.key, value, section)}${section.technicalTopics ? technicalTopicsEditor(value) : ""}${section.linkable ? linkDestinationEditor(`${section.key}.destination`, value.destination) : ""}${section.media ? renderMediaEditor(`${section.key}.media`, value.media, section.video, section.hint, section) : ""}`;
     return `<section class="page-section-editor" id="${escapeHtml(section.key)}"><div class="page-section-heading"><span>${escapeHtml(section.label.split(" ")[0])}</span><div><h2>${escapeHtml(section.label.replace(/^\d+\s/, ""))}</h2><p>${escapeHtml(section.hint)}</p></div></div>${content}</section>`;
@@ -701,12 +751,58 @@ function collectPageDraft() {
     let value = field.type === "checkbox" ? field.checked : field.value;
     setPath(draft, field.dataset.path, value);
   });
+  document.querySelectorAll("[data-collection]").forEach((collection) => {
+    const key = collection.dataset.collection;
+    const items = [...collection.querySelectorAll(`[data-collection-item="${key}"]`)].map((node, index) => {
+      const previous = draft[key]?.[Number(node.dataset.index)] || {};
+      return { ...previous, sortOrder: index };
+    });
+    draft[key] = items;
+  });
   if (pageKey === "home") {
     const ids = [...document.querySelectorAll("[data-case-slot]")].sort((a, b) => Number(a.dataset.caseSlot) - Number(b.dataset.caseSlot)).map((field) => field.value).filter(Boolean);
     if (new Set(ids).size !== ids.length) throw new Error("每个精选作品位置必须选择不同的案例。");
     draft.selectedWork.caseIds = ids;
   }
   return draft;
+}
+
+function makeCollectionItem(title = "New Item", media = null) {
+  return {
+    id: `ITEM-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(16).slice(2, 8).toUpperCase()}`,
+    title,
+    description: "",
+    caption: "",
+    altText: "",
+    featured: false,
+    cover: false,
+    hidden: false,
+    sortOrder: 0,
+    destination: "",
+    media: {
+      mediaId: media?.id || "",
+      mediaType: media?.mediaType || "image",
+      fallbackPath: "",
+      altText: "",
+      posterMediaId: "",
+      fit: "cover",
+      focalPosition: "center",
+      autoplay: true,
+      muted: true,
+      loop: true
+    }
+  };
+}
+
+function moveCollectionItem(key, from, to) {
+  pageData.config.draft = collectPageDraft();
+  const items = Array.isArray(pageData.config.draft[key]) ? pageData.config.draft[key] : [];
+  if (to < 0 || to >= items.length || from === to) return;
+  const [item] = items.splice(from, 1);
+  items.splice(to, 0, item);
+  items.forEach((entry, index) => { entry.sortOrder = index; });
+  pageData.config.draft[key] = items;
+  renderPageEditor();
 }
 
 async function loadPageEditor(key) {
@@ -761,6 +857,32 @@ document.getElementById("pageSections").addEventListener("click", (event) => {
     [ids[index], ids[next]] = [ids[next], ids[index]];
     pageData.config.draft.selectedWork.caseIds = ids.filter(Boolean);
     renderPageEditor();
+  }
+  const add = event.target.closest("[data-collection-add]");
+  if (add) {
+    pageData.config.draft = collectPageDraft();
+    const key = add.dataset.collectionAdd;
+    const items = Array.isArray(pageData.config.draft[key]) ? pageData.config.draft[key] : [];
+    items.push({ ...makeCollectionItem("New Item"), sortOrder: items.length });
+    pageData.config.draft[key] = items;
+    renderPageEditor();
+  }
+  const batch = event.target.closest("[data-collection-batch]");
+  if (batch) document.querySelector(`[data-collection-files="${batch.dataset.collectionBatch}"]`)?.click();
+  const remove = event.target.closest("[data-collection-remove]");
+  if (remove) {
+    pageData.config.draft = collectPageDraft();
+    const row = remove.closest("[data-collection-item]");
+    const key = remove.dataset.collectionRemove;
+    const index = Number(row?.dataset.index);
+    pageData.config.draft[key] = (pageData.config.draft[key] || []).filter((_, itemIndex) => itemIndex !== index).map((item, itemIndex) => ({ ...item, sortOrder: itemIndex }));
+    renderPageEditor();
+  }
+  const collectionMove = event.target.closest("[data-collection-move]");
+  if (collectionMove) {
+    const row = collectionMove.closest("[data-collection-item]");
+    const index = Number(row?.dataset.index);
+    moveCollectionItem(collectionMove.dataset.collectionKey, index, collectionMove.dataset.collectionMove === "up" ? index - 1 : index + 1);
   }
 });
 
@@ -871,6 +993,51 @@ document.getElementById("brandingFields").addEventListener("change", async (even
     renderBrandingFields();
     showMessage(message, "品牌图片已上传并选中，请保存草稿后预览。", "success");
   } catch (error) { showMessage(message, error.message, "error"); }
+});
+
+document.getElementById("pageSections").addEventListener("dragstart", (event) => {
+  const row = event.target.closest("[data-collection-item]");
+  if (!row) return;
+  event.dataTransfer.setData("text/plain", `${row.dataset.collectionItem}:${row.dataset.index}`);
+  event.dataTransfer.effectAllowed = "move";
+});
+
+document.getElementById("pageSections").addEventListener("dragover", (event) => {
+  if (event.target.closest("[data-collection-item]")) event.preventDefault();
+});
+
+document.getElementById("pageSections").addEventListener("drop", (event) => {
+  const target = event.target.closest("[data-collection-item]");
+  if (!target) return;
+  const [key, from] = event.dataTransfer.getData("text/plain").split(":");
+  if (!key || key !== target.dataset.collectionItem) return;
+  event.preventDefault();
+  moveCollectionItem(key, Number(from), Number(target.dataset.index));
+});
+
+document.getElementById("pageSections").addEventListener("change", async (event) => {
+  const input = event.target.closest("[data-collection-files]");
+  if (!input?.files?.length) return;
+  const key = input.dataset.collectionFiles;
+  const section = PAGE_SECTIONS[pageKey].find((item) => item.key === key) || {};
+  const message = document.getElementById("pageEditorMessage");
+  pageData.config.draft = collectPageDraft();
+  const items = Array.isArray(pageData.config.draft[key]) ? pageData.config.draft[key] : [];
+  showMessage(message, `正在批量上传 ${input.files.length} 个文件...`);
+  try {
+    for (const file of [...input.files]) {
+      const media = await uploadMediaFile(file, { category: section.uploadCategory || PAGE_META[pageKey].category, displayName: file.name.replace(/\.[^.]+$/, ""), altText: "" });
+      mediaItems.unshift(media);
+      items.push({ ...makeCollectionItem(file.name.replace(/\.[^.]+$/, ""), media), sortOrder: items.length });
+    }
+    pageData.config.draft[key] = items;
+    renderPageEditor();
+    showMessage(message, "批量上传完成。确认无误后请保存草稿。", "success");
+  } catch (error) {
+    showMessage(message, error.message, "error");
+  } finally {
+    input.value = "";
+  }
 });
 
 document.getElementById("mediaList").addEventListener("change", async (event) => {

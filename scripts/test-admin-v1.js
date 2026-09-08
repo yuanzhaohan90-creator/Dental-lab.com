@@ -30,7 +30,7 @@ assert.equal(homepage.hero.description.length, 500);
 assert.equal(homepage.hero.media.mediaId, "MEDIA-ABC");
 assert.equal(homepage.hero.media.fit, "contain");
 assert.equal(homepage.hero.media.focalPosition, "top");
-assert.deepEqual(homepage.selectedWork.caseIds, ["CASE-1", "CASE-2", "CASE-3"]);
+assert.deepEqual(homepage.selectedWork.caseIds, ["CASE-1", "CASE-2", "CASE-3", "CASE-4"]);
 assert.equal(homepage.workflow.items.length, 4);
 
 const fallbackHomepage = normalizeHomepage({});
@@ -65,6 +65,10 @@ assert.equal(cleanedFullArch.qc.destination, "/full-arch-all-on-x");
 const about = normalizePageConfig("about", { packing: { media: { mediaId: "MEDIA-PACKING" } } });
 assert.equal(about.packing.media.mediaId, "MEDIA-PACKING");
 assert.equal(about.production.media.fit, "contain");
+assert.equal(about.laboratoryGallery.length >= 1, true);
+assert.equal(about.equipmentGallery.length >= 1, true);
+assert.equal(about.workflowSteps.length >= 5, true);
+assert.equal(about.qualityCollection.length >= 1, true);
 
 const safeMedia = normalizePageConfig("implant", { hero: { media: { fit: "stretch", focalPosition: "random" } } });
 assert.equal(safeMedia.hero.media.fit, "cover");

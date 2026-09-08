@@ -100,7 +100,10 @@ function safeDownloadName(value) {
 }
 
 async function adminMedia(record) {
-  const usedIn = await mediaUsage(record.id);
+  const usedIn = await mediaUsage(record.id).catch((error) => {
+    console.warn("admin_media_usage_skipped", record.id, error?.message || error);
+    return [];
+  });
   const mediaType = String(record.contentType || "").startsWith("video/") ? "video" : "image";
   const posterUrl = record.posterMediaId
     ? `/api/admin?module=media-image&id=${encodeURIComponent(record.posterMediaId)}`
@@ -293,18 +296,26 @@ async function handleSubmissionFile(req, res) {
 
 async function handleMedia(req, res) {
   if (req.method === "GET") {
-    const trash = query(req, "view") === "trash";
-    const records = await listMedia({ trash });
-    const active = trash ? await listMedia() : records;
-    return reply(res, 200, {
-      ok: true,
-      media: await Promise.all(records.map(adminMedia)),
-      categories: MEDIA_CATEGORIES,
-      storage: {
-        publicMedia: active.reduce((sum, item) => sum + (Number(item.size) || 0), 0),
-        trash: (trash ? records : await listMedia({ trash: true })).reduce((sum, item) => sum + (Number(item.size) || 0), 0)
+    try {
+      const trash = query(req, "view") === "trash";
+      const records = await listMedia({ trash });
+      const active = trash ? await listMedia() : records;
+      const trashRecords = trash ? records : await listMedia({ trash: true });
+      return reply(res, 200, {
+        ok: true,
+        media: await Promise.all(records.map(adminMedia)),
+        categories: MEDIA_CATEGORIES,
+        storage: {
+          publicMedia: active.reduce((sum, item) => sum + (Number(item.size) || 0), 0),
+          trash: trashRecords.reduce((sum, item) => sum + (Number(item.size) || 0), 0)
+        }
+      });
+    } catch (error) {
+      if (query(req, "debug") === "1") {
+        return reply(res, error.statusCode || 500, { ok: false, error: error.message || "Admin request failed.", name: error.name || "Error" });
       }
-    });
+      throw error;
+    }
   }
   if (req.method === "POST") {
     const { fields, file } = await parseUpload(req);
