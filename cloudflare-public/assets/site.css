@@ -35,8 +35,10 @@ h1,h2,h3,p{margin-top:0}
 .btn-outline:active{background:#e7eef4;border-color:var(--blue-active)}
 .btn:disabled,.btn[aria-disabled="true"]{background:var(--disabled-bg);border-color:var(--disabled-bg);color:var(--disabled-text);box-shadow:none;cursor:not-allowed}
 .hero{background:#eef5fa;padding:56px 0 34px}
+.home-v3-hero{padding:72px 0;background:linear-gradient(180deg,#eef5fa 0%,#f8fbfd 100%)}
 .hero .wrap{max-width:1680px}
 .hero-grid{display:grid;grid-template-columns:minmax(0,50fr) minmax(520px,50fr);gap:clamp(50px,5.2vw,92px);align-items:center}
+.home-v3-hero .hero-grid{grid-template-columns:minmax(0,48fr) minmax(540px,52fr)}
 .hero-copy{min-width:0}
 .eyebrow{display:inline-flex;align-items:center;max-width:100%;padding:7px 11px;border-radius:999px;background:#e5f0f8;border:1px solid #bed3e4;color:#084b83;font-size:13px;font-weight:850}
 h1{font-size:clamp(3.25rem,4.15vw,5.05rem);line-height:1.01;color:var(--ink);letter-spacing:0;margin:22px 0 18px;max-width:13.2ch;overflow-wrap:break-word}
@@ -45,7 +47,20 @@ h1{font-size:clamp(3.25rem,4.15vw,5.05rem);line-height:1.01;color:var(--ink);let
 .cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px;min-width:0}
 .hero-visual{margin:0;background:#102033;border-radius:8px;overflow:hidden;box-shadow:0 18px 42px rgba(16,32,51,.12)}
 .hero-visual img{width:100%;aspect-ratio:1.26/1;object-fit:cover;object-position:center}
+.home-v3-hero .hero-visual :is(img,video){aspect-ratio:16/10}
 .hero-visual figcaption{background:#fff;padding:14px 16px;color:#4d6378;font-size:14px;border:1px solid var(--line);border-top:0}
+.home-v3-capability-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.home-v3-capability-row span{display:inline-flex;align-items:center;min-height:36px;padding:7px 10px;border:1px solid #c7d7e6;border-radius:999px;background:rgba(255,255,255,.72);color:#304c65;font-size:13px;font-weight:850}
+.home-v3-section-head{max-width:920px;margin-left:auto;margin-right:auto;text-align:center}
+.home-v3-selected{padding-top:78px}
+.home-v3-services .service-card{min-height:230px}
+.home-v3-proof{padding:84px 0}
+.home-v3-proof .section-head{margin-bottom:28px}
+.home-v3-proof-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.home-v3-proof-grid a{display:flex;align-items:center;min-height:86px;padding:18px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:rgba(255,255,255,.08);color:#fff;font-weight:900;text-decoration:none;cursor:pointer}
+.home-v3-workflow .steps{grid-template-columns:repeat(6,minmax(0,1fr))}
+.home-v3-lab .image-mosaic img{box-shadow:var(--shadow)}
+.home-v3-why .text-panel{min-height:210px}
 .proof-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:34px}
 .proof-strip :is(span,a){min-height:56px;display:flex;align-items:center;background:rgba(255,255,255,.76);border:1px solid #d4e2ed;border-radius:8px;padding:12px 16px;font-size:13px;font-weight:850;color:#36516c}
 .section{padding:92px 0}
@@ -215,6 +230,8 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   .fullarch-library,.fullarch-card{grid-template-columns:1fr}
   .fullarch-card img{height:auto;min-height:0;aspect-ratio:16/11}
   .proof-strip,.service-grid,.lab-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .home-v3-hero .hero-grid{grid-template-columns:1fr}
+  .home-v3-proof-grid,.home-v3-workflow .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
   .fullarch-proof{grid-template-columns:repeat(2,minmax(0,1fr))}
   .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
   .footer-grid{grid-template-columns:1fr 1fr}
@@ -235,6 +252,7 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   .navlinks a{padding:11px 0;border-bottom:1px solid #edf3f7;white-space:normal}
   .nav-cta{display:none}
   .hero{padding:26px 0 24px}
+  .home-v3-hero{padding:34px 0 30px}
   .hero-grid{gap:20px}
   .hero-grid,.page-hero-grid,.two-col,.cta-row{width:100%;max-width:calc(100vw - 32px)}
   h1{font-size:2.02rem;line-height:1.08;max-width:100%;margin:14px 0 12px}
@@ -247,6 +265,7 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   .hero-visual img{aspect-ratio:16/11;object-fit:cover}
   .hero-visual figcaption{font-size:13px;padding:12px}
   .proof-strip,.service-feature-grid,.service-grid,.tick-list,.case-grid,.case-grid.three,.lab-grid,.steps,.content-grid,.form-grid,.footer-grid,.qc-list{grid-template-columns:1fr}
+  .home-v3-proof-grid,.home-v3-workflow .steps{grid-template-columns:1fr}
   .process-grid,.technical-points,.case-meta,.fullarch-proof,.verification-grid{grid-template-columns:1fr}
   .fullarch-card div{padding:20px}
   .section{padding:56px 0}

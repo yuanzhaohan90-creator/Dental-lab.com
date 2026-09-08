@@ -54,7 +54,7 @@ function videoUnsupported() {
   return Response.json({ ok: false, error: "Automatic HEVC/MOV video conversion is not supported in Cloudflare Preview yet. Upload an H.264/AAC MP4 for playback." }, { status: 501, headers: { "Cache-Control": "no-store" } });
 }
 
-const publicPages = { "/": "home", "/implant-restorations": "implant", "/full-arch-all-on-x": "fullArch", "/cases": "cases", "/crown-bridge": "crownBridge", "/digital-dentistry": "digital", "/surgical-guides": "surgicalGuides", "/about": "about", "/submit-case": "submitCase", "/privacy-policy": "privacy" };
+const publicPages = { "/": "home", "/implant-restorations": "implant", "/full-arch-all-on-x": "fullArch", "/cases": "cases", "/crown-bridge": "crownBridge", "/services/crown-bridge": "crownBridge", "/digital-dentistry": "digital", "/services/digital-workflow": "digital", "/surgical-guides": "surgicalGuides", "/about": "about", "/submit-case": "submitCase", "/privacy-policy": "privacy", "/terms": "terms" };
 const adminPages = { "/admin": "index.html", "/admin/": "index.html", "/admin/home": "home.html", "/admin/homepage": "homepage.html", "/admin/implant": "implant.html", "/admin/full-arch": "full-arch.html", "/admin/about": "about.html", "/admin/submissions": "submissions.html", "/admin/media": "media.html", "/admin/settings": "settings.html", "/admin/cases": "cases.html" };
 
 function routedRequest(request, path, params = {}) {

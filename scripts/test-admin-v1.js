@@ -31,7 +31,7 @@ assert.equal(homepage.hero.media.mediaId, "MEDIA-ABC");
 assert.equal(homepage.hero.media.fit, "contain");
 assert.equal(homepage.hero.media.focalPosition, "top");
 assert.deepEqual(homepage.selectedWork.caseIds, ["CASE-1", "CASE-2", "CASE-3", "CASE-4"]);
-assert.equal(homepage.workflow.items.length, 4);
+assert.equal(homepage.workflow.items.length, 6);
 
 const fallbackHomepage = normalizeHomepage({});
 assert.equal(fallbackHomepage.hero.heading, DEFAULT_HOMEPAGE.hero.heading);
