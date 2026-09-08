@@ -154,11 +154,12 @@ function openEditor(item = null, requestedType = "quick_work") {
   publishState.textContent = item?.status === "published" ? "LIVE / 已上线" : "DRAFT / 草稿";
   publishState.classList.toggle("live", item?.status === "published");
   editor.elements.category.innerHTML = '<option value="">请选择分类</option>' + optionMarkup(state.categories, item?.category, categoryLabel);
-  const names = ["title", "category", "shortNote", "restorationType", "material", "implantSystem", "platform", "shade", "caseOverview", "challenge", "recordsReceived", "technicalReview", "cadDesign", "provisional", "framework", "finalRestoration", "qc", "technicalOutcome", "status"];
+  const names = ["title", "category", "shortNote", "restorationType", "material", "implantSystem", "platform", "shade", "technicalSummary", "caseOverview", "challenge", "planning", "recordsReceived", "technicalReview", "cadDesign", "provisional", "framework", "workflow", "finalRestoration", "qc", "clinicalNotes", "technicalOutcome", "status"];
   names.forEach((name) => { editor.elements[name].value = item?.[name] || (name === "status" ? "draft" : ""); });
   editor.elements.shortNote.value = item?.shortNote || item?.summary || "";
   editor.elements.contentType.value = contentType;
   editor.elements.tags.value = item?.tags?.join(", ") || "";
+  editor.elements.relatedCaseIds.value = item?.relatedCaseIds?.join(", ") || "";
   editor.elements.featured.checked = Boolean(item?.featured);
   editor.elements.coverCaption.value = item?.images?.find((image) => image.isCover)?.caption || "";
   editor.elements.coverImage.required = !item?.images?.some((image) => image.isCover);
@@ -180,6 +181,10 @@ function serializeCase(statusOverride) {
     title: editor.elements.title.value,
     category: editor.elements.category.value,
     shortNote: editor.elements.shortNote.value,
+    technicalSummary: editor.elements.technicalSummary.value,
+    planning: editor.elements.planning.value,
+    clinicalNotes: editor.elements.clinicalNotes.value,
+    workflow: editor.elements.workflow.value,
     restorationType: editor.elements.restorationType.value,
     material: editor.elements.material.value,
     implantSystem: editor.elements.implantSystem.value,
@@ -195,6 +200,7 @@ function serializeCase(statusOverride) {
     finalRestoration: editor.elements.finalRestoration.value,
     qc: editor.elements.qc.value,
     technicalOutcome: editor.elements.technicalOutcome.value,
+    relatedCaseIds: editor.elements.relatedCaseIds.value.split(",").map((id) => id.trim()).filter(Boolean).slice(0, 3),
     tags: editor.elements.tags.value,
     status: statusOverride || editor.elements.status.value,
     featured: editor.elements.featured.checked,
