@@ -534,7 +534,7 @@ const PAGE_SECTIONS = {
   home: [
     { key: "hero", label: "01 首屏主视觉", hint: "建议使用最有说服力的真实全口修复成品。", media: true, video: true, eyebrow: true, cta: true, secondaryCta: true, ratio: "16:9", mobileRatio: "4:5" },
     { key: "capabilities", label: "02 核心能力导航", hint: "客户可以点击整块能力卡进入对应页面或技术区段。", capabilityLinks: true },
-    { key: "selectedWork", label: "03 精选作品", hint: "最多选择 3 个已发布案例，客户点击图片可进入案例详情。", selectedCases: true, eyebrow: true },
+    { key: "selectedWork", label: "03 精选作品", hint: "选择 6-9 个已发布案例，客户点击图片可进入案例详情。", selectedCases: true, eyebrow: true },
     { key: "technicalProof", label: "04 技术证明", hint: "建议使用真实 CAD、支架、模型就位或质检照片。", media: true, video: true, eyebrow: true, technicalTopics: true, ratio: "16:9", mobileRatio: "16:9" },
     { key: "workflow", label: "05 工作流程", hint: "可分别为文件、CAD / 设计、生产和质检添加图片与链接目标。", workflow: true, eyebrow: true },
     { key: "finalCta", label: "06 最终行动区", hint: "使用相关背景图或短 MP4 视频。", media: true, video: true, eyebrow: true, cta: true, ratio: "16:9", mobileRatio: "16:9" }
@@ -653,8 +653,8 @@ function textFields(path, value, section) {
 }
 
 function selectedWorkEditor(value) {
-  const ids = [...(value.caseIds || [])]; while (ids.length < 3) ids.push("");
-  return `<div class="selected-work-editor">${ids.map((id, index) => { const item = pageData.publishedCases.find((entry) => entry.id === id); return `<div class="selected-work-slot" data-case-index="${index}">${item?.coverImage ? `<img src="${item.coverImage.url}" alt="${escapeHtml(item.title)}">` : '<div class="case-slot-empty">空位置</div>'}<label class="field">位置 ${index + 1}<select data-case-slot="${index}">${caseOptions(id)}</select></label><div class="slot-actions"><button type="button" class="btn btn-secondary" data-case-move="up" ${index === 0 ? "disabled" : ""}>上移</button><button type="button" class="btn btn-secondary" data-case-move="down" ${index === 2 ? "disabled" : ""}>下移</button></div></div>`; }).join("")}</div>`;
+  const ids = [...(value.caseIds || [])]; while (ids.length < 9) ids.push("");
+  return `<div class="selected-work-editor">${ids.map((id, index) => { const item = pageData.publishedCases.find((entry) => entry.id === id); return `<div class="selected-work-slot" data-case-index="${index}">${item?.coverImage ? `<img src="${item.coverImage.url}" alt="${escapeHtml(item.title)}">` : '<div class="case-slot-empty">空位置</div>'}<label class="field">位置 ${index + 1}<select data-case-slot="${index}">${caseOptions(id)}</select></label><div class="slot-actions"><button type="button" class="btn btn-secondary" data-case-move="up" ${index === 0 ? "disabled" : ""}>上移</button><button type="button" class="btn btn-secondary" data-case-move="down" ${index === 8 ? "disabled" : ""}>下移</button></div></div>`; }).join("")}</div>`;
 }
 
 function workflowEditor(value, section) {
@@ -757,7 +757,7 @@ document.getElementById("pageSections").addEventListener("click", (event) => {
     pageData.config.draft = collectPageDraft();
     const index = Number(move.closest("[data-case-index]").dataset.caseIndex);
     const next = move.dataset.caseMove === "up" ? index - 1 : index + 1;
-    const ids = [...pageData.config.draft.selectedWork.caseIds]; while (ids.length < 3) ids.push("");
+    const ids = [...pageData.config.draft.selectedWork.caseIds]; while (ids.length < 9) ids.push("");
     [ids[index], ids[next]] = [ids[next], ids[index]];
     pageData.config.draft.selectedWork.caseIds = ids.filter(Boolean);
     renderPageEditor();

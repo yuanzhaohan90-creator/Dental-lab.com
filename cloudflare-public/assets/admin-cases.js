@@ -13,11 +13,17 @@ const newImages = document.getElementById("newImages");
 const state = { cases: [], current: null, categories: [], imageTypes: [], existing: [], newFiles: [] };
 const nextPath = new URLSearchParams(window.location.search).get("next");
 const publishPrivacyText = "请确认此内容不包含未经授权的患者身份信息。\n\n未经适当授权，不得发布患者姓名、出生日期、病历号、正脸、含身份信息的处方或其他可识别患者的信息。";
-const categoryLabels = { "Full-Arch / All-on-X": "全口 / All-on-X", "Implant Bridge": "种植桥", "Custom Abutment": "个性化基台", "Crown & Bridge": "冠桥", "Surgical Guide": "手术导板" };
+const categoryLabels = { "Full-Arch / All-on-X": "全口 / All-on-X", "Implant Bridge": "种植桥", "Custom Abutment": "个性化基台", "Crown & Bridge": "冠桥", Veneers: "贴面", "Surgical Guide": "手术导板", "Digital Design": "数字化设计", "Removable / Denture": "活动义齿" };
 const imageTypeLabels = { CAD: "CAD", Model: "模型", Framework: "支架", "Ti-base": "Ti-base", PMMA: "PMMA", "Try-in": "试戴", Final: "最终修复体", QC: "质量检查", Other: "其他" };
 const ADMIN_SESSION_KEY = "yzh_admin_session";
 function categoryLabel(value) { return categoryLabels[value] || value; }
 function imageTypeLabel(value) { return imageTypeLabels[value] || value; }
+function isVideoMedia(item) { return item?.mediaType === "video" || String(item?.contentType || "").startsWith("video/"); }
+function caseMediaPreview(item) {
+  return isVideoMedia(item)
+    ? `<video src="${item.url}" muted playsinline controls preload="metadata"></video>`
+    : `<img src="${item.url || item.preview}" alt="">`;
+}
 
 function escapeHtml(value) {
   const element = document.createElement("div");
@@ -102,8 +108,8 @@ function renderImages() {
   const cover = state.existing.find((image) => image.isCover);
   currentCover.innerHTML = cover ? `<figure class="admin-current-cover"><img src="${cover.url}" alt=""><figcaption>当前封面</figcaption></figure>` : '<p class="admin-empty">尚未上传封面。</p>';
   const gallery = state.existing.filter((image) => !image.isCover).sort((a, b) => a.sortOrder - b.sortOrder);
-  existingImages.innerHTML = gallery.map((image, index) => `<div class="admin-image-row" data-existing-id="${image.id}"><img src="${image.url}" alt=""><div><label>图片说明<input data-key="caption" value="${escapeHtml(image.caption)}" maxlength="240"></label><label>阶段类型<select data-key="imageType">${optionMarkup(state.imageTypes, image.imageType, imageTypeLabel)}</select></label></div><div class="admin-image-controls"><button type="button" data-move="up" aria-label="图片上移">↑</button><button type="button" data-move="down" aria-label="图片下移">↓</button><button type="button" data-remove aria-label="移除图片">×</button></div></div>`).join("");
-  newImages.innerHTML = state.newFiles.map((item, index) => `<div class="admin-image-row" data-new-index="${index}"><img src="${item.preview}" alt=""><div><label>图片说明<input data-key="caption" value="${escapeHtml(item.caption)}" maxlength="240"></label><label>阶段类型<select data-key="imageType">${optionMarkup(state.imageTypes, item.imageType, imageTypeLabel)}</select></label></div><div class="admin-image-controls"><button type="button" data-new-move="up" aria-label="图片上移">↑</button><button type="button" data-new-move="down" aria-label="图片下移">↓</button><button type="button" data-new-remove aria-label="移除图片">×</button></div></div>`).join("");
+  existingImages.innerHTML = gallery.map((image, index) => `<div class="admin-image-row" data-existing-id="${image.id}">${caseMediaPreview(image)}<div><label>说明 / Caption<input data-key="caption" value="${escapeHtml(image.caption)}" maxlength="240"></label><label>阶段类型<select data-key="imageType">${optionMarkup(state.imageTypes, image.imageType, imageTypeLabel)}</select></label></div><div class="admin-image-controls"><button type="button" data-move="up" aria-label="媒体上移">↑</button><button type="button" data-move="down" aria-label="媒体下移">↓</button><button type="button" data-remove aria-label="移除媒体">×</button></div></div>`).join("");
+  newImages.innerHTML = state.newFiles.map((item, index) => `<div class="admin-image-row" data-new-index="${index}">${caseMediaPreview(item)}<div><label>说明 / Caption<input data-key="caption" value="${escapeHtml(item.caption)}" maxlength="240"></label><label>阶段类型<select data-key="imageType">${optionMarkup(state.imageTypes, item.imageType, imageTypeLabel)}</select></label></div><div class="admin-image-controls"><button type="button" data-new-move="up" aria-label="媒体上移">↑</button><button type="button" data-new-move="down" aria-label="媒体下移">↓</button><button type="button" data-new-remove aria-label="移除媒体">×</button></div></div>`).join("");
 }
 
 function syncExistingInputs() {
@@ -130,8 +136,8 @@ function updateTypeUI() {
   document.getElementById("caseStudyFields").hidden = !isCaseStudy;
   document.getElementById("upgradeCaseButton").hidden = isCaseStudy;
   document.getElementById("imageLimitNote").textContent = isCaseStudy
-    ? "重点案例研究支持较长的图片序列，只添加这个案例真实具备的阶段。"
-    : "快速作品支持 0–6 张其他图片，可用箭头调整展示顺序。";
+    ? "重点案例研究支持较长的图片/视频序列，只添加这个案例真实具备的阶段。"
+    : "快速作品支持 0–6 张其他图片或 H.264/AAC MP4，可用箭头调整展示顺序。";
 }
 
 function openEditor(item = null, requestedType = "quick_work") {
@@ -246,7 +252,7 @@ adminCaseList.addEventListener("click", (event) => { const button = event.target
 
 editor.elements.galleryImages.addEventListener("change", () => {
   state.newFiles.forEach((entry) => URL.revokeObjectURL(entry.preview));
-  state.newFiles = [...editor.elements.galleryImages.files].map((file) => ({ file, preview: URL.createObjectURL(file), caption: "", imageType: "Other" }));
+  state.newFiles = [...editor.elements.galleryImages.files].map((file) => ({ file, preview: URL.createObjectURL(file), caption: "", imageType: "Other", mediaType: file.type.startsWith("video/") ? "video" : "image", contentType: file.type }));
   renderImages();
 });
 

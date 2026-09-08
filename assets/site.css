@@ -58,6 +58,7 @@ h2{font-size:clamp(2rem,3vw,3rem);line-height:1.09;color:var(--ink);letter-spaci
 h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .service-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;margin-bottom:26px}
 .service-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.architecture-service-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 .service-card,.case-card,.lab-grid article,.workflow-link-card,.proof-list article,.steps article,.steps .workflow-step,.cta-panel,.text-panel{background:#fff;border:1px solid rgba(216,228,238,.9);border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
 .service-card img{width:100%;aspect-ratio:4/3;object-fit:cover}
 .service-card div{padding:20px}
@@ -87,6 +88,7 @@ h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .case-card h3{padding-top:16px}
 .case-card p{padding-bottom:18px;margin-bottom:0}
 .priority-case-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:stretch}
+#featured-cases .priority-case-grid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
 .priority-case{background:#fff;border:1px solid rgba(216,228,238,.9);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-rows:auto 1fr}
 .priority-case:is(a){color:inherit;text-decoration:none}
 .priority-case.large{grid-row:span 2}
@@ -160,6 +162,8 @@ h3{color:var(--ink);font-size:20px;line-height:1.18;margin-bottom:8px}
 .fullarch-submit .cta-panel p{font-weight:760}
 .content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
 .text-panel{padding:22px}
+.system-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.system-list span{display:flex;align-items:center;min-height:54px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#304c65;font-weight:850}
 .check-list{display:grid;gap:9px;margin:18px 0 0;padding:0;list-style:none}
 .check-list li{padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#40566c;font-weight:760}
 .contact-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:24px;align-items:start}
@@ -290,7 +294,7 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
 .public-case-card>a>div,.featured-public-case>a>div,.managed-featured-case>div{padding:20px}
 .managed-featured-case{display:grid;grid-template-columns:minmax(280px,.9fr) minmax(0,1.1fr);overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:var(--shadow)}
 .managed-featured-case img{height:100%;min-height:320px}
-.case-library-hero{padding:54px 0;background:#eef5fa}.case-library-hero-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.8fr);gap:42px;align-items:center}.case-library-hero figure{margin:0;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow)}.case-library-hero img{width:100%;aspect-ratio:4/3;object-fit:cover}.case-library-hero figcaption,.case-library-gallery figcaption{padding:11px 13px;color:#52677d;font-size:13px}.case-library-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start}.case-library-gallery figure{margin:0;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#fff}.case-library-gallery img{width:100%;height:auto;object-fit:contain;background:#eef5fa}.case-library-gallery figcaption span{display:block;color:var(--blue);font-weight:900}.case-summary-layout{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:36px}.case-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;border-top:1px solid var(--line)}.case-specs div{padding:12px 0;border-bottom:1px solid var(--line)}.case-specs dt{font-size:12px;color:var(--muted);font-weight:900}.case-specs dd{margin:3px 0 0}.case-reading{max-width:900px}.section-soft{background:var(--soft)}
+.case-library-hero{padding:54px 0;background:#eef5fa}.case-library-hero-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.8fr);gap:42px;align-items:center}.case-library-hero figure{margin:0;overflow:hidden;border-radius:8px;background:#fff;box-shadow:var(--shadow)}.case-library-hero img{width:100%;aspect-ratio:4/3;object-fit:cover}.case-library-hero figcaption,.case-library-gallery figcaption{padding:11px 13px;color:#52677d;font-size:13px}.case-library-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start}.case-library-gallery figure{margin:0;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#fff}.case-library-gallery img{width:100%;height:auto;object-fit:contain;background:#eef5fa}.case-library-gallery video{width:100%;aspect-ratio:16/9;background:#0b1724}.case-library-gallery figcaption span{display:block;color:var(--blue);font-weight:900}.case-summary-layout{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:36px}.case-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;border-top:1px solid var(--line)}.case-specs div{padding:12px 0;border-bottom:1px solid var(--line)}.case-specs dt{font-size:12px;color:var(--muted);font-weight:900}.case-specs dd{margin:3px 0 0}.case-reading{max-width:900px}.section-soft{background:var(--soft)}
 @media(max-width:1060px){.priority-case-grid,.public-case-grid,.featured-public-case-grid{grid-template-columns:1fr 1fr}.case-library-gallery{grid-template-columns:1fr 1fr}.case-library-hero-grid,.managed-featured-case{grid-template-columns:1fr}.managed-featured-case img{height:auto;min-height:0}}
 @media(max-width:760px){.hero-visual :is(img,video),.page-hero-grid>:is(img,video){aspect-ratio:4/5}.priority-case-grid,.public-case-grid,.featured-public-case-grid,.case-library-gallery,.case-summary-layout{grid-template-columns:1fr}.priority-case img,.priority-case.large img{aspect-ratio:4/3}.workflow-step-media{margin:-18px -18px 16px}.case-library-hero{padding:36px 0}.case-library-hero-grid{gap:22px}.case-filter{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:30px}.case-filter button{min-width:0;padding:9px 7px}.case-specs{grid-template-columns:1fr}}
 

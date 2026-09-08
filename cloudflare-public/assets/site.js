@@ -411,7 +411,7 @@ async function applyPublicSiteData() {
       applyText("#featured-cases .section-head h2", homepage.selectedWork.heading);
       applyText("#featured-cases .section-head .copy", homepage.selectedWork.description);
       const grid = document.querySelector("#featured-cases .priority-case-grid");
-      if (grid && selectedCases?.length) grid.innerHTML = selectedCases.slice(0, 3).map(makeCaseCard).join("");
+      if (grid && selectedCases?.length) grid.innerHTML = selectedCases.slice(0, 9).map(makeCaseCard).join("");
     }
     if (location.pathname === "/implant-restorations") {
       applyManagedPage(pages?.implant);
@@ -497,7 +497,7 @@ if (form) {
       const response = await fetch(form.action, { method: "POST", body: new FormData(form) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.ok) throw new Error(data.error || "Submission failed");
-      setStatus("success", `<strong>Case received.</strong><br>Case ID: <b>${data.caseId}</b><br>Your files were uploaded successfully. Our technical team will review the submission and reply by email or WhatsApp.`);
+      setStatus("success", `<strong>Case received.</strong><br>Your Case ID: <b>${data.caseId}</b><br>We’ll review the files and contact you if anything needs clarification.<div class="cta-row"><a class="btn btn-primary" href="/submit-case">Submit Another Case</a><a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noopener noreferrer">WhatsApp Us</a></div>`);
       form.reset();
     } catch (error) {
       const contact = window.yzhPublicSettings || {};

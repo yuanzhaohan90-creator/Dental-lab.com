@@ -52,6 +52,14 @@ function textSection(eyebrow, title, value) {
   return `<section class="section case-detail-section"><div class="wrap case-reading"><p class="eyebrow">${escapeHtml(eyebrow)}</p><h2>${escapeHtml(title)}</h2><div class="case-rich-text"><p>${paragraph(value)}</p></div></div></section>`;
 }
 
+function galleryMedia(item, image) {
+  const alt = escapeHtml(image.caption || `${item.title} additional view`);
+  if (image.mediaType === "video" || String(image.contentType || "").startsWith("video/")) {
+    return `<video src="${escapeHtml(image.url)}" controls playsinline preload="metadata" aria-label="${alt}"></video>`;
+  }
+  return `<a href="${escapeHtml(image.url)}" target="_blank" rel="noopener"><img src="${escapeHtml(image.url)}" alt="${alt}" width="1200" height="900" loading="lazy" decoding="async"></a>`;
+}
+
 function render(record, preview, settings) {
   const item = normalizePublicCase(publicRecord(record, true));
   const cover = item.coverImage;
@@ -61,7 +69,7 @@ function render(record, preview, settings) {
   const gallery = item.images.filter((image) => !image.isCover);
   const title = `${item.title} | ${item.category} | YZH Dental Lab`;
   const previewBanner = preview ? `<div class="preview-banner">Private draft preview. This case is not public.</div>` : "";
-  const galleryHtml = gallery.length ? `<section class="section section-soft"><div class="wrap"><div class="section-head"><p class="eyebrow">Image Gallery</p><h2>${isCaseStudy ? "Design, production and quality review." : "Completed work and technical views."}</h2></div><div class="case-library-gallery">${gallery.map((image, index) => `<figure><a href="${escapeHtml(image.url)}" target="_blank" rel="noopener"><img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.caption || `${item.title} additional view`)}" width="1200" height="900" loading="lazy" decoding="async"></a><figcaption><span>${escapeHtml(galleryLabel(image, index))}</span>${image.caption ? escapeHtml(image.caption) : ""}</figcaption></figure>`).join("")}</div></div></section>` : "";
+  const galleryHtml = gallery.length ? `<section class="section section-soft"><div class="wrap"><div class="section-head"><p class="eyebrow">Case Gallery</p><h2>${isCaseStudy ? "Design, production and quality review." : "Completed work and technical views."}</h2></div><div class="case-library-gallery">${gallery.map((image, index) => `<figure>${galleryMedia(item, image)}<figcaption><span>${escapeHtml(galleryLabel(image, index))}</span>${image.caption ? escapeHtml(image.caption) : ""}</figcaption></figure>`).join("")}</div></div></section>` : "";
   const detailedSections = isCaseStudy ? [
     textSection("Case Overview", "Technical case overview.", item.caseOverview),
     textSection("Challenge", "What required careful review.", item.challenge),

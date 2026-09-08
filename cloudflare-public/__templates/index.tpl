@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YZH Dental Lab | Complex Implant, Full-Arch & CAD/CAM Support</title>
+<meta name="description" content="YZH Dental Lab supports overseas dental laboratories and clinics with complex implant restorations, full-arch cases and CAD/CAM production from China.">
+<link rel="canonical" href="https://yzhdentallab.com/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yzhdentallab.com/">
+<meta property="og:title" content="YZH Dental Lab | Complex Implant, Full-Arch & CAD/CAM Support">
+<meta property="og:description" content="Implant restorations, full-arch and CAD/CAM support for overseas dental laboratories and clinics.">
+<meta property="og:image" content="https://yzhdentallab.com/assets/real/hero-full-arch-premium-01.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/assets/site.css?v=interaction-qa-3">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"YZH Dental Lab","url":"https://yzhdentallab.com/","email":"yzhdentallab@gmail.com","contactPoint":{"@type":"ContactPoint","contactType":"sales","email":"yzhdentallab@gmail.com","telephone":"+86-137-1473-0109","availableLanguage":["English","Chinese"]},"knowsAbout":["Digital dental lab China","Dental lab outsourcing China","Implant restorations","Full arch dental lab","All-on-X dental lab","Custom abutment dental lab","CAD/CAM dental laboratory"]}
+</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap nav">
+    <a class="brand" href="/" aria-label="YZH Dental Lab home"><span class="brand-mark">Y</span><span>YZH Dental Lab</span></a>
+    <button class="menu-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button>
+    <nav class="navlinks" id="primaryNav" aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/implant-restorations">Implant</a>
+      <a href="/full-arch-all-on-x">Full Arch</a>
+      <a href="/cases">Cases</a>
+      <a href="/about">About</a>
+      <a href="/submit-case">Submit Case</a>
+    </nav>
+    <a class="btn btn-primary nav-cta" href="/submit-case">Send a Trial Case</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow" data-manager-text="hero.eyebrow">Digital dental lab in China for overseas partners</p>
+        <h1 data-manager-text="hero.heading">Complex Implant Cases. Solved.</h1>
+        <p class="lead" data-manager-text="hero.description">Implant restorations, full-arch and CAD/CAM support for overseas dental laboratories and clinics.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/submit-case" data-manager-text="hero.primaryLabel" data-manager-href="hero.primaryDestination">Submit a Case</a>
+          <a class="btn btn-outline" href="/full-arch-all-on-x" data-manager-text="hero.secondaryLabel" data-manager-href="hero.secondaryDestination">View Full-Arch Cases</a>
+        </div>
+      </div>
+      <figure class="hero-visual" data-manager-media="hero.media">
+        <img src="/assets/real/hero-full-arch-premium-01.jpg" alt="Full arch implant restoration by YZH Dental Lab" width="900" height="675" fetchpriority="high">
+        <figcaption>Full-arch, implant and CAD/CAM restorative support for lab-to-lab outsourcing.</figcaption>
+      </figure>
+    </div>
+    <div class="wrap proof-strip" aria-label="Core capability summary">
+      <a href="/implant-restorations" data-manager-text="capabilities.0.label" data-manager-href="capabilities.0.destination">Implant Restorations</a>
+      <a href="/full-arch-all-on-x" data-manager-text="capabilities.1.label" data-manager-href="capabilities.1.destination">Full-Arch / All-on-X</a>
+      <a href="/services/digital-workflow" data-manager-text="capabilities.2.label" data-manager-href="capabilities.2.destination">Digital Workflow</a>
+      <a href="/about" data-manager-text="capabilities.3.label" data-manager-href="capabilities.3.destination">International Collaboration</a>
+    </div>
+  </section>
+
+  <section class="section" id="core-services">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Core Services</p>
+        <h2>Focused dental lab support for clinics and partner laboratories.</h2>
+        <p class="copy">Choose the workflow that matches the case. Every service card opens a relevant page or submission path.</p>
+      </div>
+      <div class="service-grid architecture-service-grid">
+        <a class="service-card text-panel" href="/full-arch-all-on-x"><h3>Full-Arch / All-on-X</h3><p>PMMA provisional, final zirconia, titanium bar and implant-supported full-arch workflows.</p><span class="text-link">View Full-Arch support</span></a>
+        <a class="service-card text-panel" href="/implant-restorations"><h3>Implant Restorations</h3><p>Custom abutments, Ti-base, screw-retained restorations and implant bridge review.</p><span class="text-link">View Implant support</span></a>
+        <a class="service-card text-panel" href="/services/crown-bridge"><h3>Crown & Bridge</h3><p>Zirconia, PFM, veneers, inlays, onlays and restorative overflow support.</p><span class="text-link">View Crown & Bridge</span></a>
+        <a class="service-card text-panel" href="/services/digital-workflow"><h3>Digital Design</h3><p>Exocad design, file review, CAD approval and design-plus-manufacturing workflows.</p><span class="text-link">View Digital Workflow</span></a>
+        <a class="service-card text-panel" href="/surgical-guides"><h3>Surgical Guides</h3><p>Design-only and printed guide support when complete clinical records are supplied.</p><span class="text-link">View Surgical Guides</span></a>
+        <a class="service-card text-panel" href="/submit-case?case_type=Removable%20%2F%20Denture"><h3>Removable / Denture</h3><p>Use this path when removable or denture-related support is part of the confirmed case request.</p><span class="text-link">Ask about removable work</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section soft" id="featured-cases">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Featured Cases</p>
+        <h2>Owner-selected work for technical buyers.</h2>
+        <p class="copy">This area supports up to nine published owner-approved cases. Add or reorder cases from Admin without changing code.</p>
+      </div>
+      <div class="priority-case-grid">
+        <a class="priority-case" href="/cases"><div><p class="case-category">Waiting for owner-approved cases</p><h3>Featured cases will appear here.</h3><p>Publish real YZH work in the Case Library, then select it for the homepage.</p><span class="text-link">Open Case Library</span></div></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="complex-implant-cases">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Complex Implant Cases</p>
+        <h2>Technical review before costly implant or full-arch production.</h2>
+        <p class="copy">These are capability visuals and technical checkpoints, not patient case studies. Published owner-approved work appears in the Case Library.</p>
+      </div>
+      <div class="priority-case-grid">
+        <a class="priority-case large" href="/full-arch-all-on-x">
+          <img src="/assets/real/full-arch-titanium-framework-10.jpg" alt="Full-arch titanium framework capability visual">
+          <div>
+            <p class="case-category">Full-Arch / All-on-X</p>
+            <h3>Full-Arch Restoration Workflow</h3>
+            <p>Review implant positions, MUA details, restorative space, screw access and framework planning before production.</p>
+            <span class="text-link">View Full-Arch Support</span>
+          </div>
+        </a>
+        <a class="priority-case" href="/implant-restorations#implant-case-information">
+          <img src="/assets/real/screw-retained-implant-bridge-01.png" alt="Screw-retained implant bridge restoration">
+          <div>
+            <p class="case-category">Screw-Retained Implant Bridge</p>
+            <h3>Long-Span Implant Bridge</h3>
+            <p>Platform details, scanbody information, screw-channel direction and material choice are checked before fabrication.</p>
+            <span class="text-link">View Implant Support</span>
+          </div>
+        </a>
+        <a class="priority-case" href="/implant-restorations#implant-case-information">
+          <img src="/assets/real/custom-abutment-crown-assembly-03.jpg" alt="Custom implant abutment and crown assembly">
+          <div>
+            <p class="case-category">Custom Abutment / Implant Restoration</p>
+            <h3>Custom Implant Workflow</h3>
+            <p>Emergence profile, margin position, tissue support and crown coordination are reviewed before milling.</p>
+            <span class="text-link">View Custom Implant Support</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section soft" id="implant-systems">
+    <div class="wrap two-col">
+      <div>
+        <p class="eyebrow">Supported Implant Systems</p>
+        <h2>Maintain the system list in Admin as real cases grow.</h2>
+        <p class="copy">YZH can work from the implant system, platform, scanbody and component information supplied with each case. Do not guess system details when records are incomplete.</p>
+      </div>
+      <div class="system-list">
+        <span>Nobel Biocare</span><span>Straumann</span><span>Zimmer Biomet</span><span>Hiossen / Osstem</span><span>Neodent</span><span>More systems by case review</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="why-yzh">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Why YZH</p>
+        <h2>Built for clear lab-to-lab communication.</h2>
+      </div>
+      <div class="content-grid">
+        <a class="text-panel" href="/submit-case"><h3>Technical communication</h3><p>Questions are raised before production when records are incomplete or risk points need confirmation.</p><span class="text-link">Submit records for review</span></a>
+        <a class="text-panel" href="/implant-restorations"><h3>Complex implant support</h3><p>Implant platform, component matching, screw access and restorative space are treated as technical checkpoints.</p><span class="text-link">View implant support</span></a>
+        <a class="text-panel" href="/services/digital-workflow"><h3>Digital workflow</h3><p>CAD, approval, production and QC are organized through a practical digital workflow for overseas partners.</p><span class="text-link">View workflow</span></a>
+        <a class="text-panel" href="/about#quality"><h3>Quality control</h3><p>Fit, contacts, occlusion, finish and case details are checked before dispatch.</p><span class="text-link">View quality process</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section dark" id="technical-review">
+    <div class="wrap workflow-intro">
+      <div>
+        <p class="eyebrow" data-manager-text="technicalProof.eyebrow">Technical Review</p>
+        <h2 data-manager-text="technicalProof.heading">Complex Cases Need More Than Manufacturing</h2>
+        <p class="copy" data-manager-text="technicalProof.description">Before production, the case should be checked for the details that most often create remakes or delays.</p>
+        <div class="managed-section-media" data-manager-media="technicalProof.media" data-hide-when-empty hidden></div>
+        <div class="tick-list">
+          <a href="/implant-restorations#implant-case-information" data-manager-text="technicalProof.items.0.label" data-manager-href="technicalProof.items.0.destination">Implant system / platform</a>
+          <a href="/implant-restorations#implant-case-information" data-manager-text="technicalProof.items.1.label" data-manager-href="technicalProof.items.1.destination">Scanbody / component matching</a>
+          <a href="/implant-restorations#implant-quality-control" data-manager-text="technicalProof.items.2.label" data-manager-href="technicalProof.items.2.destination">Restorative space / screw access</a>
+          <a href="/digital-dentistry" data-manager-text="technicalProof.items.3.label" data-manager-href="technicalProof.items.3.destination">Design / material confirmation</a>
+        </div>
+      </div>
+      <div class="steps" id="workflow">
+        <div class="managed-workflow-head"><p class="eyebrow" data-manager-text="workflow.eyebrow">Digital Workflow</p><h3 data-manager-text="workflow.heading">From files to final QC.</h3><p data-manager-text="workflow.description">Files, design, production and QC are coordinated through one technical workflow.</p></div>
+        <a class="workflow-step" href="/submit-case" data-manager-href="workflow.items.0.destination"><div class="workflow-step-media" data-manager-media="workflow.items.0.media" data-hide-when-empty hidden></div><span>01</span><h3 data-manager-text="workflow.items.0.label">Files</h3><p>Send files, prescription, implant details, photos and due date.</p></a>
+        <a class="workflow-step" href="/digital-dentistry" data-manager-href="workflow.items.1.destination"><div class="workflow-step-media" data-manager-media="workflow.items.1.media" data-hide-when-empty hidden></div><span>02</span><h3 data-manager-text="workflow.items.1.label">CAD / Design</h3><p>We check missing information and technical risk points.</p></a>
+        <a class="workflow-step" href="/about#production" data-manager-href="workflow.items.2.destination"><div class="workflow-step-media" data-manager-media="workflow.items.2.media" data-hide-when-empty hidden></div><span>03</span><h3 data-manager-text="workflow.items.2.label">Production</h3><p>CAD design and production move forward after required details are clear.</p></a>
+        <a class="workflow-step" href="/implant-restorations#implant-quality-control" data-manager-href="workflow.items.3.destination"><div class="workflow-step-media" data-manager-media="workflow.items.3.media" data-hide-when-empty hidden></div><span>04</span><h3 data-manager-text="workflow.items.3.label">QC</h3><p>Fit, contacts, occlusion, finish and case details are checked before shipment.</p></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section trial compact-section">
+    <div class="wrap two-col">
+      <div>
+        <p class="eyebrow" data-manager-text="finalCta.eyebrow">Start With One Trial Case</p>
+        <h2 data-manager-text="finalCta.heading">You do not need to move your full workload at once.</h2>
+        <p class="copy" data-manager-text="finalCta.description">Send one implant, full-arch or restorative case first. Our technical team will review the files, confirm the case details and communicate before production.</p>
+      </div>
+      <div><div class="managed-cta-media" data-manager-media="finalCta.media" data-hide-when-empty hidden></div><div class="cta-panel"><a class="btn btn-primary" href="/submit-case" data-manager-text="finalCta.primaryLabel" data-manager-href="finalCta.primaryDestination">Send a Trial Case</a><a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a></div></div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div><h3>YZH Dental Lab</h3><p>Digital dental laboratory in China supporting overseas labs and clinics with implant, full-arch, crown & bridge, surgical guide and CAD/CAM restorative workflows.</p></div>
+    <div><h3>Services</h3><a href="/implant-restorations">Implant Restorations</a><a href="/full-arch-all-on-x">Full Arch / All-on-X</a><a href="/crown-bridge">Crown & Bridge</a><a href="/digital-dentistry">Digital Dentistry</a><a href="/surgical-guides">Surgical Guides</a></div>
+    <div><h3>Company</h3><a href="/about">About</a><a href="/digital-dentistry">Workflow</a><a href="/submit-case">Submit a Case</a><a href="/privacy-policy">Privacy Policy</a></div>
+    <div><h3>Contact</h3><a href="mailto:yzhdentallab@gmail.com">yzhdentallab@gmail.com</a><a href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp: +86 137 1473 0109</a></div>
+  </div>
+</footer>
+<a class="floating btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a>
+<script src="/assets/site.js?v=interaction-qa-3" defer></script>
+</body>
+</html>

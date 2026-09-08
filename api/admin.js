@@ -111,9 +111,9 @@ async function adminMedia(record) {
 async function validateSelection(value) {
   const ids = value?.selectedWork?.caseIds || [];
   if (!Array.isArray(ids)) throw Object.assign(new Error("Selected cases must be a list."), { statusCode: 400 });
-  if (ids.length > 3) throw Object.assign(new Error("Select no more than three homepage cases."), { statusCode: 400 });
+  if (ids.length > 9) throw Object.assign(new Error("Select no more than nine homepage cases."), { statusCode: 400 });
   const cleanIds = ids.map((id) => String(id || "").trim()).filter(Boolean);
-  if (cleanIds.length > 3) throw Object.assign(new Error("Select no more than three homepage cases."), { statusCode: 400 });
+  if (cleanIds.length > 9) throw Object.assign(new Error("Select no more than nine homepage cases."), { statusCode: 400 });
   if (new Set(cleanIds).size !== cleanIds.length) throw Object.assign(new Error("Each Selected Work slot must use a different case."), { statusCode: 400 });
   const cases = await listRecords();
   const published = new Set(cases.filter((item) => item.status === "published").map((item) => item.id));
@@ -534,8 +534,8 @@ async function handleHomepage(req, res) {
     const body = await readJson(req);
     await validateSelection(body);
     const incomingIds = body?.selectedWork?.caseIds;
-    if (Array.isArray(incomingIds) && incomingIds.filter(Boolean).length > 3) {
-      throw Object.assign(new Error("Select no more than three homepage cases."), { statusCode: 400 });
+    if (Array.isArray(incomingIds) && incomingIds.filter(Boolean).length > 9) {
+      throw Object.assign(new Error("Select no more than nine homepage cases."), { statusCode: 400 });
     }
     const saved = await saveConfigDraft("homepage", DEFAULT_HOMEPAGE, body, normalizeHomepage);
     return reply(res, 200, { ok: true, ...(await homepageData(saved)) });

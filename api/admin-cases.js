@@ -55,7 +55,7 @@ function parseMultipart(req) {
       stream.on("limit", () => { limited = true; });
       stream.on("data", (chunk) => chunks.push(chunk));
       stream.on("end", () => {
-        if (limited) return reject(Object.assign(new Error("Each image must be 10MB or smaller."), { statusCode: 413 }));
+        if (limited) return reject(Object.assign(new Error("Each case media file must be 10MB or smaller."), { statusCode: 413 }));
         files.push({ field, filename: info.filename, contentType: String(info.mimeType || "").toLowerCase(), buffer: Buffer.concat(chunks) });
       });
     });

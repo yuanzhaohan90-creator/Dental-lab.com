@@ -30,6 +30,20 @@
     </div>
   </section>
 
+  <section class="section soft">
+    <div class="wrap two-col">
+      <div>
+        <p class="eyebrow">Who We Are</p>
+        <h2>A technical dental lab partner for overseas restorative teams.</h2>
+        <p class="copy">YZH Dental Lab focuses on implant restorations, full-arch work and digital CAD/CAM workflows for laboratories and clinics that need reliable case review and production support.</p>
+      </div>
+      <div class="proof-list">
+        <article><h3>Technical Focus</h3><p>Implant components, restorative space, CAD design, material choice and QC are reviewed as part of the production workflow.</p></article>
+        <article><h3>No Fake Claims</h3><p>This site uses owner-approved work and practical workflow information. New real cases can be published through Admin.</p></article>
+      </div>
+    </div>
+  </section>
+
   <section class="section">
     <div class="wrap">
       <div class="section-head">
@@ -60,6 +74,22 @@
         <article><h3>Case review before production</h3><p>Missing scan, implant or bite information is flagged before manufacturing starts.</p></article>
         <article><h3>Digital CAD/CAM workflow</h3><p>STL, PLY, Exocad and CAD/CAM records are used for design and production review.</p></article>
         <article><h3>QC before shipment</h3><p>Fit, contact, occlusion, finish and case details are checked before dispatch.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Markets Served</p>
+        <h2>Built for clear communication with overseas partners.</h2>
+        <p class="copy">YZH is positioned for dental laboratories and clinics in English-speaking markets that need implant, full-arch and digital workflow support.</p>
+      </div>
+      <div class="content-grid">
+        <a class="text-panel" href="/submit-case?country=United%20States"><h3>United States / Canada</h3><p>For labs seeking technical outsourcing, design support or controlled trial-case production.</p><span class="text-link">Submit a case</span></a>
+        <a class="text-panel" href="/submit-case?country=Australia%20%2F%20New%20Zealand"><h3>Australia / New Zealand</h3><p>For partners that need digital restorative support with clear communication before production.</p><span class="text-link">Start a review</span></a>
+        <a class="text-panel" href="/submit-case?country=United%20Kingdom"><h3>United Kingdom</h3><p>For labs and clinics evaluating implant and full-arch technical support from China.</p><span class="text-link">Send files</span></a>
+        <a class="text-panel" href="/cases"><h3>Owner-approved work</h3><p>Published cases and quick work can be expanded through the Case Library without changing code.</p><span class="text-link">View cases</span></a>
       </div>
     </div>
   </section>
