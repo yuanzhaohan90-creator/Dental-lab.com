@@ -105,18 +105,19 @@ function applyBranding(settings) {
   document.querySelectorAll(".brand").forEach((brand) => {
     const mark = brand.querySelector(".brand-mark");
     const text = brand.querySelector("span:last-child");
-    if (text) text.textContent = company;
     let logo = brand.querySelector(".brand-logo");
     if (settings.primaryLogoUrl) {
       if (!logo) {
         logo = document.createElement("img");
         logo.className = "brand-logo";
-        logo.alt = company;
         brand.prepend(logo);
       }
+      logo.alt = company;
       logo.src = settings.primaryLogoUrl;
       if (mark) mark.hidden = true;
+      if (text) text.remove();
     } else {
+      if (text) text.textContent = company;
       if (!logo) {
         logo = document.createElement("img");
         logo.className = "brand-logo";
@@ -130,7 +131,9 @@ function applyBranding(settings) {
   const footerTitle = document.querySelector(".site-footer .footer-grid > div:first-child h3");
   if (footerTitle) {
     const logoUrl = settings.darkLogoUrl || settings.primaryLogoUrl;
-    footerTitle.innerHTML = `<a class="footer-brand" href="/"><img src="${escapeAttr(logoUrl || "/assets/brand/yzh-mark.svg")}" alt=""><span>${escapeHtml(company)}</span></a>`;
+    footerTitle.innerHTML = logoUrl
+      ? `<a class="footer-brand" href="/"><img src="${escapeAttr(logoUrl)}" alt="${escapeHtml(company)}"></a>`
+      : `<a class="footer-brand" href="/"><img src="/assets/brand/yzh-mark.svg" alt=""><span>${escapeHtml(company)}</span></a>`;
   }
   const footerWrap = document.querySelector(".site-footer > .wrap");
   if (footerWrap && !footerWrap.querySelector(".footer-copyright")) {
