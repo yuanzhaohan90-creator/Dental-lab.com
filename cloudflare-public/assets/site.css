@@ -226,8 +226,8 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   .wrap.nav{padding-left:16px;padding-right:16px}
   .brand-mark{width:36px;height:36px}
   .brand-logo{height:40px;max-width:220px;object-fit:contain}
-  .brand{font-size:15px;min-width:0;max-width:100%}
-  .brand span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .brand{font-size:15px;min-width:0;max-width:calc(100% - 76px)}
+  .brand span:last-child{overflow:visible;text-overflow:clip;white-space:nowrap}
   .menu-toggle{position:fixed;left:min(calc(100vw - 74px),316px);right:auto;top:12px;z-index:80;display:inline-flex;align-items:center;justify-content:center;min-height:38px;width:58px;padding:8px 12px;border-radius:8px;border:1px solid #c7d7e6;background:#fff;color:var(--ink);font-weight:850;font-family:inherit}
   .navlinks{display:none;grid-column:1/-1;width:100%;overflow:visible;padding:8px 0 4px;margin:0;gap:0;border-top:1px solid var(--line)}
   .navlinks.open{display:grid}
