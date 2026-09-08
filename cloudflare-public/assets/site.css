@@ -53,6 +53,7 @@ h1{font-size:clamp(3.25rem,4.15vw,5.05rem);line-height:1.01;color:var(--ink);let
 .home-v3-capability-row span{display:inline-flex;align-items:center;min-height:36px;padding:7px 10px;border:1px solid #c7d7e6;border-radius:999px;background:rgba(255,255,255,.72);color:#304c65;font-size:13px;font-weight:850}
 .home-v3-section-head{max-width:920px;margin-left:auto;margin-right:auto;text-align:center}
 .home-v3-selected{padding-top:78px}
+.home-v3-selected .priority-case-grid>.priority-case:only-child{grid-column:1/-1;max-width:430px}
 .home-v3-services .service-card{min-height:230px}
 .home-v3-proof{padding:84px 0}
 .home-v3-proof .section-head{margin-bottom:28px}
@@ -287,6 +288,7 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
 /* Media slot ratios: containers define shape; media always keeps its own proportions. */
 [data-manager-media]{min-width:0;max-width:100%}
 [data-manager-media] :is(img,video),:is(img,video)[data-manager-media]{display:block;width:100%;max-width:100%;min-width:0}
+[hidden]{display:none!important}
 .hero-visual :is(img,video),.page-hero-grid>:is(img,video){width:100%;aspect-ratio:16/9;object-fit:cover;object-position:center;background:#eef5fa}
 .hero-visual video{border:0}.page-hero-grid>video{border-radius:8px;box-shadow:var(--shadow)}
 .priority-case-grid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
