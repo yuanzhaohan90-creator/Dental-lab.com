@@ -38,6 +38,17 @@ function metaItems(item) {
   }).map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("");
 }
 
+function heroProofItems(item) {
+  const values = [
+    ["Case Type", item.restorationType || item.category],
+    ["Material", item.material],
+    ["Implant System", item.implantSystem],
+    ["Workflow", item.workflow ? "Documented" : item.cadDesign ? "CAD / Design" : ""]
+  ].filter(([, value]) => String(value || "").trim()).slice(0, 4);
+  if (!values.length) return "";
+  return `<div class="case-proof-strip">${values.map(([label, value]) => `<span><strong>${escapeHtml(label)}</strong>${escapeHtml(value)}</span>`).join("")}</div>`;
+}
+
 function galleryLabel(image, index) {
   const caption = String(image.caption || "");
   if (/smile/i.test(caption)) return "Smile View";
@@ -58,6 +69,19 @@ function storySection(key, title, value, mediaItems = []) {
   return `<section class="section case-detail-stage" id="case-${escapeHtml(key)}"><div class="wrap case-stage-grid"><div><p class="eyebrow">${escapeHtml(key)}</p><h2>${escapeHtml(title)}</h2>${value ? `<div class="case-rich-text"><p>${paragraph(value)}</p></div>` : ""}</div>${media}</div></section>`;
 }
 
+function journeyNav(item, gallery) {
+  const stages = [
+    ["Challenge", item.challenge],
+    ["Planning", item.planning || item.recordsReceived || item.technicalReview || gallery.some((image) => image.imageType === "Model")],
+    ["Design", item.cadDesign || gallery.some((image) => image.imageType === "CAD")],
+    ["Framework", item.framework || item.provisional || gallery.some((image) => ["Framework", "Ti-base", "PMMA"].includes(image.imageType))],
+    ["Try-in", item.workflow || item.clinicalNotes || gallery.some((image) => image.imageType === "Try-in")],
+    ["Final", item.finalRestoration || item.technicalOutcome || gallery.some((image) => ["Final", "QC"].includes(image.imageType))]
+  ].filter(([, available]) => available);
+  if (!stages.length) return "";
+  return `<section class="case-journey-nav"><div class="wrap"><p class="eyebrow">Case Story</p><div>${stages.map(([label]) => `<a href="#case-${escapeHtml(label)}">${escapeHtml(label)}</a>`).join("")}</div></div></section>`;
+}
+
 function galleryMedia(item, image) {
   const alt = escapeHtml(image.caption || `${item.title} additional view`);
   if (image.mediaType === "video" || String(image.contentType || "").startsWith("video/")) {
@@ -74,7 +98,7 @@ function relatedCaseCards(current, records) {
     .slice(0, 3)
     .map((record) => normalizePublicCase(publicRecord(record)));
   if (!candidates.length) return "";
-  return `<section class="section section-soft"><div class="wrap"><div class="section-head"><p class="eyebrow">Related Cases</p><h2>More work in this technical area.</h2></div><div class="public-case-grid">${candidates.map((item) => `<article class="public-case-card case-portfolio-card"><a href="/cases/${encodeURIComponent(item.slug)}"><div class="case-card-media"><img src="${escapeHtml(item.coverImage?.url || "/assets/real/anterior-crown-model-12.jpg")}" alt="${escapeHtml(item.title)}" width="1200" height="900" loading="lazy" decoding="async"></div><div><span class="case-category">${escapeHtml(item.category)}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.technicalSummary || item.shortNote || "View the technical case details.")}</p><span class="text-link">View Case</span></div></a></article>`).join("")}</div></div></section>`;
+  return `<section class="section section-soft"><div class="wrap"><div class="section-head"><p class="eyebrow">Related Cases</p><h2>More work in this technical area.</h2><p class="copy">Compare similar restorative challenges, materials and workflows before sending your own case.</p></div><div class="public-case-grid">${candidates.map((item) => `<article class="public-case-card case-portfolio-card"><a href="/cases/${encodeURIComponent(item.slug)}"><div class="case-card-media"><img src="${escapeHtml(item.coverImage?.url || "/assets/real/anterior-crown-model-12.jpg")}" alt="${escapeHtml(item.title)}" width="1200" height="900" loading="lazy" decoding="async"><div class="case-card-hover"><span><strong>Material</strong>${escapeHtml(item.material || "-")}</span><span><strong>Implant</strong>${escapeHtml(item.implantSystem || "-")}</span><em>View Case</em></div></div><div><span class="case-category">${escapeHtml(item.category)}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.technicalSummary || item.shortNote || "View the technical case details.")}</p><span class="text-link">View Case</span></div></a></article>`).join("")}</div></div></section>`;
 }
 
 function render(record, preview, settings, allRecords = []) {
@@ -106,7 +130,8 @@ ${preview ? '<meta name="robots" content="noindex,nofollow">' : ""}<link rel="ic
 <meta property="og:title" content="${escapeHtml(item.title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:type" content="article"><meta property="og:url" content="${canonical}">${cover ? `<meta property="og:image" content="https://yzhdentallab.com${escapeHtml(cover.url)}">` : ""}
 <link rel="preload" as="image" href="${cover ? escapeHtml(cover.url) : ""}" fetchpriority="high"><link rel="stylesheet" href="/assets/site.css?v=cases-v3-1"></head><body>${previewBanner}
 ${headerMarkup("cases", settings)}
-<main><section class="case-library-hero"><div class="wrap case-library-hero-grid"><div><p class="eyebrow">${isCaseStudy ? "Featured Case Study" : "Recent Work"} · ${escapeHtml(item.category)}</p><h1>${escapeHtml(item.title)}</h1>${item.summary ? `<p class="lead">${escapeHtml(item.summary)}</p>` : ""}</div>${cover ? `<figure><a href="${escapeHtml(cover.url)}" target="_blank" rel="noopener"><img src="${escapeHtml(cover.url)}" alt="${escapeHtml(item.title)}" width="1200" height="900" loading="eager" fetchpriority="high" decoding="async"></a><figcaption>${escapeHtml(cover.caption || "Final restoration")}</figcaption></figure>` : ""}</div></section>
+<main><section class="case-library-hero"><div class="wrap case-library-hero-grid"><div><p class="eyebrow">${isCaseStudy ? "Featured Case Study" : "Recent Work"} · ${escapeHtml(item.category)}</p><h1>${escapeHtml(item.title)}</h1>${item.summary ? `<p class="lead">${escapeHtml(item.summary)}</p>` : ""}${heroProofItems(item)}</div>${cover ? `<figure><a href="${escapeHtml(cover.url)}" target="_blank" rel="noopener"><img src="${escapeHtml(cover.url)}" alt="${escapeHtml(item.title)}" width="1200" height="900" loading="eager" fetchpriority="high" decoding="async"></a><figcaption>${escapeHtml(cover.caption || "Final restoration")}</figcaption></figure>` : ""}</div></section>
+${journeyNav(item, gallery)}
 <section class="section"><div class="wrap case-summary-layout"><div><p class="eyebrow">${isCaseStudy ? "Case Summary" : "Work Details"}</p><h2>${isCaseStudy ? "Technical case information." : "Key restorative information."}</h2></div><dl class="case-specs">${metaItems(item)}</dl></div></section>
 ${detailedSections}
 ${galleryHtml}

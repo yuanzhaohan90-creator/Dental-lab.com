@@ -33,8 +33,8 @@ function cardMeta(item) {
 
 function renderCases(category = "") {
   const filtered = category ? publishedCases.filter((item) => item.category === category) : publishedCases;
-  const featured = filtered.filter((item) => item.contentType === "case_study");
-  const recent = filtered.filter((item) => item.contentType !== "case_study");
+  const featured = filtered.filter((item) => item.featured || item.contentType === "case_study");
+  const recent = filtered;
   if (featuredCaseSection) featuredCaseSection.hidden = featured.length === 0;
   if (featuredCaseList) featuredCaseList.innerHTML = featured.map((item) => `<article class="featured-public-case case-portfolio-card"><a href="/cases/${encodeURIComponent(item.slug)}"><div class="case-card-media"><img src="${escapeHtml(item.coverImage.url)}" alt="${escapeHtml(item.title)}" loading="lazy"><div class="case-card-hover">${cardMeta(item)}<em>View Case</em></div></div><div><span class="case-category">Featured Case Study · ${escapeHtml(item.category)}</span><h3>${escapeHtml(item.title)}</h3><p class="case-technical-line">${escapeHtml(technicalLine(item, true))}</p><p>${escapeHtml(caseSummary(item))}</p><span class="text-link">View Case Study</span></div></a></article>`).join("");
   if (!recent.length) {

@@ -340,7 +340,17 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
 @media(max-width:760px){.hero-visual :is(img,video),.page-hero-grid>:is(img,video){aspect-ratio:4/5}.priority-case-grid,.public-case-grid,.featured-public-case-grid,.case-library-gallery,.case-summary-layout,.case-portfolio-hero,.case-stage-grid,.case-stage-media{grid-template-columns:1fr}.priority-case img,.priority-case.large img{aspect-ratio:4/3}.workflow-step-media{margin:-18px -18px 16px}.case-library-hero{padding:36px 0}.case-library-hero-grid{gap:22px}.case-portfolio-proof{grid-template-columns:1fr 1fr}.case-filter{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:30px}.case-filter button{min-width:0;padding:9px 7px}.case-specs{grid-template-columns:1fr}}
 
 /* Professional public-page shell and stable loading states. */
-.case-library-hero h1{font-size:clamp(2.45rem,4vw,4.5rem);line-height:1.04;max-width:18ch}
+@media(min-width:761px){.case-library-hero h1{font-size:clamp(2.45rem,4vw,4.5rem);line-height:1.04;max-width:18ch}}
+.case-proof-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:24px;max-width:640px}
+.case-proof-strip span{display:flex;flex-direction:column;gap:4px;padding:13px 14px;border:1px solid #c7d7e6;border-radius:8px;background:rgba(255,255,255,.78);color:var(--ink);font-size:14px}
+.case-proof-strip strong{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.case-journey-nav{position:sticky;top:72px;z-index:12;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 8px 22px rgba(16,42,67,.06)}
+.case-journey-nav .wrap{display:flex;align-items:center;gap:18px;padding-top:12px;padding-bottom:12px;overflow-x:auto}
+.case-journey-nav .eyebrow{margin:0;white-space:nowrap}
+.case-journey-nav div{display:flex;gap:8px}
+.case-journey-nav a{display:inline-flex;min-height:36px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:999px;color:var(--ink);font-weight:850;text-decoration:none;white-space:nowrap}
+.case-journey-nav a:hover,.case-journey-nav a:focus-visible{border-color:var(--blue);color:var(--blue);outline:none}
+@media(max-width:760px){.case-proof-strip{grid-template-columns:1fr}.case-journey-nav{top:64px}.case-journey-nav .wrap{align-items:flex-start;gap:10px}.case-journey-nav div{overflow-x:auto;padding-bottom:2px}}
 .case-library-skeleton{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;grid-column:1/-1}
 .case-library-skeleton span{display:block;min-height:420px;border:1px solid var(--line);border-radius:8px;background:linear-gradient(100deg,#eef5fa 30%,#f8fbfd 50%,#eef5fa 70%);background-size:220% 100%;animation:case-skeleton 1.4s ease-in-out infinite}
 @keyframes case-skeleton{to{background-position:-220% 0}}
@@ -366,4 +376,18 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   .case-library-skeleton{grid-template-columns:1fr}
   .case-library-skeleton span{min-height:360px}
   .case-library-skeleton span:not(:first-child){display:none}
+  .wrap>*{min-width:0}
+  .case-library-hero h1,.case-portfolio-hero h1{display:block;max-width:calc(100vw - 32px);font-size:clamp(1.72rem,7.3vw,2rem);line-height:1.1;overflow-wrap:anywhere;word-break:break-word}
+  .case-library-hero .wrap,.case-portfolio-hero.wrap{overflow:visible}
+  .case-library-hero .lead,.case-portfolio-hero .lead{max-width:100%;overflow-wrap:anywhere}
+  .case-proof-strip,.case-portfolio-proof,.case-filter,.cta-row{width:100%;max-width:calc(100vw - 32px)}
+  .case-portfolio-proof{grid-template-columns:1fr}
+  .case-card-hover span{display:block}
+  .case-library-hero-grid>div,.case-portfolio-index .section-head,.case-summary-layout>div{width:100%;max-width:100%;min-width:0;overflow:visible}
+  .case-library-hero h1,.case-portfolio-index h2,.case-summary-layout h2{max-width:100%;overflow-wrap:anywhere;word-break:normal;hyphens:auto}
+  .case-library-hero h1{font-size:clamp(1.48rem,6vw,1.82rem);max-width:12ch}
+  .case-library-hero .lead{font-size:1rem}
+  .case-library-hero .cta-row,.case-filter{max-width:100%}
+  .case-filter{grid-template-columns:1fr;gap:8px}
+  .case-filter button{width:100%}
 }
