@@ -39,6 +39,7 @@ const {
   updateMediaReferences
 } = require("../lib/admin-store");
 const { listRecords, publicRecord, saveRecord } = require("../lib/case-store");
+const { submitIndexNowSoon } = require("../lib/indexnow");
 
 function route(req) {
   return query(req, "module") || "";
@@ -560,6 +561,7 @@ async function handleHomepage(req, res) {
     await assertPublishableMedia(target);
     await syncFeaturedCases(target.selectedWork.caseIds);
     const saved = action === "restore" ? await restoreConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage) : await publishConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage);
+    await submitIndexNowSoon("https://yzhdentallab.com/");
     return reply(res, 200, { ok: true, ...(await homepageData(saved)) });
   }
   return reply(res, 405, { ok: false, error: "Method not allowed." });
@@ -589,6 +591,12 @@ async function handlePageEditor(req, res) {
     await validatePageCases(page, target);
     await assertPublishableMedia(target);
     const saved = action === "restore" ? await restoreConfig(name, defaults, normalize) : await publishConfig(name, defaults, normalize);
+    const publicUrl = {
+      implant: "https://yzhdentallab.com/implant-restorations",
+      fullArch: "https://yzhdentallab.com/full-arch-all-on-x",
+      about: "https://yzhdentallab.com/about"
+    }[page];
+    if (publicUrl) await submitIndexNowSoon(publicUrl);
     return reply(res, 200, { ok: true, page, config: saved });
   }
   return reply(res, 405, { ok: false, error: "Method not allowed." });

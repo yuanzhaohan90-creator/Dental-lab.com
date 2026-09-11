@@ -17,6 +17,7 @@ const {
   trashRecord,
   uniqueSlug
 } = require("../lib/case-store");
+const { caseUrl, submitIndexNowSoon } = require("../lib/indexnow");
 
 const MAX_TOTAL_BYTES = 90 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -134,6 +135,9 @@ async function writeCase(req, isUpdate) {
     }
     record.images.sort((a, b) => a.sortOrder - b.sortOrder).forEach((image, index) => { image.sortOrder = image.isCover ? -1 : index; });
     await saveRecord(record);
+    if (record.status === "published") {
+      await submitIndexNowSoon(caseUrl(record));
+    }
   } catch (error) {
     await deletePaths(uploadedPaths).catch(() => {});
     throw error;
