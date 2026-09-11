@@ -19,7 +19,7 @@ const {
 } = require("../lib/case-store");
 const { caseUrl, submitIndexNowSoon } = require("../lib/indexnow");
 
-const MAX_TOTAL_BYTES = 90 * 1024 * 1024;
+const MAX_TOTAL_BYTES = 140 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
 function reply(res, statusCode, payload) {
@@ -42,7 +42,7 @@ function parseMultipart(req) {
     const fields = {};
     const files = [];
     let total = 0;
-    const busboy = Busboy({ headers: req.headers, limits: { files: 45, fields: 24, fileSize: MAX_IMAGE_BYTES } });
+    const busboy = Busboy({ headers: req.headers, limits: { files: 110, fields: 36, fileSize: MAX_IMAGE_BYTES } });
     req.on("error", reject);
     req.on("data", (chunk) => {
       total += chunk.length;
@@ -56,7 +56,7 @@ function parseMultipart(req) {
       stream.on("limit", () => { limited = true; });
       stream.on("data", (chunk) => chunks.push(chunk));
       stream.on("end", () => {
-        if (limited) return reject(Object.assign(new Error("Each case media file must be 10MB or smaller."), { statusCode: 413 }));
+      if (limited) return reject(Object.assign(new Error("Each case media file must be 10MB or smaller."), { statusCode: 413 }));
         files.push({ field, filename: info.filename, contentType: String(info.mimeType || "").toLowerCase(), buffer: Buffer.concat(chunks) });
       });
     });
@@ -93,9 +93,10 @@ async function writeCase(req, isUpdate) {
   const id = current ? current.id : makeId("CASE");
   const now = new Date().toISOString();
   const fieldsNormalized = normalizeFields(input);
+  const requestedSlug = String(input.slug || current?.slug || "").trim();
   const record = {
     id,
-    slug: await uniqueSlug(fieldsNormalized.title, id),
+    slug: requestedSlug ? await uniqueSlug(requestedSlug, id) : await uniqueSlug(fieldsNormalized.title, id),
     ...fieldsNormalized,
     images: [],
     createdAt: current ? current.createdAt : now,
@@ -111,6 +112,7 @@ async function writeCase(req, isUpdate) {
       record.images.push({
         ...oldImage,
         caption: String(incoming.caption || "").trim().slice(0, 240),
+        altText: String(incoming.altText || "").trim().slice(0, 240),
         imageType: IMAGE_TYPES.includes(incoming.imageType) ? incoming.imageType : "Other",
         sortOrder: Number(incoming.sortOrder) || 0,
         isCover: Boolean(incoming.isCover)

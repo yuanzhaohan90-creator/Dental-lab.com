@@ -79,3 +79,54 @@
 .admin-image-row[draggable=true]:active{cursor:grabbing}
 .admin-image-row .drag-handle{align-self:start}
 @media(max-width:560px){.admin-image-row .drag-handle{width:max-content;max-width:100%}}
+
+/* Dental OS V1 */
+.dental-os-body{background:#eef4f8;color:#1f354a}
+.dental-os-shell .admin-v1-sidebar{background:#071b2d}
+.dental-os-shell .admin-v1-sidebar nav a{font-size:14px;letter-spacing:.01em}
+.dental-os-shell .admin-v1-content{padding-top:30px}
+.dental-os-stats{grid-template-columns:repeat(5,minmax(0,1fr));box-shadow:0 18px 42px rgba(16,32,51,.06)}
+.dental-os-actions{margin:18px 0 28px}
+.dental-os-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.dental-os-dashboard-grid .admin-plain-list{min-height:136px}
+.dental-os-uploader{display:grid;gap:16px}
+.upload-dropzone{display:grid;place-items:center;min-height:154px;border:2px dashed #9fbad1;border-radius:10px;background:#f7fbfd;color:#102033;font-size:1.35rem;font-weight:900;text-align:center;cursor:pointer;transition:border-color .18s ease,background .18s ease}
+.upload-dropzone:hover,.upload-dropzone.drag-over{border-color:#145da7;background:#eaf3f8}
+.upload-dropzone span{display:block;margin-top:6px;color:#52677d;font-size:.92rem;font-weight:800}
+.upload-dropzone input{position:absolute;inline-size:1px;block-size:1px;opacity:0;pointer-events:none}
+.bulk-upload-queue{display:grid;gap:8px}
+.bulk-upload-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid #d8e4ee;border-radius:7px;background:#fff}
+.bulk-upload-row span{min-width:0;overflow-wrap:anywhere}
+.bulk-upload-row strong{font-size:13px;color:#52677d}
+.bulk-upload-row strong.success{color:#147a4b}.bulk-upload-row strong.error{color:#a02c2c}
+#mediaSearch,#caseSearch{width:min(100%,320px);min-height:42px;padding:10px 12px;border:1px solid #c8d7e4;border-radius:7px;background:#fff;color:#102033;font:inherit}
+#mediaBulkTagValue{min-height:38px;max-width:180px;padding:8px 10px;border:1px solid #c8d7e4;border-radius:6px}
+.case-center-shell{display:grid;grid-template-columns:minmax(300px,370px) minmax(0,1fr);gap:22px;align-items:start}
+.case-center-list-panel,.case-center-editor{background:#fff;border:1px solid #d8e4ee;border-radius:10px;padding:18px;box-shadow:0 18px 42px rgba(16,32,51,.05)}
+.case-center-toolbar{display:grid;gap:10px;margin-bottom:14px}
+.case-center-toolbar select{min-height:42px;padding:10px;border:1px solid #c8d7e4;border-radius:7px;background:#fff;color:#102033}
+.case-center-list{display:grid;gap:9px;max-height:calc(100vh - 230px);overflow:auto;padding-right:3px}
+.case-center-row{width:100%;display:grid;grid-template-columns:70px minmax(0,1fr);gap:11px;align-items:center;text-align:left;border:1px solid #d8e4ee;background:#fff;border-radius:8px;padding:10px;color:#273d53;font:inherit;cursor:pointer}
+.case-center-row:hover,.case-center-row.active{border-color:#145da7;background:#f6fafc}
+.case-center-row img,.case-row-empty{width:70px;aspect-ratio:4/3;border-radius:6px;object-fit:cover;background:#eaf0f4}
+.case-row-empty{display:grid;place-items:center;color:#6b7d90;font-size:11px;font-weight:900}
+.case-center-row strong{display:block;color:#102033;line-height:1.25}
+.case-center-row small{display:block;margin-top:4px;color:#52677d;line-height:1.35}
+.case-editor-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-bottom:16px;border-bottom:1px solid #e3ebf1}
+.case-editor-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.case-editor-tabs{display:flex;gap:6px;overflow-x:auto;margin:16px 0;padding-bottom:4px}
+.case-editor-tabs button{border:1px solid #c8d7e4;border-radius:999px;background:#fff;color:#36516c;padding:9px 13px;font:inherit;font-weight:850;white-space:nowrap;cursor:pointer}
+.case-editor-tabs button.active{background:#102033;color:#fff;border-color:#102033}
+.case-editor-section{display:none}
+.case-editor-section.active{display:grid;gap:14px}
+.case-media-upload-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.case-media-list{display:grid;gap:11px}
+.case-media-row{display:grid;grid-template-columns:auto 130px minmax(0,1fr) auto;gap:12px;align-items:start;border:1px solid #d8e4ee;border-radius:8px;background:#f8fafc;padding:12px;cursor:grab}
+.case-media-row:active{cursor:grabbing}
+.case-media-row img,.case-media-row video,.case-media-empty{width:130px;aspect-ratio:4/3;border-radius:6px;object-fit:cover;background:#102033;color:#fff}
+.case-media-empty{display:grid;place-items:center}
+.case-media-fields{display:grid;grid-template-columns:160px minmax(0,1fr) minmax(0,1fr);gap:10px}
+.case-media-fields .field{margin:0}
+.case-editor-section textarea{min-height:96px}
+@media(max-width:980px){.dental-os-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.dental-os-dashboard-grid,.case-center-shell{grid-template-columns:1fr}.case-center-list{max-height:none}.case-editor-top{align-items:stretch;flex-direction:column}.case-editor-actions{justify-content:flex-start}.case-media-fields{grid-template-columns:1fr}.case-media-upload-row{grid-template-columns:1fr}}
+@media(max-width:560px){.dental-os-stats{grid-template-columns:1fr}.case-center-list-panel,.case-center-editor{padding:13px}.case-center-row{grid-template-columns:62px minmax(0,1fr)}.case-center-row img,.case-row-empty{width:62px}.case-editor-actions{display:grid;grid-template-columns:1fr}.case-editor-actions .btn{width:100%}.case-media-row{grid-template-columns:1fr}.case-media-row img,.case-media-row video,.case-media-empty{width:100%}.case-editor-tabs button{padding:9px 11px}.upload-dropzone{min-height:132px;font-size:1.1rem}.bulk-upload-row{align-items:flex-start;flex-direction:column}}

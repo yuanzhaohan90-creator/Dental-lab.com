@@ -199,14 +199,32 @@ async function resolvePageMedia(value) {
 
 async function handleDashboard(req, res) {
   if (req.method !== "GET") return reply(res, 405, { ok: false, error: "Method not allowed." });
-  const [cases, submissions] = await Promise.all([listRecords(), listSubmissions()]);
+  const [cases, submissions, media] = await Promise.all([listRecords(), listSubmissions(), listMedia()]);
   const published = cases.filter((item) => item.status === "published");
-  const drafts = cases.filter((item) => item.status !== "published");
+  const drafts = cases.filter((item) => item.status === "draft");
   const fresh = submissions.filter((item) => item.status === "New");
   const activeSubmissions = submissions.filter((item) => item.status !== "Trash");
+  const health = [];
+  for (const item of cases) {
+    if (item.status === "trash") continue;
+    if (!item.images?.some((image) => image.isCover)) health.push({ label: `${item.title || item.id} 缺少 Cover`, href: `/admin/cases?case=${encodeURIComponent(item.id)}` });
+    if (item.status === "published" && !item.technicalSummary && !item.shortNote) health.push({ label: `${item.title || item.id} 缺少 Technical Summary`, href: `/admin/cases?case=${encodeURIComponent(item.id)}` });
+    if (item.status === "published" && !item.images?.some((image) => image.imageType === "Final")) health.push({ label: `${item.title || item.id} 缺少 Final 阶段媒体`, href: `/admin/cases?case=${encodeURIComponent(item.id)}` });
+  }
+  const missingAlt = media.filter((item) => !item.altText).slice(0, 6);
+  for (const item of missingAlt) health.push({ label: `${item.displayName || item.originalFilename || item.id} 缺少 ALT`, href: `/admin/media#media-${encodeURIComponent(item.id)}` });
+  if (published.filter((item) => item.featured).length < 4) health.push({ label: "Homepage Featured Cases 少于 4 个", href: "/admin/home" });
+  const activity = [
+    ...activeSubmissions.slice(0, 4).map((item) => ({ type: "Submission", label: item.caseId, detail: item.fields?.company || item.fields?.name || "客户提交", at: item.submittedAt, href: `/admin/submissions?case=${encodeURIComponent(item.caseId)}` })),
+    ...cases.slice(0, 4).map((item) => ({ type: "Case", label: item.title, detail: item.status, at: item.updatedAt || item.createdAt, href: `/admin/cases?case=${encodeURIComponent(item.id)}` })),
+    ...media.slice(0, 4).map((item) => ({ type: "Media", label: item.displayName || item.originalFilename, detail: item.category, at: item.updatedAt || item.createdAt, href: `/admin/media#media-${encodeURIComponent(item.id)}` }))
+  ].sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0)).slice(0, 8);
   return reply(res, 200, {
     ok: true,
-    counts: { publishedCases: published.length, draftCases: drafts.length, newSubmissions: fresh.length },
+    counts: { publishedCases: published.length, draftCases: drafts.length, newSubmissions: fresh.length, totalMedia: media.length, contentHealth: health.length },
+    contentHealth: health.slice(0, 12),
+    recentActivity: activity,
+    recentMedia: media.slice(0, 6).map((item) => ({ id: item.id, title: item.displayName || item.originalFilename, category: item.category, createdAt: item.createdAt })),
     recentSubmissions: activeSubmissions.slice(0, 5).map((item) => ({ caseId: item.caseId, submittedAt: item.submittedAt, name: item.fields?.name || "", company: item.fields?.company || "", caseType: item.fields?.case_type || "", status: item.status })),
     recentPublished: published.slice(0, 5).map((item) => ({ id: item.id, title: item.title, category: item.category, publishedAt: item.publishedAt }))
   });
@@ -327,7 +345,7 @@ async function handleMedia(req, res) {
     const body = await readJson(req);
     const record = await getMedia(body.id);
     if (!record) return reply(res, 404, { ok: false, error: "Media item not found." });
-    const saved = await saveMedia({ ...record, displayName: body.displayName, altText: body.altText, category: body.category, posterMediaId: body.posterMediaId });
+    const saved = await saveMedia({ ...record, displayName: body.displayName, altText: body.altText, category: body.category, posterMediaId: body.posterMediaId, tags: body.tags, collection: body.collection });
     return reply(res, 200, { ok: true, media: await adminMedia(saved) });
   }
   if (req.method === "DELETE") {
@@ -357,6 +375,19 @@ async function handleMediaManage(req, res) {
       else { await trashMedia(record); moved.push(id); }
     }
     return reply(res, 200, { ok: true, moved, conflicts });
+  }
+  if (action === "bulk-tag") {
+    const ids = [...new Set((Array.isArray(body.ids) ? body.ids : []).map(String))];
+    const tag = String(body.tag || "").trim().slice(0, 60);
+    if (!tag) return reply(res, 400, { ok: false, error: "Enter a tag before applying it." });
+    const updated = [];
+    for (const id of ids) {
+      const item = await getMedia(id);
+      if (!item || item.trashedAt) continue;
+      const tags = [...new Set([...(Array.isArray(item.tags) ? item.tags : []), tag])].slice(0, 30);
+      updated.push((await saveMedia({ ...item, tags })).id);
+    }
+    return reply(res, 200, { ok: true, updated });
   }
   const record = await getMedia(String(body.id || ""));
   if (!record) return reply(res, 404, { ok: false, error: "Media item not found." });
