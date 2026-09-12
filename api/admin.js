@@ -100,11 +100,13 @@ function safeDownloadName(value) {
   return String(value || "download").replace(/[\r\n"\\/]+/g, "-").slice(0, 160);
 }
 
-async function adminMedia(record) {
-  const usedIn = await mediaUsage(record.id).catch((error) => {
-    console.warn("admin_media_usage_skipped", record.id, error?.message || error);
-    return [];
-  });
+async function adminMedia(record, options = {}) {
+  const usedIn = options.includeUsage
+    ? await mediaUsage(record.id).catch((error) => {
+        console.warn("admin_media_usage_skipped", record.id, error?.message || error);
+        return [];
+      })
+    : [];
   const mediaType = String(record.contentType || "").startsWith("video/") ? "video" : "image";
   const posterUrl = record.posterMediaId
     ? `/api/admin?module=media-image&id=${encodeURIComponent(record.posterMediaId)}`
@@ -322,7 +324,7 @@ async function handleMedia(req, res) {
       const trashRecords = trash ? records : await listMedia({ trash: true });
       return reply(res, 200, {
         ok: true,
-        media: await Promise.all(records.map(adminMedia)),
+        media: await Promise.all(records.map((record) => adminMedia(record))),
         categories: MEDIA_CATEGORIES,
         storage: {
           publicMedia: active.reduce((sum, item) => sum + (Number(item.size) || 0), 0),
@@ -346,7 +348,7 @@ async function handleMedia(req, res) {
     const record = await getMedia(body.id);
     if (!record) return reply(res, 404, { ok: false, error: "Media item not found." });
     const saved = await saveMedia({ ...record, displayName: body.displayName, altText: body.altText, category: body.category, posterMediaId: body.posterMediaId, tags: body.tags, collection: body.collection });
-    return reply(res, 200, { ok: true, media: await adminMedia(saved) });
+    return reply(res, 200, { ok: true, media: await adminMedia(saved, { includeUsage: true }) });
   }
   if (req.method === "DELETE") {
     const record = await getMedia(query(req, "id"));
@@ -386,6 +388,31 @@ async function handleMediaManage(req, res) {
       if (!item || item.trashedAt) continue;
       const tags = [...new Set([...(Array.isArray(item.tags) ? item.tags : []), tag])].slice(0, 30);
       updated.push((await saveMedia({ ...item, tags })).id);
+    }
+    return reply(res, 200, { ok: true, updated });
+  }
+  if (action === "bulk-remove-tag") {
+    const ids = [...new Set((Array.isArray(body.ids) ? body.ids : []).map(String))];
+    const tag = String(body.tag || "").trim().slice(0, 60);
+    if (!tag) return reply(res, 400, { ok: false, error: "Enter a tag before removing it." });
+    const updated = [];
+    for (const id of ids) {
+      const item = await getMedia(id);
+      if (!item || item.trashedAt) continue;
+      const tags = (Array.isArray(item.tags) ? item.tags : []).filter((value) => value.toLowerCase() !== tag.toLowerCase());
+      updated.push((await saveMedia({ ...item, tags })).id);
+    }
+    return reply(res, 200, { ok: true, updated });
+  }
+  if (action === "bulk-collection") {
+    const ids = [...new Set((Array.isArray(body.ids) ? body.ids : []).map(String))];
+    const collection = String(body.collection || "").trim().slice(0, 120);
+    if (!collection) return reply(res, 400, { ok: false, error: "Enter a collection before applying it." });
+    const updated = [];
+    for (const id of ids) {
+      const item = await getMedia(id);
+      if (!item || item.trashedAt) continue;
+      updated.push((await saveMedia({ ...item, collection })).id);
     }
     return reply(res, 200, { ok: true, updated });
   }

@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
     if (!hasValidOrigin(req)) return reply(res, 403, { ok: false, error: "Invalid request origin." });
     if (req.method === "POST") {
       const body = await readJson(req);
-      if (!verifyPassword(body.password)) return reply(res, 401, { ok: false, error: "Invalid password." });
+      if (!(await verifyPassword(body.password))) return reply(res, 401, { ok: false, error: "Invalid password." });
       const sessionToken = setSessionCookie(res);
       return reply(res, 200, { ok: true, authenticated: true, sessionToken });
     }

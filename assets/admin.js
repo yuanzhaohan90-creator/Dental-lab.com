@@ -286,6 +286,8 @@ let mediaTypeFilter = "";
 let mediaTrashView = false;
 let mediaSort = "newest";
 let mediaSearch = "";
+let mediaTagFilter = "";
+let mediaCollectionFilter = "";
 const selectedMediaIds = new Set();
 const VIDEO_ACCEPT = "video/*,.mp4,.mov,.m4v";
 const processingLabels = { uploading: "正在上传", processing: "处理中", ready: "可使用", failed: "处理失败" };
@@ -326,9 +328,13 @@ function mediaPreview(item, className = "") {
 function renderMedia() {
   const category = document.getElementById("mediaCategoryFilter").value;
   const needle = mediaSearch.trim().toLowerCase();
+  const tagNeedle = mediaTagFilter.trim().toLowerCase();
+  const collectionNeedle = mediaCollectionFilter.trim().toLowerCase();
   const filtered = mediaItems.filter((item) => {
     const haystack = [item.displayName, item.originalFilename, item.altText, item.category, item.collection, ...(Array.isArray(item.tags) ? item.tags : [])].join(" ").toLowerCase();
-    return (!mediaTypeFilter || item.mediaType === mediaTypeFilter) && (!category || item.category === category) && (!needle || haystack.includes(needle));
+    const tags = (Array.isArray(item.tags) ? item.tags : []).join(" ").toLowerCase();
+    const collection = String(item.collection || "").toLowerCase();
+    return (!mediaTypeFilter || item.mediaType === mediaTypeFilter) && (!category || item.category === category) && (!needle || haystack.includes(needle)) && (!tagNeedle || tags.includes(tagNeedle)) && (!collectionNeedle || collection.includes(collectionNeedle));
   }).sort((a, b) => {
     if (mediaSort === "largest") return (Number(b.size) || 0) - (Number(a.size) || 0);
     if (mediaSort === "name") return String(a.displayName || a.originalFilename || "").localeCompare(String(b.displayName || b.originalFilename || ""), "zh-CN");
@@ -339,8 +345,9 @@ function renderMedia() {
   document.getElementById("mediaUploadForm").hidden = mediaTrashView;
   document.getElementById("mediaSelectedCount").textContent = `已选择 ${selectedMediaIds.size} 项`;
   document.getElementById("mediaList").innerHTML = filtered.length ? filtered.map((item) => {
-    const usage = item.usedIn.length
-      ? `<ul class="admin-used-in">${item.usedIn.map((place) => `<li><a href="${escapeHtml(place.editorUrl)}">${escapeHtml(place.label)}</a>${place.required ? "<small>需要替换</small>" : ""}</li>`).join("")}</ul>`
+    const usedIn = item.usedIn || [];
+    const usage = usedIn.length
+      ? `<ul class="admin-used-in">${usedIn.map((place) => `<li><a href="${escapeHtml(place.editorUrl)}">${escapeHtml(place.label)}</a>${place.required ? "<small>需要替换</small>" : ""}</li>`).join("")}</ul>`
       : '<p class="admin-media-usage">当前未使用</p>';
     if (mediaTrashView) return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}">${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><p class="admin-trash-meta">删除时间：${formatDate(item.trashedAt)}<br>原分类：${escapeHtml(categoryLabel(item.originalLocation || item.category))}<br>${item.originalUsage?.length ? `原使用位置：${item.originalUsage.map(escapeHtml).join("；")}<br>` : ""}30 天后自动清理</p><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-restore>恢复</button><button class="btn admin-danger" type="button" data-media-permanent>永久删除</button></div><div class="admin-message" role="status"></div></div></article>`;
     return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}"><label class="admin-media-select"><input type="checkbox" data-media-select ${selectedMediaIds.has(item.id) ? "checked" : ""}> 选择</label>${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><label class="field">显示名称<input data-media-key="displayName" value="${escapeHtml(item.displayName)}"></label><label class="field">图片说明（ALT）<input data-media-key="altText" value="${escapeHtml(item.altText)}"></label><label class="field">分类<select data-media-key="category">${["Cases", "Homepage", "Implant", "Full-Arch", "Lab", "Products", "Other"].map((value) => `<option value="${value}" ${value === item.category ? "selected" : ""}>${categoryLabel(value)}</option>`).join("")}</select></label><label class="field">Collection<input data-media-key="collection" value="${escapeHtml(item.collection || "")}"></label><label class="field">Tags<input data-media-key="tags" value="${escapeHtml((item.tags || []).join(", "))}"></label>${item.mediaType === "video" ? `<label class="field">视频海报<select data-media-key="posterMediaId">${mediaOptions(item.posterMediaId, "image")}</select></label>${item.processingMessage ? `<p class="admin-helper">${escapeHtml(item.processingMessage)}</p>` : ""}` : ""}<div class="admin-media-usage"><strong>Used On</strong>${usage}</div><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-use ${item.mediaType === "video" && item.processingStatus !== "ready" ? "disabled" : ""}>使用到页面</button>${item.mediaType === "video" && item.processingStatus === "failed" ? '<button class="btn btn-secondary" type="button" data-media-retry>重试视频处理</button>' : ""}<button class="btn btn-secondary" type="button" data-media-replace>替换文件</button><button class="btn btn-secondary" type="button" data-media-save>保存信息</button><button class="btn admin-danger" type="button" data-media-delete>删除</button></div><input class="visually-hidden" type="file" data-media-replace-file accept="image/jpeg,image/png,image/webp,image/svg+xml,${VIDEO_ACCEPT}"><div class="media-use-menu" hidden><a href="/admin/home">网站首页</a><a href="/admin/implant">种植修复</a><a href="/admin/full-arch">全口修复</a><a href="/admin/about">关于我们</a></div><div class="admin-message" role="status"></div></div></article>`;
@@ -364,6 +371,8 @@ document.getElementById("mediaViewTabs").addEventListener("click", async (event)
 document.getElementById("mediaCategoryFilter").addEventListener("change", renderMedia);
 document.getElementById("mediaSort").addEventListener("change", (event) => { mediaSort = event.target.value; renderMedia(); });
 document.getElementById("mediaSearch").addEventListener("input", (event) => { mediaSearch = event.target.value; renderMedia(); });
+document.getElementById("mediaTagFilter")?.addEventListener("input", (event) => { mediaTagFilter = event.target.value; renderMedia(); });
+document.getElementById("mediaCollectionFilter")?.addEventListener("input", (event) => { mediaCollectionFilter = event.target.value; renderMedia(); });
 document.getElementById("showMediaUpload").addEventListener("click", () => document.getElementById("mediaUploadForm").scrollIntoView({ behavior: "smooth", block: "start" }));
 document.getElementById("mediaSelectAll").addEventListener("change", (event) => {
   const category = document.getElementById("mediaCategoryFilter").value;
@@ -390,7 +399,7 @@ function delay(milliseconds) {
 }
 
 async function processVideoAndWait(media, onStatus, retry = false) {
-  if (media.mediaType !== "video" || (media.processingStatus === "ready" && media.posterUrl)) return media;
+  if (media.mediaType !== "video" || media.processingStatus === "ready") return media;
   onStatus?.("视频已上传，正在生成 H.264 网页播放版本和海报...");
   await api("/api/video-process", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: media.id, action: retry ? "retry" : "start" }) });
   for (let attempt = 0; attempt < 105; attempt += 1) {
@@ -490,6 +499,37 @@ document.getElementById("mediaBulkTag").addEventListener("click", async () => {
   }
 });
 
+document.getElementById("mediaBulkRemoveTag")?.addEventListener("click", async () => {
+  const tag = document.getElementById("mediaBulkTagValue").value.trim();
+  const ids = [...selectedMediaIds];
+  if (!ids.length) return showMessage(document.getElementById("mediaMessage"), "请先选择媒体。", "error");
+  if (!tag) return showMessage(document.getElementById("mediaMessage"), "请输入要移除的标签。", "error");
+  try {
+    await api("/api/admin?module=media-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "bulk-remove-tag", ids, tag }) });
+    selectedMediaIds.clear();
+    showMessage(document.getElementById("mediaMessage"), "批量标签已移除。", "success");
+    await loadMedia();
+  } catch (error) {
+    showMessage(document.getElementById("mediaMessage"), error.message, "error");
+  }
+});
+
+document.getElementById("mediaBulkCollection")?.addEventListener("click", async () => {
+  const collection = document.getElementById("mediaBulkCollectionValue").value.trim();
+  const ids = [...selectedMediaIds];
+  if (!ids.length) return showMessage(document.getElementById("mediaMessage"), "请先选择媒体。", "error");
+  if (!collection) return showMessage(document.getElementById("mediaMessage"), "请输入 Collection。", "error");
+  try {
+    await api("/api/admin?module=media-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "bulk-collection", ids, collection }) });
+    selectedMediaIds.clear();
+    document.getElementById("mediaBulkCollectionValue").value = "";
+    showMessage(document.getElementById("mediaMessage"), "批量 Collection 已保存。", "success");
+    await loadMedia();
+  } catch (error) {
+    showMessage(document.getElementById("mediaMessage"), error.message, "error");
+  }
+});
+
 document.getElementById("mediaRetryFailed").addEventListener("click", () => {
   showMessage(document.getElementById("mediaMessage"), "请选择失败文件重新上传。系统不会重复上传已经成功的文件。");
   mediaFileInput.click();
@@ -500,6 +540,7 @@ function closeAdminModal(modal) {
 }
 
 function openMediaDeleteReview(item) {
+  item.usedIn = item.usedIn || [];
   const required = item.usedIn.some((place) => place.required);
   const replacements = mediaItems.filter((candidate) => candidate.id !== item.id && !candidate.trashedAt && (candidate.mediaType !== "video" || candidate.processingStatus === "ready"));
   const modal = document.createElement("div");
@@ -552,9 +593,14 @@ document.getElementById("mediaList").addEventListener("click", async (event) => 
       showMessage(message, "名称和图片说明已保存。", "success"); await loadMedia();
     }
     if (event.target.closest("[data-media-delete]")) {
-      if (item.usedIn.length) return openMediaDeleteReview(item);
+      if ((item.usedIn || []).length) return openMediaDeleteReview(item);
       if (!confirm("将这项媒体移入回收站？30 天内可以恢复。")) return;
-      await api("/api/admin?module=media-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "trash", id: card.dataset.mediaId }) });
+      try {
+        await api("/api/admin?module=media-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "trash", id: card.dataset.mediaId }) });
+      } catch (error) {
+        if (error.status === 409 && error.data?.usedIn?.length) return openMediaDeleteReview({ ...item, usedIn: error.data.usedIn });
+        throw error;
+      }
       await loadMedia();
     }
     if (event.target.closest("[data-media-restore]")) {
@@ -733,6 +779,7 @@ function collectionEditor(key, value = [], section = {}) {
     <div class="collection-toolbar">
       <button class="btn btn-primary" type="button" data-collection-add="${key}">+ Add Item</button>
       <button class="btn btn-secondary" type="button" data-collection-batch="${key}">Batch Upload</button>
+      <button class="btn btn-secondary" type="button" data-collection-choose="${key}">Choose from Media</button>
       <input class="visually-hidden" type="file" data-collection-files="${key}" accept="image/jpeg,image/png,image/webp,${section.allowVideo ? VIDEO_ACCEPT : ""}" multiple>
       <span>${items.length} item${items.length === 1 ? "" : "s"}</span>
     </div>
@@ -927,6 +974,8 @@ document.getElementById("pageSections").addEventListener("click", (event) => {
   }
   const batch = event.target.closest("[data-collection-batch]");
   if (batch) document.querySelector(`[data-collection-files="${batch.dataset.collectionBatch}"]`)?.click();
+  const collectionChoose = event.target.closest("[data-collection-choose]");
+  if (collectionChoose) openCollectionMediaPicker(collectionChoose.dataset.collectionChoose);
   const remove = event.target.closest("[data-collection-remove]");
   if (remove) {
     pageData.config.draft = collectPageDraft();
@@ -973,6 +1022,34 @@ document.getElementById("pageEditorForm").addEventListener("submit", async (even
 document.getElementById("previewPage").addEventListener("click", async () => { try { await savePageDraft(); window.open(`${PAGE_META[pageKey].publicPath}?adminPreview=${encodeURIComponent(pageKey)}`, "_blank", "noopener"); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
 document.getElementById("publishPage").addEventListener("click", async () => { if (!confirm(`确定把“${PAGE_META[pageKey].title}”草稿发布到正式网站吗？`)) return; try { await savePageDraft(); await api(`/api/admin?module=page-editor&page=${encodeURIComponent(pageKey)}&action=publish`, { method: "POST" }); showMessage(document.getElementById("pageEditorMessage"), "发布成功。", "success"); await loadPageEditor(pageKey); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
 document.getElementById("restorePage").addEventListener("click", async () => { if (!confirm("确定恢复上一个已发布版本吗？")) return; try { await api(`/api/admin?module=page-editor&page=${encodeURIComponent(pageKey)}&action=restore`, { method: "POST" }); showMessage(document.getElementById("pageEditorMessage"), "已恢复上一版本。", "success"); await loadPageEditor(pageKey); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
+
+function openCollectionMediaPicker(key) {
+  pageData.config.draft = collectPageDraft();
+  const section = PAGE_SECTIONS[pageKey].find((item) => item.key === key) || {};
+  const allowed = mediaItems.filter((item) => !item.trashedAt && (section.allowVideo || item.mediaType !== "video"));
+  const modal = document.createElement("div");
+  modal.className = "admin-modal-backdrop";
+  modal.innerHTML = `<div class="admin-modal media-picker-modal"><div class="admin-modal-head"><h2>Choose Media</h2><button class="icon-command" type="button" data-close-modal>×</button></div><p class="admin-helper">选择现有媒体，一次加入 ${escapeHtml(key)}。不会重复上传资源。</p><input class="media-picker-search" placeholder="Search media"><div class="media-picker-grid">${allowed.map((item) => `<label class="media-picker-item" data-picker-search="${escapeHtml([item.displayName, item.originalFilename, item.category, item.collection, ...(item.tags || [])].join(" ").toLowerCase())}"><input type="checkbox" value="${escapeHtml(item.id)}">${mediaPreview(item, "media-picker-preview")}<span>${escapeHtml(item.displayName || item.originalFilename || item.id)}</span><small>${escapeHtml(item.collection || item.category || "")}</small></label>`).join("")}</div><div class="admin-form-actions"><button class="btn btn-primary" type="button" data-picker-add>Add selected</button><button class="btn btn-secondary" type="button" data-close-modal>Cancel</button></div></div>`;
+  document.body.append(modal);
+  modal.querySelector("[data-close-modal]").focus();
+  modal.addEventListener("input", (event) => {
+    if (!event.target.matches(".media-picker-search")) return;
+    const needle = event.target.value.trim().toLowerCase();
+    modal.querySelectorAll("[data-picker-search]").forEach((item) => { item.hidden = needle && !item.dataset.pickerSearch.includes(needle); });
+  });
+  modal.addEventListener("click", (event) => {
+    if (event.target.matches("[data-close-modal]") || event.target === modal) modal.remove();
+    if (!event.target.matches("[data-picker-add]")) return;
+    const selected = [...modal.querySelectorAll("input[type='checkbox']:checked")].map((input) => mediaItems.find((item) => item.id === input.value)).filter(Boolean);
+    if (!selected.length) return;
+    const items = Array.isArray(pageData.config.draft[key]) ? pageData.config.draft[key] : [];
+    for (const media of selected) items.push({ ...makeCollectionItem(media.displayName || media.originalFilename || media.id, media), sortOrder: items.length });
+    pageData.config.draft[key] = items;
+    modal.remove();
+    renderPageEditor();
+    showMessage(document.getElementById("pageEditorMessage"), `${selected.length} 个媒体已加入，请保存草稿。`, "success");
+  });
+}
 
 function mediaOptionsSimple(items, selected, fallbackLabel) {
   return `<option value="">${escapeHtml(fallbackLabel)}</option>${items.filter((item) => item.mediaType === "image").map((item) => `<option value="${item.id}" ${item.id === selected ? "selected" : ""}>${escapeHtml(item.displayName || item.originalFilename)} · ${escapeHtml(item.category)}</option>`).join("")}`;
@@ -1109,7 +1186,7 @@ document.getElementById("mediaList").addEventListener("change", async (event) =>
   showMessage(message, `正在上传 ${file.name}...`);
   try {
     const replacement = await uploadMediaFile(file, { category: item.category, displayName: item.displayName || file.name.replace(/\.[^.]+$/, ""), altText: item.altText || "" }, (percentage) => showMessage(message, `正在上传 ${file.name} · ${percentage}%`));
-    if (item.usedIn.length) {
+    if ((item.usedIn || []).length) {
       await api("/api/admin?module=media-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "replace-delete", id: item.id, replacementId: replacement.id, usageIds: item.usedIn.map((place) => place.id) }) });
     } else {
       await api("/api/admin?module=media-manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "trash", id: item.id }) });
@@ -1121,9 +1198,9 @@ document.getElementById("previewSettings").addEventListener("click", async () =>
 document.getElementById("publishSettings").addEventListener("click", async () => { if (!confirm("确定发布这些公开网站设置吗？")) return; try { await saveSettingsDraft(); await api("/api/admin?module=settings&action=publish", { method: "POST" }); showMessage(document.getElementById("settingsMessage"), "网站设置已发布。", "success"); await loadSettings(); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
 document.getElementById("restoreSettings").addEventListener("click", async () => { if (!confirm("确定恢复上一版已发布设置吗？")) return; try { await api("/api/admin?module=settings&action=restore", { method: "POST" }); showMessage(document.getElementById("settingsMessage"), "已恢复上一版设置。", "success"); await loadSettings(); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
 
-const caseCenterState = { cases: [], categories: [], imageTypes: [], current: null, existing: [], newFiles: [] };
+const caseCenterState = { cases: [], categories: [], imageTypes: [], current: null, existing: [], newFiles: [], selectedMedia: [] };
 const caseStatusLabels = { draft: "Draft", published: "Published", hidden: "Hidden", trash: "Trash" };
-const caseStageLabels = { CAD: "CAD", Model: "Model", Framework: "Framework", "Ti-base": "Ti-base", PMMA: "PMMA", "Try-in": "Try-in", Final: "Final", QC: "QC", Other: "Other" };
+const caseStageLabels = { Before: "Before", Scan: "Scan", Planning: "Planning", Design: "Design", CAD: "CAD", Model: "Model", Framework: "Framework", "Ti-base": "Ti-base", PMMA: "PMMA", "Try-in": "Try-in", Final: "Final", QC: "QC", Delivery: "Delivery", Other: "Other" };
 
 function caseMessage(message, type = "") {
   showMessage(document.getElementById("caseCenterMessage"), message, type);
@@ -1171,6 +1248,13 @@ function syncCaseMediaInputs() {
     item.imageType = row.querySelector('[data-key="imageType"]').value;
     item.altText = row.querySelector('[data-key="altText"]').value;
   });
+  document.querySelectorAll("#caseNewMedia [data-selected-media-index]").forEach((row) => {
+    const item = caseCenterState.selectedMedia[Number(row.dataset.selectedMediaIndex)];
+    if (!item) return;
+    item.caption = row.querySelector('[data-key="caption"]').value;
+    item.imageType = row.querySelector('[data-key="imageType"]').value;
+    item.altText = row.querySelector('[data-key="altText"]').value;
+  });
 }
 
 function renderCaseMediaCenter() {
@@ -1178,7 +1262,9 @@ function renderCaseMediaCenter() {
   document.getElementById("caseCoverPreview").innerHTML = cover ? `<figure class="admin-current-cover">${casePreviewMarkup(cover)}<figcaption>Current cover</figcaption></figure>` : '<p class="admin-empty">No cover yet.</p>';
   const existing = caseCenterState.existing.filter((image) => !image.isCover).sort((a, b) => a.sortOrder - b.sortOrder);
   document.getElementById("caseExistingMedia").innerHTML = existing.map((item) => `<div class="case-media-row" draggable="true" data-case-drag="existing" data-existing-id="${escapeHtml(item.id)}"><span class="drag-handle">Drag</span>${casePreviewMarkup(item)}<div class="case-media-fields"><label class="field">Stage<select data-key="imageType">${caseOptionMarkup(caseCenterState.imageTypes, item.imageType, (value) => caseStageLabels[value] || value)}</select></label><label class="field">Caption<input data-key="caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label><label class="field">Alt<input data-key="altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label></div><button class="icon-command" type="button" data-case-media-remove aria-label="Remove">×</button></div>`).join("");
-  document.getElementById("caseNewMedia").innerHTML = caseCenterState.newFiles.map((item, index) => `<div class="case-media-row" draggable="true" data-case-drag="new" data-new-index="${index}"><span class="drag-handle">Drag</span>${casePreviewMarkup(item)}<div class="case-media-fields"><label class="field">Stage<select data-key="imageType">${caseOptionMarkup(caseCenterState.imageTypes, item.imageType, (value) => caseStageLabels[value] || value)}</select></label><label class="field">Caption<input data-key="caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label><label class="field">Alt<input data-key="altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label></div><button class="icon-command" type="button" data-case-new-remove aria-label="Remove">×</button></div>`).join("");
+  const uploadedRows = caseCenterState.newFiles.map((item, index) => `<div class="case-media-row" draggable="true" data-case-drag="new" data-new-index="${index}"><span class="drag-handle">Drag</span>${casePreviewMarkup(item)}<div class="case-media-fields"><label class="field">Stage<select data-key="imageType">${caseOptionMarkup(caseCenterState.imageTypes, item.imageType, (value) => caseStageLabels[value] || value)}</select></label><label class="field">Caption<input data-key="caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label><label class="field">Alt<input data-key="altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label></div><button class="icon-command" type="button" data-case-new-remove aria-label="Remove">×</button></div>`);
+  const selectedRows = caseCenterState.selectedMedia.map((item, index) => `<div class="case-media-row" draggable="true" data-case-drag="selected" data-selected-media-index="${index}"><span class="drag-handle">Drag</span>${casePreviewMarkup(item)}<div class="case-media-fields"><label class="field">Stage<select data-key="imageType">${caseOptionMarkup(caseCenterState.imageTypes, item.imageType, (value) => caseStageLabels[value] || value)}</select></label><label class="field">Caption<input data-key="caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label><label class="field">Alt<input data-key="altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label></div><button class="icon-command" type="button" data-case-selected-remove aria-label="Remove">×</button></div>`);
+  document.getElementById("caseNewMedia").innerHTML = [...uploadedRows, ...selectedRows].join("");
 }
 
 function openCaseCenterEditor(item = null) {
@@ -1187,6 +1273,7 @@ function openCaseCenterEditor(item = null) {
   caseCenterState.existing = item ? item.images.map((image) => ({ ...image })) : [];
   caseCenterState.newFiles.forEach((entry) => URL.revokeObjectURL(entry.preview));
   caseCenterState.newFiles = [];
+  caseCenterState.selectedMedia = [];
   form.reset();
   form.hidden = false;
   document.getElementById("caseEditorMode").textContent = item ? "Edit Case" : "New Case";
@@ -1198,7 +1285,7 @@ function openCaseCenterEditor(item = null) {
   form.elements.relatedCaseIds.innerHTML = caseCenterState.cases.filter((entry) => entry.id !== item?.id).map((entry) => `<option value="${escapeHtml(entry.id)}">${escapeHtml(entry.title || entry.id)}</option>`).join("");
   ["title", "category", "contentType", "status", "restorationType", "technicalSummary", "challenge", "planning", "clinicalNotes", "workflow", "technicalOutcome", "material", "implantSystem", "platform", "shade", "software", "technicalReview", "seoTitle", "metaDescription", "tags"].forEach((name) => {
     if (!form.elements[name]) return;
-    form.elements[name].value = name === "contentType" ? (item?.contentType || "quick_work") : name === "status" ? (item?.status === "published" ? "published" : "draft") : Array.isArray(item?.[name]) ? item[name].join(", ") : (item?.[name] || "");
+    form.elements[name].value = name === "contentType" ? (item?.contentType || "quick_work") : name === "status" ? (["published", "hidden"].includes(item?.status) ? item.status : "draft") : Array.isArray(item?.[name]) ? item[name].join(", ") : (item?.[name] || "");
   });
   form.elements.featured.checked = Boolean(item?.featured);
   [...form.elements.relatedCaseIds.options].forEach((option) => { option.selected = (item?.relatedCaseIds || []).includes(option.value); });
@@ -1271,6 +1358,7 @@ async function saveCaseCenter(statusOverride) {
   formData.append("case", JSON.stringify(serializeCaseCenter(statusOverride)));
   formData.append("existingImages", JSON.stringify(caseCenterState.existing.map(({ id, caption, imageType, sortOrder, isCover, altText }) => ({ id, caption, imageType, sortOrder, isCover, altText }))));
   formData.append("newImageMeta", JSON.stringify(caseCenterState.newFiles.map((item, index) => ({ caption: item.caption, imageType: item.imageType, altText: item.altText, sortOrder: caseCenterState.existing.length + index }))));
+  formData.append("selectedMedia", JSON.stringify(caseCenterState.selectedMedia.map((item, index) => ({ mediaId: item.mediaId, caption: item.caption, imageType: item.imageType, altText: item.altText, sortOrder: caseCenterState.existing.length + caseCenterState.newFiles.length + index }))));
   if (form.elements.coverImage.files[0]) formData.append("coverImage", form.elements.coverImage.files[0]);
   caseCenterState.newFiles.forEach((item) => formData.append("galleryImages", item.file));
   caseMessage("正在保存...");
@@ -1296,6 +1384,7 @@ document.querySelector(".case-editor-tabs").addEventListener("click", (event) =>
 });
 document.getElementById("caseCenterEditor").addEventListener("submit", async (event) => { event.preventDefault(); try { await saveCaseCenter("draft"); } catch (error) { caseMessage(error.message, "error"); } });
 document.getElementById("casePublishButton").addEventListener("click", async () => { try { await saveCaseCenter("published"); } catch (error) { caseMessage(error.message, "error"); } });
+document.getElementById("caseHideButton")?.addEventListener("click", async () => { try { await saveCaseCenter("hidden"); } catch (error) { caseMessage(error.message, "error"); } });
 document.getElementById("casePreviewButton").addEventListener("click", () => { if (caseCenterState.current) window.open(`/cases/${encodeURIComponent(caseCenterState.current.slug)}?preview=1`, "_blank", "noopener"); });
 document.getElementById("caseCloseButton").addEventListener("click", () => { document.getElementById("caseCenterEditor").hidden = true; caseCenterState.current = null; renderCaseListCenter(); });
 document.getElementById("caseDuplicateButton").addEventListener("click", async () => { if (!caseCenterState.current) return; try { const data = await api(`/api/admin-cases?action=duplicate&id=${encodeURIComponent(caseCenterState.current.id)}`, { method: "POST" }); await loadCaseCenter(); openCaseCenterEditor(caseCenterState.cases.find((item) => item.id === data.case.id)); caseMessage("草稿副本已创建。", "success"); } catch (error) { caseMessage(error.message, "error"); } });
@@ -1307,6 +1396,7 @@ document.getElementById("caseCenterEditor").elements.galleryImages.addEventListe
   caseCenterState.newFiles = [...event.target.files].map((file) => ({ file, preview: URL.createObjectURL(file), caption: "", altText: "", imageType: "Other", mediaType: file.type.startsWith("video/") ? "video" : "image", contentType: file.type }));
   renderCaseMediaCenter();
 });
+document.getElementById("caseChooseMediaButton")?.addEventListener("click", () => openCaseMediaPicker());
 document.getElementById("caseExistingMedia").addEventListener("input", syncCaseMediaInputs);
 document.getElementById("caseNewMedia").addEventListener("input", syncCaseMediaInputs);
 document.getElementById("caseExistingMedia").addEventListener("click", (event) => {
@@ -1318,29 +1408,77 @@ document.getElementById("caseExistingMedia").addEventListener("click", (event) =
 });
 document.getElementById("caseNewMedia").addEventListener("click", (event) => {
   const row = event.target.closest("[data-new-index]");
-  if (!row || !event.target.closest("[data-case-new-remove]")) return;
-  const index = Number(row.dataset.newIndex);
-  URL.revokeObjectURL(caseCenterState.newFiles[index].preview);
-  caseCenterState.newFiles.splice(index, 1);
+  const selectedRow = event.target.closest("[data-selected-media-index]");
+  if (row && event.target.closest("[data-case-new-remove]")) {
+    const index = Number(row.dataset.newIndex);
+    URL.revokeObjectURL(caseCenterState.newFiles[index].preview);
+    caseCenterState.newFiles.splice(index, 1);
+  }
+  if (selectedRow && event.target.closest("[data-case-selected-remove]")) {
+    caseCenterState.selectedMedia.splice(Number(selectedRow.dataset.selectedMediaIndex), 1);
+  }
+  if (!row && !selectedRow) return;
   renderCaseMediaCenter();
 });
+
+function openCaseMediaPicker() {
+  syncCaseMediaInputs();
+  const already = new Set([
+    ...caseCenterState.existing.map((item) => item.mediaId).filter(Boolean),
+    ...caseCenterState.selectedMedia.map((item) => item.mediaId).filter(Boolean)
+  ]);
+  const allowed = mediaItems.filter((item) => !item.trashedAt && !already.has(item.id) && (item.mediaType !== "video" || item.processingStatus === "ready"));
+  const modal = document.createElement("div");
+  modal.className = "admin-modal-backdrop";
+  modal.innerHTML = `<div class="admin-modal media-picker-modal"><div class="admin-modal-head"><h2>Choose Case Media</h2><button class="icon-command" type="button" data-close-modal>×</button></div><p class="admin-helper">从 Media Library 批量加入图片/视频，不复制 URL，不重复上传。</p><input class="media-picker-search" placeholder="Search media"><div class="media-picker-grid">${allowed.map((item) => `<label class="media-picker-item" data-picker-search="${escapeHtml([item.displayName, item.originalFilename, item.category, item.collection, ...(item.tags || [])].join(" ").toLowerCase())}"><input type="checkbox" value="${escapeHtml(item.id)}">${mediaPreview(item, "media-picker-preview")}<span>${escapeHtml(item.displayName || item.originalFilename || item.id)}</span><small>${escapeHtml(item.collection || item.category || "")}</small></label>`).join("")}</div><div class="admin-form-actions"><button class="btn btn-primary" type="button" data-picker-add>Add selected</button><button class="btn btn-secondary" type="button" data-close-modal>Cancel</button></div></div>`;
+  document.body.append(modal);
+  modal.querySelector("[data-close-modal]").focus();
+  modal.addEventListener("input", (event) => {
+    if (!event.target.matches(".media-picker-search")) return;
+    const needle = event.target.value.trim().toLowerCase();
+    modal.querySelectorAll("[data-picker-search]").forEach((item) => { item.hidden = needle && !item.dataset.pickerSearch.includes(needle); });
+  });
+  modal.addEventListener("click", (event) => {
+    if (event.target.matches("[data-close-modal]") || event.target === modal) modal.remove();
+    if (!event.target.matches("[data-picker-add]")) return;
+    const selected = [...modal.querySelectorAll("input[type='checkbox']:checked")].map((input) => mediaItems.find((item) => item.id === input.value)).filter(Boolean);
+    if (!selected.length) return;
+    for (const media of selected) {
+      caseCenterState.selectedMedia.push({
+        mediaId: media.id,
+        url: media.url,
+        preview: media.url,
+        mediaType: media.mediaType,
+        contentType: media.contentType,
+        caption: media.displayName || media.originalFilename || "",
+        altText: media.altText || media.displayName || media.originalFilename || "",
+        imageType: "Other"
+      });
+    }
+    modal.remove();
+    renderCaseMediaCenter();
+    caseMessage(`${selected.length} 个媒体已加入案例，请保存。`, "success");
+  });
+}
 function enableDentalOsDrag(container, listName) {
   container.addEventListener("dragstart", (event) => {
     const row = event.target.closest("[data-case-drag]");
     if (!row) return;
-    event.dataTransfer.setData("text/plain", listName === "newFiles" ? row.dataset.newIndex : row.dataset.existingId);
+    if ((listName === "newFiles" && row.dataset.caseDrag !== "new") || (listName === "selectedMedia" && row.dataset.caseDrag !== "selected") || (listName === "existing" && row.dataset.caseDrag !== "existing")) return;
+    event.dataTransfer.setData("text/plain", listName === "newFiles" ? row.dataset.newIndex : listName === "selectedMedia" ? row.dataset.selectedMediaIndex : row.dataset.existingId);
     event.dataTransfer.effectAllowed = "move";
   });
   container.addEventListener("dragover", (event) => { if (event.target.closest("[data-case-drag]")) event.preventDefault(); });
   container.addEventListener("drop", (event) => {
     const row = event.target.closest("[data-case-drag]");
     if (!row) return;
+    if ((listName === "newFiles" && row.dataset.caseDrag !== "new") || (listName === "selectedMedia" && row.dataset.caseDrag !== "selected") || (listName === "existing" && row.dataset.caseDrag !== "existing")) return;
     event.preventDefault();
     syncCaseMediaInputs();
     const list = caseCenterState[listName];
     const fromValue = event.dataTransfer.getData("text/plain");
-    const from = listName === "newFiles" ? Number(fromValue) : list.findIndex((item) => item.id === fromValue);
-    const to = listName === "newFiles" ? Number(row.dataset.newIndex) : list.findIndex((item) => item.id === row.dataset.existingId);
+    const from = listName === "newFiles" ? Number(fromValue) : listName === "selectedMedia" ? Number(fromValue) : list.findIndex((item) => item.id === fromValue);
+    const to = listName === "newFiles" ? Number(row.dataset.newIndex) : listName === "selectedMedia" ? Number(row.dataset.selectedMediaIndex) : list.findIndex((item) => item.id === row.dataset.existingId);
     if (from < 0 || to < 0 || from === to) return;
     const [item] = list.splice(from, 1);
     list.splice(to, 0, item);
@@ -1350,5 +1488,6 @@ function enableDentalOsDrag(container, listName) {
 }
 enableDentalOsDrag(document.getElementById("caseExistingMedia"), "existing");
 enableDentalOsDrag(document.getElementById("caseNewMedia"), "newFiles");
+enableDentalOsDrag(document.getElementById("caseNewMedia"), "selectedMedia");
 
 initialize();

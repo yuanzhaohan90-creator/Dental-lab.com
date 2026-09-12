@@ -1,6 +1,6 @@
 const assert = require("assert");
 const crypto = require("crypto");
-const { createSession, isAdmin, verifyPassword, verifySession } = require("../lib/case-auth");
+const { createSession, isAdmin, pbkdf2Hex, PBKDF2_ITERATIONS, verifyPassword, verifySession } = require("../lib/case-auth");
 const { CATEGORIES, IMAGE_TYPES, duplicateRecordData, normalizeFields, validateRecord } = require("../lib/case-store");
 const { CANONICAL_CASE_SLUG, canonicalPublicRecords, canonicalSlugFor, normalizePublicCase } = require("../lib/public-cases");
 
@@ -9,8 +9,17 @@ const salt = "unit-test-salt";
 process.env.CASE_ADMIN_PASSWORD_HASH = `scrypt$${salt}$${crypto.scryptSync(password, salt, 64).toString("hex")}`;
 process.env.CASE_SESSION_SECRET = "unit-test-session-secret-with-sufficient-entropy";
 
-assert.equal(verifyPassword(password), true);
-assert.equal(verifyPassword("wrong-password"), false);
+async function main() {
+assert.equal(await verifyPassword(password), true);
+assert.equal(await verifyPassword("wrong-password"), false);
+const pbkdfSalt = "unit-test-pbkdf2-salt";
+process.env.CASE_ADMIN_PASSWORD_HASH = `pbkdf2$${PBKDF2_ITERATIONS}$${pbkdfSalt}$${await pbkdf2Hex(password, pbkdfSalt, PBKDF2_ITERATIONS)}`;
+assert.equal(await verifyPassword(password), true);
+assert.equal(await verifyPassword("wrong-password"), false);
+const hmacSalt = "unit-test-hmac-salt";
+process.env.CASE_ADMIN_PASSWORD_HASH = `hmac-sha256$${hmacSalt}$${crypto.createHmac("sha256", hmacSalt).update(password).digest("hex")}`;
+assert.equal(await verifyPassword(password), true);
+assert.equal(await verifyPassword("wrong-password"), false);
 
 const session = createSession(1000);
 assert.equal(verifySession(session, 2000), true);
@@ -88,3 +97,9 @@ assert.equal(canonicalSlugFor("4-unit-anterior-zirconia-esthetic-restoration"), 
 assert.deepEqual(normalizePublicCase({ title: "Copy of Anterior Zirconia", shade: "a3" }), { title: "Anterior Zirconia", shade: "A3" });
 
 console.log("case-library unit tests passed");
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

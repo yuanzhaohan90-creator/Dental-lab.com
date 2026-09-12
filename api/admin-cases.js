@@ -10,6 +10,7 @@ const {
   getRecord,
   listRecords,
   makeId,
+  mediaImage,
   normalizeFields,
   restoreRecord,
   saveRecord,
@@ -17,6 +18,7 @@ const {
   trashRecord,
   uniqueSlug
 } = require("../lib/case-store");
+const { getMedia } = require("../lib/admin-store");
 const { caseUrl, submitIndexNowSoon } = require("../lib/indexnow");
 
 const MAX_TOTAL_BYTES = 140 * 1024 * 1024;
@@ -85,8 +87,10 @@ async function writeCase(req, isUpdate) {
   const input = safeJson(fields.case, {});
   const existingValue = safeJson(fields.existingImages, []);
   const newImageMetaValue = safeJson(fields.newImageMeta, []);
+  const selectedMediaValue = safeJson(fields.selectedMedia, []);
   const existing = Array.isArray(existingValue) ? existingValue : [];
   const newImageMeta = Array.isArray(newImageMetaValue) ? newImageMetaValue : [];
+  const selectedMedia = Array.isArray(selectedMediaValue) ? selectedMediaValue : [];
   const current = isUpdate ? await getRecord(input.id) : null;
   if (isUpdate && !current) throw Object.assign(new Error("Case not found."), { statusCode: 404 });
 
@@ -134,6 +138,11 @@ async function writeCase(req, isUpdate) {
       const image = await storeImage(id, galleryFiles[index], newImageMeta[index] || { sortOrder: record.images.length + index }, false);
       record.images.push(image);
       uploadedPaths.push(image.pathname);
+    }
+    for (const item of selectedMedia) {
+      const media = await getMedia(String(item.mediaId || ""));
+      if (!media || media.trashedAt) throw Object.assign(new Error("A selected media item is no longer available."), { statusCode: 409 });
+      record.images.push(mediaImage(media, item, false));
     }
     record.images.sort((a, b) => a.sortOrder - b.sortOrder).forEach((image, index) => { image.sortOrder = image.isCover ? -1 : index; });
     await saveRecord(record);

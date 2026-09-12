@@ -99,8 +99,16 @@
 .bulk-upload-row span{min-width:0;overflow-wrap:anywhere}
 .bulk-upload-row strong{font-size:13px;color:#52677d}
 .bulk-upload-row strong.success{color:#147a4b}.bulk-upload-row strong.error{color:#a02c2c}
-#mediaSearch,#caseSearch{width:min(100%,320px);min-height:42px;padding:10px 12px;border:1px solid #c8d7e4;border-radius:7px;background:#fff;color:#102033;font:inherit}
-#mediaBulkTagValue{min-height:38px;max-width:180px;padding:8px 10px;border:1px solid #c8d7e4;border-radius:6px}
+#mediaSearch,#caseSearch,#mediaTagFilter,#mediaCollectionFilter{width:min(100%,320px);min-height:42px;padding:10px 12px;border:1px solid #c8d7e4;border-radius:7px;background:#fff;color:#102033;font:inherit}
+#mediaBulkTagValue,#mediaBulkCollectionValue{min-height:38px;max-width:180px;padding:8px 10px;border:1px solid #c8d7e4;border-radius:6px}
+.media-picker-modal{inline-size:min(1040px,calc(100vw - 32px));max-block-size:calc(100vh - 48px);overflow:auto}
+.media-picker-search{width:100%;min-height:42px;margin:10px 0 14px;padding:10px 12px;border:1px solid #c8d7e4;border-radius:7px}
+.media-picker-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;max-height:54vh;overflow:auto;padding:2px}
+.media-picker-item{display:grid;gap:7px;border:1px solid #d8e4ee;border-radius:8px;background:#fff;padding:10px;cursor:pointer}
+.media-picker-item:hover{border-color:#145da7;background:#f6fafc}
+.media-picker-item input{justify-self:start}
+.media-picker-preview{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;background:#102033}
+.media-picker-item span,.media-picker-item small{min-width:0;overflow-wrap:anywhere}
 .case-center-shell{display:grid;grid-template-columns:minmax(300px,370px) minmax(0,1fr);gap:22px;align-items:start}
 .case-center-list-panel,.case-center-editor{background:#fff;border:1px solid #d8e4ee;border-radius:10px;padding:18px;box-shadow:0 18px 42px rgba(16,32,51,.05)}
 .case-center-toolbar{display:grid;gap:10px;margin-bottom:14px}
@@ -120,6 +128,7 @@
 .case-editor-section{display:none}
 .case-editor-section.active{display:grid;gap:14px}
 .case-media-upload-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.case-media-toolrow{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
 .case-media-list{display:grid;gap:11px}
 .case-media-row{display:grid;grid-template-columns:auto 130px minmax(0,1fr) auto;gap:12px;align-items:start;border:1px solid #d8e4ee;border-radius:8px;background:#f8fafc;padding:12px;cursor:grab}
 .case-media-row:active{cursor:grabbing}
