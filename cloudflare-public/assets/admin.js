@@ -59,14 +59,26 @@ async function api(url, options = {}) {
   return data;
 }
 
-const routeAliases = { homepage: "home", "full-arch": "fullArch" };
+const routeAliases = { homepage: "home", "full-arch": "fullArch", "submit-case": "submitCase" };
+const websitePageAliases = { home: "home", implant: "implant", "full-arch": "fullArch", about: "about", "submit-case": "submitCase" };
+function adminRouteSegments() {
+  return location.pathname.replace(/^\/admin\/?/, "").split("/").filter(Boolean);
+}
+
 function routePart() {
-  const part = location.pathname.replace(/^\/admin\/?/, "").split("/")[0];
+  const [part] = adminRouteSegments();
   return routeAliases[part] || part || "dashboard";
+}
+
+function websitePageKey() {
+  const segments = adminRouteSegments();
+  if (segments[0] !== "website") return "";
+  return websitePageAliases[segments[1]] || "";
 }
 
 function currentView() {
   const part = routePart();
+  if (part === "website") return websitePageKey() ? "page" : "website";
   if (["home", "implant", "fullArch", "about"].includes(part)) return "page";
   return ["cases", "submissions", "media", "settings", "seo", "advanced"].includes(part) ? part : "dashboard";
 }
@@ -76,7 +88,8 @@ function showShell() {
   shell.hidden = false;
   window.scrollTo({ top: 0, left: 0 });
   const view = currentView();
-  const route = routePart();
+  const route = currentView() === "page" ? "website" : routePart();
+  const editorKey = websitePageKey() || routePart();
   document.querySelectorAll("[data-view]").forEach((section) => { section.hidden = section.dataset.view !== view; });
   document.querySelectorAll("[data-admin-route]").forEach((link) => {
     const active = link.dataset.adminRoute === route;
@@ -86,7 +99,7 @@ function showShell() {
   });
   if (view === "dashboard") loadDashboard();
   if (view === "cases") loadCaseCenter();
-  if (view === "page") loadPageEditor(route);
+  if (view === "page") loadPageEditor(editorKey);
   if (view === "submissions") loadSubmissions();
   if (view === "media") loadMedia();
   if (view === "settings") loadSettings();
@@ -350,7 +363,7 @@ function renderMedia() {
       ? `<ul class="admin-used-in">${usedIn.map((place) => `<li><a href="${escapeHtml(place.editorUrl)}">${escapeHtml(place.label)}</a>${place.required ? "<small>需要替换</small>" : ""}</li>`).join("")}</ul>`
       : '<p class="admin-media-usage">当前未使用</p>';
     if (mediaTrashView) return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}">${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><p class="admin-trash-meta">删除时间：${formatDate(item.trashedAt)}<br>原分类：${escapeHtml(categoryLabel(item.originalLocation || item.category))}<br>${item.originalUsage?.length ? `原使用位置：${item.originalUsage.map(escapeHtml).join("；")}<br>` : ""}30 天后自动清理</p><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-restore>恢复</button><button class="btn admin-danger" type="button" data-media-permanent>永久删除</button></div><div class="admin-message" role="status"></div></div></article>`;
-    return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}"><label class="admin-media-select"><input type="checkbox" data-media-select ${selectedMediaIds.has(item.id) ? "checked" : ""}> 选择</label>${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><label class="field">显示名称<input data-media-key="displayName" value="${escapeHtml(item.displayName)}"></label><label class="field">图片说明（ALT）<input data-media-key="altText" value="${escapeHtml(item.altText)}"></label><label class="field">分类<select data-media-key="category">${["Cases", "Homepage", "Implant", "Full-Arch", "Lab", "Products", "Other"].map((value) => `<option value="${value}" ${value === item.category ? "selected" : ""}>${categoryLabel(value)}</option>`).join("")}</select></label><label class="field">Collection<input data-media-key="collection" value="${escapeHtml(item.collection || "")}"></label><label class="field">Tags<input data-media-key="tags" value="${escapeHtml((item.tags || []).join(", "))}"></label>${item.mediaType === "video" ? `<label class="field">视频海报<select data-media-key="posterMediaId">${mediaOptions(item.posterMediaId, "image")}</select></label>${item.processingMessage ? `<p class="admin-helper">${escapeHtml(item.processingMessage)}</p>` : ""}` : ""}<div class="admin-media-usage"><strong>Used On</strong>${usage}</div><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-use ${item.mediaType === "video" && item.processingStatus !== "ready" ? "disabled" : ""}>使用到页面</button>${item.mediaType === "video" && item.processingStatus === "failed" ? '<button class="btn btn-secondary" type="button" data-media-retry>重试视频处理</button>' : ""}<button class="btn btn-secondary" type="button" data-media-replace>替换文件</button><button class="btn btn-secondary" type="button" data-media-save>保存信息</button><button class="btn admin-danger" type="button" data-media-delete>删除</button></div><input class="visually-hidden" type="file" data-media-replace-file accept="image/jpeg,image/png,image/webp,image/svg+xml,${VIDEO_ACCEPT}"><div class="media-use-menu" hidden><a href="/admin/home">网站首页</a><a href="/admin/implant">种植修复</a><a href="/admin/full-arch">全口修复</a><a href="/admin/about">关于我们</a></div><div class="admin-message" role="status"></div></div></article>`;
+    return `<article class="admin-media-item" id="media-${item.id}" data-media-id="${item.id}"><label class="admin-media-select"><input type="checkbox" data-media-select ${selectedMediaIds.has(item.id) ? "checked" : ""}> 选择</label>${mediaPreview(item)}<div class="admin-media-fields"><p class="media-type-label">${mediaFileDetails(item)}</p><label class="field">显示名称<input data-media-key="displayName" value="${escapeHtml(item.displayName)}"></label><label class="field">图片说明（ALT）<input data-media-key="altText" value="${escapeHtml(item.altText)}"></label><label class="field">分类<select data-media-key="category">${["Cases", "Homepage", "Implant", "Full-Arch", "Lab", "Products", "Other"].map((value) => `<option value="${value}" ${value === item.category ? "selected" : ""}>${categoryLabel(value)}</option>`).join("")}</select></label><label class="field">Collection<input data-media-key="collection" value="${escapeHtml(item.collection || "")}"></label><label class="field">Tags<input data-media-key="tags" value="${escapeHtml((item.tags || []).join(", "))}"></label>${item.mediaType === "video" ? `<label class="field">视频海报<select data-media-key="posterMediaId">${mediaOptions(item.posterMediaId, "image")}</select></label>${item.processingMessage ? `<p class="admin-helper">${escapeHtml(item.processingMessage)}</p>` : ""}` : ""}<div class="admin-media-usage"><strong>Used On</strong>${usage}</div><div class="admin-media-actions"><button class="btn btn-secondary" type="button" data-media-use ${item.mediaType === "video" && item.processingStatus !== "ready" ? "disabled" : ""}>使用到页面</button>${item.mediaType === "video" && item.processingStatus === "failed" ? '<button class="btn btn-secondary" type="button" data-media-retry>重试视频处理</button>' : ""}<button class="btn btn-secondary" type="button" data-media-replace>替换文件</button><button class="btn btn-secondary" type="button" data-media-save>保存信息</button><button class="btn admin-danger" type="button" data-media-delete>删除</button></div><input class="visually-hidden" type="file" data-media-replace-file accept="image/jpeg,image/png,image/webp,image/svg+xml,${VIDEO_ACCEPT}"><div class="media-use-menu" hidden><a href="/admin/website/home">网站首页</a><a href="/admin/website/implant">种植修复</a><a href="/admin/website/full-arch">全口修复</a><a href="/admin/website/about">关于我们</a></div><div class="admin-message" role="status"></div></div></article>`;
   }).join("") : `<p class="admin-empty">${mediaTrashView ? "回收站为空。" : "没有符合当前筛选条件的媒体。"}</p>`;
 }
 
@@ -631,7 +644,8 @@ const PAGE_META = {
   home: { title: "网站首页", intro: "从上到下编辑网站首页内容。", publicPath: "/", category: "Homepage" },
   implant: { title: "种植修复", intro: "为每个位置选择真实、有说服力的种植作品。", publicPath: "/implant-restorations", category: "Implant" },
   fullArch: { title: "全口修复 / All-on-X", intro: "管理全口案例、修复方案、支架和工作流程媒体。", publicPath: "/full-arch-all-on-x", category: "Full-Arch" },
-  about: { title: "关于我们 / 实验室", intro: "这里只使用真实的实验室、技师、设备和质检媒体。", publicPath: "/about", category: "Lab" }
+  about: { title: "关于我们 / 实验室", intro: "这里只使用真实的实验室、技师、设备和质检媒体。", publicPath: "/about", category: "Lab" },
+  submitCase: { title: "提交病例页面", intro: "当前提交表单由安全接口管理，公开联系方式在 Settings 中统一维护。", publicPath: "/submit-case", category: "Other", readonly: true }
 };
 
 const PAGE_SECTIONS = {
@@ -672,6 +686,9 @@ const PAGE_SECTIONS = {
     { key: "finishing", label: "Legacy: 单张修整图", hint: "旧版兼容字段。后续会被动态 Gallery 替代。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
     { key: "qc", label: "Legacy: 单张质检图", hint: "旧版兼容字段。后续会被动态 Collection 替代。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" },
     { key: "packing", label: "Legacy: 单张包装 / 发货图", hint: "旧版兼容字段；没有真实媒体时请留空。", media: true, video: true, ratio: "4:3", mobileRatio: "4:3" }
+  ],
+  submitCase: [
+    { key: "submitCaseStatus", label: "Submit Case Status", hint: "提交病例页面已连接客户提交、私密附件、邮件通知和后台 Submissions。", readonly: true }
   ]
 };
 
@@ -820,6 +837,10 @@ function collectionItemEditor(key, item, index, section) {
 }
 
 function renderPageEditor() {
+  if (PAGE_META[pageKey]?.readonly) {
+    document.getElementById("pageSections").innerHTML = `<section class="page-section-editor"><div class="page-section-heading"><span>Info</span><div><h2>Submit Case is operational</h2><p>此页面的表单流程由 Submit Case 系统统一管理。联系信息、Logo 和社交链接请在 Settings 修改；客户提交记录请在 Submissions 查看。</p></div></div><div class="admin-quick-actions"><a class="btn btn-primary" href="/submit-case" target="_blank" rel="noopener">打开公开提交页</a><a class="btn btn-secondary" href="/admin/settings">编辑联系信息</a><a class="btn btn-secondary" href="/admin/submissions">查看客户提交</a></div></section>`;
+    return;
+  }
   const draft = pageData.config.draft;
   const sections = PAGE_SECTIONS[pageKey];
   document.getElementById("pageSections").innerHTML = sections.map((section) => {
@@ -916,6 +937,20 @@ async function loadPageEditor(key) {
   document.getElementById("pageEditorTitle").textContent = meta.title;
   document.getElementById("pageEditorIntro").textContent = meta.intro;
   document.title = `${meta.title} | YZH 网站管理后台`;
+  document.querySelector("#pageEditorForm button[type='submit']").disabled = false;
+  document.getElementById("previewPage").disabled = false;
+  document.getElementById("publishPage").disabled = false;
+  document.getElementById("previewPage").onclick = null;
+  if (meta.readonly) {
+    document.getElementById("pageLiveState").textContent = "LIVE / 系统页面";
+    document.getElementById("pageDraftState").textContent = "DRAFT / 不适用";
+    document.querySelector("#pageEditorForm button[type='submit']").disabled = true;
+    document.getElementById("restorePage").disabled = true;
+    document.getElementById("previewPage").onclick = () => window.open(meta.publicPath, "_blank", "noopener");
+    document.getElementById("publishPage").disabled = true;
+    renderPageEditor();
+    return;
+  }
   try {
     const [page, media] = await Promise.all([api(`/api/admin?module=page-editor&page=${encodeURIComponent(key)}`), api("/api/admin?module=media")]);
     pageData = page; mediaItems = media.media;
@@ -1018,10 +1053,10 @@ async function savePageDraft() {
   return data;
 }
 
-document.getElementById("pageEditorForm").addEventListener("submit", async (event) => { event.preventDefault(); try { await savePageDraft(); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
-document.getElementById("previewPage").addEventListener("click", async () => { try { await savePageDraft(); window.open(`${PAGE_META[pageKey].publicPath}?adminPreview=${encodeURIComponent(pageKey)}`, "_blank", "noopener"); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
-document.getElementById("publishPage").addEventListener("click", async () => { if (!confirm(`确定把“${PAGE_META[pageKey].title}”草稿发布到正式网站吗？`)) return; try { await savePageDraft(); await api(`/api/admin?module=page-editor&page=${encodeURIComponent(pageKey)}&action=publish`, { method: "POST" }); showMessage(document.getElementById("pageEditorMessage"), "发布成功。", "success"); await loadPageEditor(pageKey); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
-document.getElementById("restorePage").addEventListener("click", async () => { if (!confirm("确定恢复上一个已发布版本吗？")) return; try { await api(`/api/admin?module=page-editor&page=${encodeURIComponent(pageKey)}&action=restore`, { method: "POST" }); showMessage(document.getElementById("pageEditorMessage"), "已恢复上一版本。", "success"); await loadPageEditor(pageKey); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
+document.getElementById("pageEditorForm").addEventListener("submit", async (event) => { event.preventDefault(); if (PAGE_META[pageKey]?.readonly) return showMessage(document.getElementById("pageEditorMessage"), "这个系统页面不需要保存草稿。"); try { await savePageDraft(); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
+document.getElementById("previewPage").addEventListener("click", async () => { try { if (PAGE_META[pageKey]?.readonly) return window.open(PAGE_META[pageKey].publicPath, "_blank", "noopener"); await savePageDraft(); window.open(`${PAGE_META[pageKey].publicPath}?adminPreview=${encodeURIComponent(pageKey)}`, "_blank", "noopener"); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
+document.getElementById("publishPage").addEventListener("click", async () => { if (PAGE_META[pageKey]?.readonly) return showMessage(document.getElementById("pageEditorMessage"), "这个系统页面不需要发布。"); if (!confirm(`确定把“${PAGE_META[pageKey].title}”草稿发布到正式网站吗？`)) return; try { await savePageDraft(); await api(`/api/admin?module=page-editor&page=${encodeURIComponent(pageKey)}&action=publish`, { method: "POST" }); showMessage(document.getElementById("pageEditorMessage"), "发布成功。", "success"); await loadPageEditor(pageKey); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
+document.getElementById("restorePage").addEventListener("click", async () => { if (PAGE_META[pageKey]?.readonly) return showMessage(document.getElementById("pageEditorMessage"), "这个系统页面没有可恢复版本。"); if (!confirm("确定恢复上一个已发布版本吗？")) return; try { await api(`/api/admin?module=page-editor&page=${encodeURIComponent(pageKey)}&action=restore`, { method: "POST" }); showMessage(document.getElementById("pageEditorMessage"), "已恢复上一版本。", "success"); await loadPageEditor(pageKey); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
 
 function openCollectionMediaPicker(key) {
   pageData.config.draft = collectPageDraft();

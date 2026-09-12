@@ -60,7 +60,30 @@ function videoUnsupported() {
 }
 
 const publicPages = { "/": "home", "/implant-restorations": "implant", "/full-arch-all-on-x": "fullArch", "/cases": "cases", "/crown-bridge": "crownBridge", "/services/crown-bridge": "crownBridge", "/digital-dentistry": "digital", "/services/digital-workflow": "digital", "/exocad-design-outsourcing": "exocadOutsourcing", "/all-on-x-full-arch-cad-design": "allOnXCadDesign", "/implant-bar-design": "implantBarDesign", "/custom-abutment-implant-design": "customAbutmentDesign", "/surgical-guide-design-outsourcing": "surgicalGuideOutsourcing", "/surgical-guides": "surgicalGuides", "/about": "about", "/submit-case": "submitCase", "/privacy-policy": "privacy", "/terms": "terms" };
-const adminPages = { "/admin": "index.html", "/admin/": "index.html", "/admin/home": "index.html", "/admin/homepage": "index.html", "/admin/implant": "index.html", "/admin/full-arch": "index.html", "/admin/about": "index.html", "/admin/submissions": "index.html", "/admin/media": "index.html", "/admin/settings": "index.html", "/admin/cases": "index.html", "/admin/seo": "index.html", "/admin/advanced": "index.html" };
+const adminRedirects = {
+  "/admin/home": "/admin/website/home",
+  "/admin/homepage": "/admin/website/home",
+  "/admin/implant": "/admin/website/implant",
+  "/admin/full-arch": "/admin/website/full-arch",
+  "/admin/about": "/admin/website/about"
+};
+const adminPages = new Set([
+  "/admin",
+  "/admin/",
+  "/admin/website",
+  "/admin/website/",
+  "/admin/website/home",
+  "/admin/website/implant",
+  "/admin/website/full-arch",
+  "/admin/website/about",
+  "/admin/website/submit-case",
+  "/admin/submissions",
+  "/admin/media",
+  "/admin/settings",
+  "/admin/cases",
+  "/admin/seo",
+  "/admin/advanced"
+]);
 const templatePaths = ["index.tpl", "implant-restorations.tpl", "full-arch-all-on-x.tpl", "cases.tpl", "crown-bridge.tpl", "digital-dentistry.tpl", "exocad-design-outsourcing.tpl", "all-on-x-full-arch-cad-design.tpl", "implant-bar-design.tpl", "custom-abutment-implant-design.tpl", "surgical-guide-design-outsourcing.tpl", "surgical-guides.tpl", "about.tpl", "submit-case.tpl", "privacy-policy.tpl", "terms.tpl"];
 let templatesPromise;
 
@@ -96,7 +119,8 @@ export default {
       return invoke(routedRequest(request, "/api/public-page", { page: publicPages[url.pathname] }), env, publicPage);
     }
     if (url.pathname.startsWith("/cases/") && url.pathname.length > "/cases/".length) return invoke(routedRequest(request, "/api/case-page", { slug: decodeURIComponent(url.pathname.slice("/cases/".length)) }), env, casePage);
-    if (adminPages[url.pathname]) return env.ASSETS.fetch(routedRequest(request, `/admin/${adminPages[url.pathname]}`));
+    if (adminRedirects[url.pathname]) return Response.redirect(new URL(`${adminRedirects[url.pathname]}${url.search}`, url), 302);
+    if (adminPages.has(url.pathname)) return env.ASSETS.fetch(routedRequest(request, "/admin-shell.html"));
     return env.ASSETS.fetch(request);
   },
 };
