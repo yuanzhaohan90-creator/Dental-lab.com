@@ -64,10 +64,10 @@
       <div class="section-head home-v3-section-head">
         <p class="eyebrow" data-manager-text="selectedWork.eyebrow">Selected Cases</p>
         <h2 data-manager-text="selectedWork.heading">Real work comes before claims.</h2>
-        <p class="copy" data-manager-text="selectedWork.description">Owner-approved implant, full-arch and restorative work selected for technical buyers. Each card opens the full case detail.</p>
+        <p class="copy" data-manager-text="selectedWork.description">A focused selection of published implant, full-arch and restorative work. Each card opens the full case detail.</p>
       </div>
       <div class="priority-case-grid">
-        <a class="priority-case" href="/cases"><div><p class="case-category">Waiting for owner-approved cases</p><h3>Selected cases will appear here.</h3><p>Publish real YZH work in the Case Library, then select it for the homepage.</p><span class="text-link">Open Case Portfolio</span></div></a>
+        <a class="priority-case" href="/cases"><div><p class="case-category">Case Portfolio</p><h3>Review YZH Dental Lab case work.</h3><p>Browse published implant, full-arch and restorative cases selected for technical buyers.</p><span class="text-link">Open Case Portfolio</span></div></a>
       </div>
     </div>
   </section>
@@ -129,8 +129,8 @@
     <div class="wrap two-col">
       <div>
         <p class="eyebrow">Laboratory & Equipment</p>
-        <h2>Show the capability, then let buyers inspect more.</h2>
-        <p class="copy">Homepage media should stay curated. The About page can hold the larger Laboratory and Equipment galleries managed from Admin.</p>
+        <h2>Laboratory capability with a practical workflow behind it.</h2>
+        <p class="copy">A focused view of laboratory, CAD and production areas helps new partners understand how cases move from review to delivery.</p>
         <div class="cta-row"><a class="btn btn-outline" href="/about">View Laboratory</a></div>
       </div>
       <div class="image-mosaic">
@@ -163,7 +163,7 @@
         <h2 data-manager-text="finalCta.heading">You do not need to move your full workload at once.</h2>
         <p class="copy" data-manager-text="finalCta.description">Send one implant, full-arch or restorative case first. Our technical team will review the files, confirm the case details and communicate before production.</p>
       </div>
-      <div><div class="managed-cta-media" data-manager-media="finalCta.media" data-hide-when-empty hidden></div><div class="cta-panel"><a class="btn btn-primary" href="/submit-case" data-manager-text="finalCta.primaryLabel" data-manager-href="finalCta.primaryDestination">Submit a Case</a><a class="btn btn-outline" href="/about">Contact Us</a></div></div>
+      <div><div class="managed-cta-media" data-manager-media="finalCta.media" data-hide-when-empty hidden></div><div class="cta-panel"><a class="btn btn-primary" href="/submit-case" data-manager-text="finalCta.primaryLabel" data-manager-href="finalCta.primaryDestination">Submit a Case</a><a class="btn btn-outline" href="mailto:yzhdentallab@gmail.com">Contact Us</a></div></div>
     </div>
   </section>
 </main>

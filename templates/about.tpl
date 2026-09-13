@@ -42,8 +42,8 @@
         <article><div data-manager-media="cad.media"></div><h3 data-manager-text="cad.heading">CAD / Design</h3><p data-manager-text="cad.description">Digital design review for implant, full-arch and restorative cases.</p></article>
         <article id="production"><div data-manager-media="production.media"></div><h3 data-manager-text="production.heading">Production</h3><p data-manager-text="production.description">CAD/CAM production support for approved restorative workflows.</p></article>
         <article><div data-manager-media="finishing.media"></div><h3 data-manager-text="finishing.heading">Finishing</h3><p data-manager-text="finishing.description">Restoration finishing is checked against the submitted case request.</p></article>
-        <article><div data-manager-media="qc.media"></div><h3 data-manager-text="qc.heading">QC</h3><p data-manager-text="qc.description">Fit, contact, occlusion, finish and case details are checked before dispatch.</p></article>
-        <article data-hide-when-empty hidden><div data-manager-media="packing.media"></div><h3 data-manager-text="packing.heading">Packing / Shipping</h3><p data-manager-text="packing.description">Use a real packing or dispatch photo when available.</p></article>
+        <article><div data-manager-media="qc.media"></div><h3 data-manager-text="qc.heading">Quality Control</h3><p data-manager-text="qc.description">Fit, implant interfaces, contacts, occlusion, surface finish and case instructions are reviewed at the relevant stages before delivery.</p></article>
+        <article data-hide-when-empty hidden><div data-manager-media="packing.media"></div><h3 data-manager-text="packing.heading">Packing / Shipping</h3><p data-manager-text="packing.description">Packing and delivery details are checked against the case instructions.</p></article>
       </div>
     </div>
   </section>
@@ -59,7 +59,7 @@
         <article><h3>Direct technical communication</h3><p>Questions are handled through practical case discussion with the technical team.</p></article>
         <article><h3>Case review before production</h3><p>Missing scan, implant or bite information is flagged before manufacturing starts.</p></article>
         <article><h3>Digital CAD/CAM workflow</h3><p>STL, PLY, Exocad and CAD/CAM records are used for design and production review.</p></article>
-        <article><h3>QC before shipment</h3><p>Fit, contact, occlusion, finish and case details are checked before dispatch.</p></article>
+        <article><h3>QC before shipment</h3><p>Fit, implant interfaces, contacts, occlusion, surface finish and case instructions are reviewed at the relevant stages before delivery.</p></article>
       </div>
     </div>
   </section>

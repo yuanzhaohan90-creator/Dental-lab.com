@@ -38,7 +38,7 @@
       </div>
       <div data-featured-case="implant" hidden></div>
       <div class="implant-module-grid">
-        <a class="implant-module" href="#implant-case-information" data-manager-href="customAbutments.destination">
+        <a class="implant-module" id="custom-abutment" href="#implant-case-information" data-manager-href="customAbutments.destination">
           <img src="/assets/real/custom-implant-abutments-poster-04.jpg" alt="Custom implant abutments manufactured by YZH Dental Lab" loading="lazy" data-manager-media="customAbutments.media">
           <div><h3 data-manager-text="customAbutments.heading">Custom Abutments</h3><p data-manager-text="customAbutments.description">Emergence profile, gingival support, implant angulation and restorative space are reviewed around the submitted digital records.</p></div>
         </a>

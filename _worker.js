@@ -60,6 +60,11 @@ function videoUnsupported() {
 }
 
 const publicPages = { "/": "home", "/services": "services", "/workflow": "workflow", "/services/implant": "implant", "/implant-restorations": "implant", "/services/full-arch": "fullArch", "/full-arch-all-on-x": "fullArch", "/cases": "cases", "/services/crown-bridge": "crownBridge", "/crown-bridge": "crownBridge", "/services/digital-workflow": "digital", "/digital-dentistry": "digital", "/services/design-only": "designOnly", "/services/surgical-guide": "surgicalGuides", "/exocad-design-outsourcing": "exocadOutsourcing", "/all-on-x-full-arch-cad-design": "allOnXCadDesign", "/implant-bar-design": "implantBarDesign", "/custom-abutment-implant-design": "customAbutmentDesign", "/surgical-guide-design-outsourcing": "surgicalGuideOutsourcing", "/surgical-guides": "surgicalGuides", "/about": "about", "/submit-case": "submitCase", "/privacy-policy": "privacy", "/privacy": "privacy", "/terms": "terms" };
+const permanentRedirects = {
+  "/custom-abutment-implant-design": "/services/implant#custom-abutment",
+  "/all-on-x-full-arch-cad-design": "/services/full-arch#cad-design",
+  "/surgical-guide-design-outsourcing": "/services/surgical-guide"
+};
 const adminRedirects = {
   "/admin/home": "/admin/website/home",
   "/admin/homepage": "/admin/website/home",
@@ -117,6 +122,7 @@ export default {
     const handler = handlers[url.pathname];
     if (url.pathname === "/api/video-process") return videoUnsupported();
     if (handler) return invoke(request, env, handler);
+    if (permanentRedirects[url.pathname]) return Response.redirect(new URL(permanentRedirects[url.pathname], url), 308);
     if (publicPages[url.pathname]) {
       await loadTemplates(request, env);
       return invoke(routedRequest(request, "/api/public-page", { page: publicPages[url.pathname] }), env, publicPage);

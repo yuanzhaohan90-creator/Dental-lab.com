@@ -11,7 +11,7 @@
 <meta property="og:url" content="https://yzhdentallab.com/services/design-only">
 <meta property="og:title" content="Dental CAD Design Only Support | YZH Dental Lab">
 <meta property="og:description" content="Exocad and 3Shape design support for labs that want CAD files without manufacturing.">
-<meta property="og:image" content="https://yzhdentallab.com/assets/real/cad-design-workstation-02.jpg">
+<meta property="og:image" content="https://yzhdentallab.com/assets/real/full-arch-cad-design-05.jpg">
 <link rel="stylesheet" href="/assets/site.css?v=public-v3-2">
 </head>
 <body>
@@ -25,7 +25,7 @@
         <p class="lead">For partner labs that want design capacity while keeping milling, printing, finishing or final production in-house.</p>
         <div class="cta-row"><a class="btn btn-primary" href="/submit-case">Submit Design Files</a><a class="btn btn-outline" href="/workflow">View Workflow</a></div>
       </div>
-      <img src="/assets/real/cad-design-workstation-02.jpg" alt="CAD design workstation for dental design-only support" width="1600" height="900" loading="eager" fetchpriority="high">
+      <img src="/assets/real/full-arch-cad-design-05.jpg" alt="CAD design review screen for dental design-only support" width="1600" height="900" loading="eager" fetchpriority="high">
     </div>
   </section>
 
@@ -39,9 +39,9 @@
       <div class="service-grid architecture-service-grid">
         <a class="service-card text-panel" href="/submit-case?case_type=Crown%20%26%20Bridge"><h3>Crown / Bridge CAD</h3><p>Zirconia, PFM, veneer, inlay and onlay design support for partner labs.</p><span class="text-link">Submit files</span></a>
         <a class="service-card text-panel" href="/submit-case?case_type=Implant%20Crown%20%2F%20Abutment"><h3>Implant Crown</h3><p>Screw-retained, Ti-base and cement-retained implant crown design review.</p><span class="text-link">Submit files</span></a>
-        <a class="service-card text-panel" href="/custom-abutment-implant-design"><h3>Custom Abutment</h3><p>Emergence profile, margin placement and implant component information checked before design.</p><span class="text-link">View abutment support</span></a>
-        <a class="service-card text-panel" href="/all-on-x-full-arch-cad-design"><h3>Full-Arch Design</h3><p>PMMA, zirconia, bar-supported and approval-based full-arch CAD workflows.</p><span class="text-link">View full-arch CAD</span></a>
-        <a class="service-card text-panel" href="/surgical-guide-design-outsourcing"><h3>Surgical Guide Design</h3><p>Guide design support when complete clinical planning records are supplied.</p><span class="text-link">View guide design</span></a>
+        <a class="service-card text-panel" href="/services/implant#custom-abutment"><h3>Custom Abutment</h3><p>Emergence profile, margin placement and implant component information checked before design.</p><span class="text-link">View abutment support</span></a>
+        <a class="service-card text-panel" href="/services/full-arch#cad-design"><h3>Full-Arch Design</h3><p>PMMA, zirconia, bar-supported and approval-based full-arch CAD workflows.</p><span class="text-link">View full-arch CAD</span></a>
+        <a class="service-card text-panel" href="/services/surgical-guide"><h3>Surgical Guide Design</h3><p>Guide design support when complete clinical planning records are supplied.</p><span class="text-link">View guide design</span></a>
         <a class="service-card text-panel" href="/submit-case?case_type=Digital%20Design%20%2F%20Exocad"><h3>Printable Model</h3><p>Model and digital workflow support for design cases that need printable outputs.</p><span class="text-link">Submit model files</span></a>
         <a class="service-card text-panel" href="/services/digital-workflow"><h3>Exocad / 3Shape Support</h3><p>Design communication for common digital dental workflows and lab-to-lab handoff.</p><span class="text-link">View digital workflow</span></a>
       </div>

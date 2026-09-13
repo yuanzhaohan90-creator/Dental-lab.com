@@ -48,7 +48,7 @@
         <p class="copy">Review published Full-Arch / All-on-X work and use one trial case to evaluate communication, records review and production fit before scaling up.</p>
       </div>
       <div class="case-grid three">
-        <a class="text-panel" href="/cases?category=Full-Arch%20%2F%20All-on-X"><h3>Published Full-Arch Cases</h3><p>View real owner-approved full-arch cases currently available in the Case Library.</p><span class="text-link">Open Full-Arch cases</span></a>
+        <a class="text-panel" href="/cases?category=Full-Arch%20%2F%20All-on-X"><h3>Selected Full-Arch Cases</h3><p>View available full-arch case work with restorative details and technical notes.</p><span class="text-link">Open Full-Arch cases</span></a>
         <a class="text-panel" href="/submit-case?case_type=Full-Arch%20%2F%20All-on-X"><h3>Submit a Full-Arch Case</h3><p>Send one case with scan, bite, implant component and material requirements for technical review.</p><span class="text-link">Submit files</span></a>
         <a class="text-panel" href="/services/digital-workflow"><h3>Digital Design Support</h3><p>Review the CAD approval workflow before committing to final manufacture.</p><span class="text-link">View workflow</span></a>
       </div>
@@ -147,7 +147,7 @@
     </div>
   </section>
 
-  <section class="section" id="framework">
+  <section class="section" id="cad-design">
     <div class="wrap split-feature">
       <div>
         <p class="eyebrow">What To Send</p>

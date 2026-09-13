@@ -23,7 +23,7 @@
         <p class="lead" data-manager-text="hero.description">YZH Dental Lab supports overseas laboratories and clinics with implant restorations, full-arch cases and CAD/CAM production from China.</p>
         <div class="cta-row">
           <a class="btn btn-primary" href="/submit-case">Submit a Case</a>
-          <a class="btn btn-outline" href="/services/digital-workflow">View Workflow</a>
+          <a class="btn btn-outline" href="/workflow">View Workflow</a>
         </div>
       </div>
       <img src="/assets/real/hero-production-floor-03.jpg" alt="YZH Dental Lab production floor" fetchpriority="high" data-manager-media="hero.media">
@@ -56,8 +56,8 @@
         <a class="workflow-link-card" href="/services/digital-workflow"><div data-manager-media="cad.media"></div><h3>CAD Design</h3><p data-manager-text="cad.description">Digital design review for implant, full-arch and restorative cases.</p><span class="text-link">Learn more →</span></a>
         <a class="workflow-link-card" id="production" href="/services/crown-bridge"><div data-manager-media="production.media"></div><h3>Production</h3><p data-manager-text="production.description">CAD/CAM production support for approved restorative workflows.</p><span class="text-link">Learn more →</span></a>
         <a class="workflow-link-card" href="/cases"><div data-manager-media="finishing.media"></div><h3>Final Finishing</h3><p data-manager-text="finishing.description">Restoration finishing is checked against the submitted case request.</p><span class="text-link">Learn more →</span></a>
-        <a class="workflow-link-card" id="quality" href="/about#quality"><div data-manager-media="qc.media"></div><h3>Quality Control</h3><p data-manager-text="qc.description">Fit, contact, occlusion, finish and case details are checked before dispatch.</p><span class="text-link">Learn more →</span></a>
-        <article data-hide-when-empty hidden><div data-manager-media="packing.media"></div><h3 data-manager-text="packing.heading">Packing / Shipping</h3><p data-manager-text="packing.description">Use a real packing or dispatch photo when available.</p></article>
+        <a class="workflow-link-card" id="quality" href="/about#quality"><div data-manager-media="qc.media"></div><h3>Quality Control</h3><p data-manager-text="qc.description">Fit, implant interfaces, contacts, occlusion, surface finish and case instructions are reviewed at the relevant stages before delivery.</p><span class="text-link">Learn more →</span></a>
+        <article data-hide-when-empty hidden><div data-manager-media="packing.media"></div><h3 data-manager-text="packing.heading">Packing / Shipping</h3><p data-manager-text="packing.description">Case packing and delivery details are checked against the case instructions.</p></article>
       </div>
     </div>
   </section>
@@ -89,7 +89,7 @@
         <a class="text-panel" href="/submit-case?country=United%20States"><h3>United States / Canada</h3><p>For labs seeking technical outsourcing, design support or controlled trial-case production.</p><span class="text-link">Submit a case</span></a>
         <a class="text-panel" href="/submit-case?country=Australia%20%2F%20New%20Zealand"><h3>Australia / New Zealand</h3><p>For partners that need digital restorative support with clear communication before production.</p><span class="text-link">Start a review</span></a>
         <a class="text-panel" href="/submit-case?country=United%20Kingdom"><h3>United Kingdom</h3><p>For labs and clinics evaluating implant and full-arch technical support from China.</p><span class="text-link">Send files</span></a>
-        <a class="text-panel" href="/cases"><h3>Owner-approved work</h3><p>Published cases and quick work can be expanded through the Case Library without changing code.</p><span class="text-link">View cases</span></a>
+        <a class="text-panel" href="/cases"><h3>Selected case work</h3><p>Published case work gives new partners a clearer view of restorative focus, materials and technical details.</p><span class="text-link">View cases</span></a>
       </div>
     </div>
   </section>
