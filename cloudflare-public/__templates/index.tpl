@@ -25,8 +25,8 @@
     <button class="menu-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button>
     <nav class="navlinks" id="primaryNav" aria-label="Primary">
       <a href="/">Home</a>
-      <a href="/implant-restorations">Implant</a>
-      <a href="/full-arch-all-on-x">Full Arch</a>
+      <a href="/services/implant">Implant</a>
+      <a href="/services/full-arch">Full Arch</a>
       <a href="/cases">Cases</a>
       <a href="/about">About</a>
       <a href="/submit-case">Submit Case</a>
@@ -67,7 +67,7 @@
         <p class="copy" data-manager-text="selectedWork.description">Owner-approved implant, full-arch and restorative work selected for technical buyers. Each card opens the full case detail.</p>
       </div>
       <div class="priority-case-grid">
-        <a class="priority-case" href="/cases"><div><p class="case-category">Waiting for owner-approved cases</p><h3>Selected cases will appear here.</h3><p>Publish real YZH work in the Case Library, then select it for the homepage.</p><span class="text-link">Open Case Portfolio</span></div></a>
+        <a class="priority-case" href="/cases"><div><p class="case-category">Case Portfolio</p><h3>Review YZH Dental Lab case work.</h3><p>Browse published implant, full-arch and restorative cases selected for technical buyers.</p><span class="text-link">Open Case Portfolio</span></div></a>
       </div>
     </div>
   </section>
@@ -77,15 +77,15 @@
       <div class="section-head home-v3-section-head">
         <p class="eyebrow">Core Services</p>
         <h2>Focused support for implant-driven restorative work.</h2>
-        <p class="copy">The homepage stays tight: only services that move a clinic or partner lab toward a real case submission remain here.</p>
+        <p class="copy">Focused services for partner labs and clinics that want clear technical review before sending their first case.</p>
       </div>
       <div class="service-grid architecture-service-grid">
-        <a class="service-card text-panel" href="/full-arch-all-on-x"><h3>Full-Arch / All-on-X</h3><p>PMMA provisional, final zirconia, titanium bar and implant-supported full-arch workflows.</p><span class="text-link">View Full-Arch support</span></a>
-        <a class="service-card text-panel" href="/implant-restorations"><h3>Implant Restorations</h3><p>Custom abutments, Ti-base, screw-retained restorations and implant bridge review.</p><span class="text-link">View Implant support</span></a>
-        <a class="service-card text-panel" href="/crown-bridge"><h3>Crown & Bridge</h3><p>Zirconia, PFM, veneers, inlays, onlays and restorative overflow support.</p><span class="text-link">View Crown & Bridge</span></a>
-        <a class="service-card text-panel" href="/digital-dentistry"><h3>CAD/CAM Design</h3><p>Exocad design, file review, CAD approval and design-plus-manufacturing workflows.</p><span class="text-link">View Digital Workflow</span></a>
-        <a class="service-card text-panel" href="/surgical-guides"><h3>Surgical Guides</h3><p>Design-only and printed guide support when complete clinical records are supplied.</p><span class="text-link">View Surgical Guides</span></a>
-        <a class="service-card text-panel" href="/implant-restorations#implant-case-information"><h3>Custom Abutments</h3><p>Emergence profile, margin position and restorative space review for implant-supported restorations.</p><span class="text-link">View abutment support</span></a>
+        <a class="service-card text-panel" href="/services/full-arch"><h3>Full-Arch / All-on-X</h3><p>PMMA provisional, final zirconia, titanium bar and implant-supported full-arch workflows.</p><span class="text-link">View Full-Arch support</span></a>
+        <a class="service-card text-panel" href="/services/implant"><h3>Implant Restorations</h3><p>Custom abutments, Ti-base, screw-retained restorations and implant bridge review.</p><span class="text-link">View Implant support</span></a>
+        <a class="service-card text-panel" href="/services/crown-bridge"><h3>Crown & Bridge</h3><p>Zirconia, PFM, veneers, inlays, onlays and restorative overflow support.</p><span class="text-link">View Crown & Bridge</span></a>
+        <a class="service-card text-panel" href="/services/digital-workflow"><h3>CAD/CAM Design</h3><p>Exocad design, file review, CAD approval and design-plus-manufacturing workflows.</p><span class="text-link">View Digital Workflow</span></a>
+        <a class="service-card text-panel" href="/services/surgical-guide"><h3>Surgical Guides</h3><p>Design-only and printed guide support when complete clinical records are supplied.</p><span class="text-link">View Surgical Guides</span></a>
+        <a class="service-card text-panel" href="/services/implant#implant-case-information"><h3>Custom Abutments</h3><p>Emergence profile, margin position and restorative space review for implant-supported restorations.</p><span class="text-link">View abutment support</span></a>
       </div>
     </div>
   </section>
@@ -99,10 +99,10 @@
         <div class="managed-section-media" data-manager-media="technicalProof.media" data-hide-when-empty hidden></div>
       </div>
       <div class="home-v3-proof-grid">
-        <a href="/implant-restorations#implant-case-information" data-manager-text="technicalProof.items.0.label" data-manager-href="technicalProof.items.0.destination">Implant system / platform</a>
-        <a href="/implant-restorations#implant-case-information" data-manager-text="technicalProof.items.1.label" data-manager-href="technicalProof.items.1.destination">Scanbody / component matching</a>
-        <a href="/implant-restorations#implant-quality-control" data-manager-text="technicalProof.items.2.label" data-manager-href="technicalProof.items.2.destination">Restorative space / screw access</a>
-        <a href="/digital-dentistry" data-manager-text="technicalProof.items.3.label" data-manager-href="technicalProof.items.3.destination">Design / material confirmation</a>
+        <a href="/services/implant#implant-case-information" data-manager-text="technicalProof.items.0.label" data-manager-href="technicalProof.items.0.destination">Implant system / platform</a>
+        <a href="/services/implant#implant-case-information" data-manager-text="technicalProof.items.1.label" data-manager-href="technicalProof.items.1.destination">Scanbody / component matching</a>
+        <a href="/services/implant#implant-quality-control" data-manager-text="technicalProof.items.2.label" data-manager-href="technicalProof.items.2.destination">Restorative space / screw access</a>
+        <a href="/services/digital-workflow" data-manager-text="technicalProof.items.3.label" data-manager-href="technicalProof.items.3.destination">Design / material confirmation</a>
       </div>
     </div>
   </section>
@@ -116,8 +116,8 @@
       </div>
       <div class="steps">
         <a class="workflow-step" href="/submit-case" data-manager-href="workflow.items.0.destination"><div class="workflow-step-media" data-manager-media="workflow.items.0.media" data-hide-when-empty hidden></div><span>01</span><h3 data-manager-text="workflow.items.0.label">Receive Case</h3><p>Send STL, scans, photos, prescription, implant details and due date.</p></a>
-        <a class="workflow-step" href="/digital-dentistry" data-manager-href="workflow.items.1.destination"><div class="workflow-step-media" data-manager-media="workflow.items.1.media" data-hide-when-empty hidden></div><span>02</span><h3 data-manager-text="workflow.items.1.label">Review</h3><p>Missing records and technical risk points are confirmed before design.</p></a>
-        <a class="workflow-step" href="/digital-dentistry" data-manager-href="workflow.items.2.destination"><div class="workflow-step-media" data-manager-media="workflow.items.2.media" data-hide-when-empty hidden></div><span>03</span><h3 data-manager-text="workflow.items.2.label">Design</h3><p>CAD design, material path and approval communication are organized.</p></a>
+        <a class="workflow-step" href="/services/digital-workflow" data-manager-href="workflow.items.1.destination"><div class="workflow-step-media" data-manager-media="workflow.items.1.media" data-hide-when-empty hidden></div><span>02</span><h3 data-manager-text="workflow.items.1.label">Review</h3><p>Missing records and technical risk points are confirmed before design.</p></a>
+        <a class="workflow-step" href="/services/digital-workflow" data-manager-href="workflow.items.2.destination"><div class="workflow-step-media" data-manager-media="workflow.items.2.media" data-hide-when-empty hidden></div><span>03</span><h3 data-manager-text="workflow.items.2.label">Design</h3><p>CAD design, material path and approval communication are organized.</p></a>
         <a class="workflow-step" href="/about#production" data-manager-href="workflow.items.3.destination"><div class="workflow-step-media" data-manager-media="workflow.items.3.media" data-hide-when-empty hidden></div><span>04</span><h3 data-manager-text="workflow.items.3.label">Manufacture</h3><p>Approved restorative workflows move into production with documented requirements.</p></a>
         <a class="workflow-step" href="/about#quality" data-manager-href="workflow.items.4.destination"><div class="workflow-step-media" data-manager-media="workflow.items.4.media" data-hide-when-empty hidden></div><span>05</span><h3 data-manager-text="workflow.items.4.label">Quality Control</h3><p>Fit, contacts, occlusion, finish and case details are checked before shipping.</p></a>
         <a class="workflow-step" href="/submit-case" data-manager-href="workflow.items.5.destination"><div class="workflow-step-media" data-manager-media="workflow.items.5.media" data-hide-when-empty hidden></div><span>06</span><h3 data-manager-text="workflow.items.5.label">Delivery</h3><p>Finished cases are prepared for delivery after final review.</p></a>
@@ -130,13 +130,13 @@
       <div>
         <p class="eyebrow">Laboratory & Equipment</p>
         <h2>Show the capability, then let buyers inspect more.</h2>
-        <p class="copy">Homepage media should stay curated. The About page can hold the larger Laboratory and Equipment galleries managed from Admin.</p>
+        <p class="copy">The homepage shows a focused view of laboratory capability. The About page gives buyers a broader look at workflow, equipment and quality control.</p>
         <div class="cta-row"><a class="btn btn-outline" href="/about">View Laboratory</a></div>
       </div>
       <div class="image-mosaic">
         <a href="/about"><img src="/assets/real/production-floor-10.jpg" alt="YZH Dental Lab production area"></a>
         <a href="/about#equipment"><img src="/assets/real/equipment-line-01.jpg" alt="Dental laboratory equipment line"></a>
-        <a href="/digital-dentistry"><img src="/assets/real/cad-design-workstation-02.jpg" alt="CAD design workstation"></a>
+        <a href="/services/digital-workflow"><img src="/assets/real/cad-design-workstation-02.jpg" alt="CAD design workstation"></a>
       </div>
     </div>
   </section>
@@ -148,8 +148,8 @@
         <h2>Practical reasons to test one case.</h2>
       </div>
       <div class="content-grid">
-        <a class="text-panel" href="/implant-restorations"><h3>Implant focus</h3><p>Implant platform, component matching, screw access and restorative space are treated as technical checkpoints.</p><span class="text-link">View implant support</span></a>
-        <a class="text-panel" href="/digital-dentistry"><h3>Experienced CAD team</h3><p>Digital design and approval communication are built into the workflow, not added after problems appear.</p><span class="text-link">View CAD/CAM workflow</span></a>
+        <a class="text-panel" href="/services/implant"><h3>Implant focus</h3><p>Implant platform, component matching, screw access and restorative space are treated as technical checkpoints.</p><span class="text-link">View implant support</span></a>
+        <a class="text-panel" href="/services/digital-workflow"><h3>Experienced CAD team</h3><p>Digital design and approval communication are built into the workflow, not added after problems appear.</p><span class="text-link">View CAD/CAM workflow</span></a>
         <a class="text-panel" href="/about#quality"><h3>Strict QC</h3><p>Fit, contacts, occlusion, finish and case details are checked before dispatch.</p><span class="text-link">View quality process</span></a>
         <a class="text-panel" href="/submit-case"><h3>Worldwide collaboration</h3><p>Start with one trial case so your team can evaluate communication, fit and workflow before sending more work.</p><span class="text-link">Submit a trial case</span></a>
       </div>
@@ -171,8 +171,8 @@
 <footer class="site-footer">
   <div class="wrap footer-grid">
     <div><h3>YZH Dental Lab</h3><p>Digital dental laboratory in China supporting overseas labs and clinics with implant, full-arch, crown & bridge, surgical guide and CAD/CAM restorative workflows.</p></div>
-    <div><h3>Services</h3><a href="/implant-restorations">Implant Restorations</a><a href="/full-arch-all-on-x">Full Arch / All-on-X</a><a href="/crown-bridge">Crown & Bridge</a><a href="/digital-dentistry">Digital Dentistry</a><a href="/surgical-guides">Surgical Guides</a></div>
-    <div><h3>Company</h3><a href="/about">About</a><a href="/digital-dentistry">Workflow</a><a href="/submit-case">Submit a Case</a><a href="/privacy-policy">Privacy Policy</a></div>
+    <div><h3>Services</h3><a href="/services/implant">Implant Restorations</a><a href="/services/full-arch">Full Arch / All-on-X</a><a href="/services/crown-bridge">Crown & Bridge</a><a href="/services/digital-workflow">Digital Dentistry</a><a href="/services/surgical-guide">Surgical Guides</a></div>
+    <div><h3>Company</h3><a href="/about">About</a><a href="/services/digital-workflow">Workflow</a><a href="/submit-case">Submit a Case</a><a href="/privacy-policy">Privacy Policy</a></div>
     <div><h3>Contact</h3><a href="mailto:yzhdentallab@gmail.com">yzhdentallab@gmail.com</a><a href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp: +86 137 1473 0109</a></div>
   </div>
 </footer>

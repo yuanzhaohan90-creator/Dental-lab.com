@@ -4,8 +4,8 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Surgical Guide Design & Production Support | YZH Dental Lab</title>
 <meta name="description" content="Surgical guide design and printed guide support using STL or PLY surface scans, CBCT data, implant system and sleeve information.">
-<link rel="canonical" href="https://yzhdentallab.com/surgical-guides"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta property="og:type" content="website"><meta property="og:url" content="https://yzhdentallab.com/surgical-guides"><meta property="og:title" content="Surgical Guide Design & Production Support | YZH Dental Lab"><meta property="og:description" content="Clear records and implant component information for surgical guide workflows."><meta property="og:image" content="https://yzhdentallab.com/assets/real/surgical-guide-workflow-poster-03.jpg">
+<link rel="canonical" href="https://yzhdentallab.com/services/surgical-guide"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website"><meta property="og:url" content="https://yzhdentallab.com/services/surgical-guide"><meta property="og:title" content="Surgical Guide Design & Production Support | YZH Dental Lab"><meta property="og:description" content="Clear records and implant component information for surgical guide workflows."><meta property="og:image" content="https://yzhdentallab.com/assets/real/surgical-guide-workflow-poster-03.jpg">
 <link rel="stylesheet" href="/assets/site.css?v=interaction-qa-3">
 </head>
 <body>

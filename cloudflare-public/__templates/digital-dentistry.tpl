@@ -4,8 +4,8 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Digital Dentistry & Exocad Workflow | YZH Dental Lab</title>
 <meta name="description" content="Exocad design, digital file review, design approval and CAD/CAM manufacturing support for overseas dental laboratories.">
-<link rel="canonical" href="https://yzhdentallab.com/digital-dentistry"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta property="og:type" content="website"><meta property="og:url" content="https://yzhdentallab.com/digital-dentistry"><meta property="og:title" content="Digital Dentistry & Exocad Workflow | YZH Dental Lab"><meta property="og:description" content="Design-only and design-plus-manufacturing support for digital dental workflows."><meta property="og:image" content="https://yzhdentallab.com/assets/real/full-arch-cad-design-05.jpg">
+<link rel="canonical" href="https://yzhdentallab.com/services/digital-workflow"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website"><meta property="og:url" content="https://yzhdentallab.com/services/digital-workflow"><meta property="og:title" content="Digital Dentistry & Exocad Workflow | YZH Dental Lab"><meta property="og:description" content="Design-only and design-plus-manufacturing support for digital dental workflows."><meta property="og:image" content="https://yzhdentallab.com/assets/real/full-arch-cad-design-05.jpg">
 <link rel="stylesheet" href="/assets/site.css?v=interaction-qa-3">
 </head>
 <body>

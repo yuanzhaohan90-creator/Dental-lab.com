@@ -59,7 +59,7 @@ function videoUnsupported() {
   return Response.json({ ok: false, error: "Automatic HEVC/MOV video conversion is not supported in Cloudflare Preview yet. Upload an H.264/AAC MP4 for playback." }, { status: 501, headers: { "Cache-Control": "no-store" } });
 }
 
-const publicPages = { "/": "home", "/implant-restorations": "implant", "/full-arch-all-on-x": "fullArch", "/cases": "cases", "/crown-bridge": "crownBridge", "/services/crown-bridge": "crownBridge", "/digital-dentistry": "digital", "/services/digital-workflow": "digital", "/exocad-design-outsourcing": "exocadOutsourcing", "/all-on-x-full-arch-cad-design": "allOnXCadDesign", "/implant-bar-design": "implantBarDesign", "/custom-abutment-implant-design": "customAbutmentDesign", "/surgical-guide-design-outsourcing": "surgicalGuideOutsourcing", "/surgical-guides": "surgicalGuides", "/about": "about", "/submit-case": "submitCase", "/privacy-policy": "privacy", "/terms": "terms" };
+const publicPages = { "/": "home", "/services": "services", "/services/implant": "implant", "/implant-restorations": "implant", "/services/full-arch": "fullArch", "/full-arch-all-on-x": "fullArch", "/cases": "cases", "/services/crown-bridge": "crownBridge", "/crown-bridge": "crownBridge", "/services/digital-workflow": "digital", "/workflow": "digital", "/digital-dentistry": "digital", "/services/surgical-guide": "surgicalGuides", "/exocad-design-outsourcing": "exocadOutsourcing", "/all-on-x-full-arch-cad-design": "allOnXCadDesign", "/implant-bar-design": "implantBarDesign", "/custom-abutment-implant-design": "customAbutmentDesign", "/surgical-guide-design-outsourcing": "surgicalGuideOutsourcing", "/surgical-guides": "surgicalGuides", "/about": "about", "/submit-case": "submitCase", "/privacy-policy": "privacy", "/privacy": "privacy", "/terms": "terms" };
 const adminRedirects = {
   "/admin/home": "/admin/website/home",
   "/admin/homepage": "/admin/website/home",
@@ -87,7 +87,7 @@ const adminPages = new Set([
   "/admin/seo",
   "/admin/advanced"
 ]);
-const templatePaths = ["index.tpl", "implant-restorations.tpl", "full-arch-all-on-x.tpl", "cases.tpl", "crown-bridge.tpl", "digital-dentistry.tpl", "exocad-design-outsourcing.tpl", "all-on-x-full-arch-cad-design.tpl", "implant-bar-design.tpl", "custom-abutment-implant-design.tpl", "surgical-guide-design-outsourcing.tpl", "surgical-guides.tpl", "about.tpl", "submit-case.tpl", "privacy-policy.tpl", "terms.tpl"];
+const templatePaths = ["index.tpl", "services.tpl", "implant-restorations.tpl", "full-arch-all-on-x.tpl", "cases.tpl", "crown-bridge.tpl", "digital-dentistry.tpl", "exocad-design-outsourcing.tpl", "all-on-x-full-arch-cad-design.tpl", "implant-bar-design.tpl", "custom-abutment-implant-design.tpl", "surgical-guide-design-outsourcing.tpl", "surgical-guides.tpl", "about.tpl", "submit-case.tpl", "privacy-policy.tpl", "terms.tpl"];
 let templatesPromise;
 
 async function loadTemplates(request, env) {

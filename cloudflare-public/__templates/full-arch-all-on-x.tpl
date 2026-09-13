@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Full-Arch & All-on-X Lab Support | YZH Dental Lab</title>
 <meta name="description" content="Full-Arch and All-on-X lab support for PMMA provisionals, final zirconia, titanium bars, MUA or Ti-base information, design approval and passive-fit review.">
-<link rel="canonical" href="https://yzhdentallab.com/full-arch-all-on-x">
+<link rel="canonical" href="https://yzhdentallab.com/services/full-arch">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://yzhdentallab.com/full-arch-all-on-x">
+<meta property="og:url" content="https://yzhdentallab.com/services/full-arch">
 <meta property="og:title" content="Full-Arch & All-on-X Lab Support | YZH Dental Lab">
 <meta property="og:description" content="PMMA, zirconia and titanium-supported full-arch workflows with design approval and passive-fit focused review.">
 <meta property="og:image" content="https://yzhdentallab.com/assets/real/full-arch-titanium-framework-10.jpg">
 <link rel="stylesheet" href="/assets/site.css?v=interaction-qa-3">
 </head>
 <body>
-<header class="site-header"><div class="wrap nav"><a class="brand" href="/"><span class="brand-mark">Y</span><span>YZH Dental Lab</span></a><button class="menu-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button><nav class="navlinks" id="primaryNav"><a href="/">Home</a><a href="/implant-restorations">Implant</a><a href="/full-arch-all-on-x">Full Arch</a><a href="/crown-bridge">Crown & Bridge</a><a href="/digital-dentistry">Digital Workflow</a><a href="/about">About</a><a href="/submit-case">Contact</a></nav><a class="btn btn-primary nav-cta" href="/submit-case">Send a Trial Case</a></div></header>
+<header class="site-header"><div class="wrap nav"><a class="brand" href="/"><span class="brand-mark">Y</span><span>YZH Dental Lab</span></a><button class="menu-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button><nav class="navlinks" id="primaryNav"><a href="/">Home</a><a href="/services/implant">Implant</a><a href="/services/full-arch">Full Arch</a><a href="/services/crown-bridge">Crown & Bridge</a><a href="/services/digital-workflow">Digital Workflow</a><a href="/about">About</a><a href="/submit-case">Contact</a></nav><a class="btn btn-primary nav-cta" href="/submit-case">Send a Trial Case</a></div></header>
 <main>
   <section class="page-hero fullarch-hero">
     <div class="wrap page-hero-grid">
@@ -44,8 +44,8 @@
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">Featured Full-Arch Cases</p>
-        <h2>Ready for 6–10 owner-approved full-arch cases.</h2>
-        <p class="copy">Use the Case Manager to publish real Full-Arch / All-on-X work. This page can link to the selected case detail pages as more evidence becomes available.</p>
+        <h2>Full-arch proof for technical buyers.</h2>
+        <p class="copy">Review published Full-Arch / All-on-X work and use one trial case to evaluate communication, records review and production fit before scaling up.</p>
       </div>
       <div class="case-grid three">
         <a class="text-panel" href="/cases?category=Full-Arch%20%2F%20All-on-X"><h3>Published Full-Arch Cases</h3><p>View real owner-approved full-arch cases currently available in the Case Library.</p><span class="text-link">Open Full-Arch cases</span></a>
@@ -194,7 +194,7 @@
     </div>
   </section>
 </main>
-<footer class="site-footer"><div class="wrap footer-grid"><div><h3>YZH Dental Lab</h3><p>Digital dental laboratory in China for implant, full-arch and CAD/CAM restorative workflows.</p></div><div><h3>Services</h3><a href="/implant-restorations">Implant Restorations</a><a href="/full-arch-all-on-x">Full Arch / All-on-X</a><a href="/crown-bridge">Crown & Bridge</a><a href="/digital-dentistry">Digital Dentistry</a><a href="/surgical-guides">Surgical Guides</a></div><div><h3>Company</h3><a href="/about">About</a><a href="/submit-case">Submit a Case</a><a href="/privacy-policy">Privacy Policy</a></div><div><h3>Contact</h3><a href="mailto:yzhdentallab@gmail.com">yzhdentallab@gmail.com</a><a href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp: +86 137 1473 0109</a></div></div></footer>
+<footer class="site-footer"><div class="wrap footer-grid"><div><h3>YZH Dental Lab</h3><p>Digital dental laboratory in China for implant, full-arch and CAD/CAM restorative workflows.</p></div><div><h3>Services</h3><a href="/services/implant">Implant Restorations</a><a href="/services/full-arch">Full Arch / All-on-X</a><a href="/services/crown-bridge">Crown & Bridge</a><a href="/services/digital-workflow">Digital Dentistry</a><a href="/services/surgical-guide">Surgical Guides</a></div><div><h3>Company</h3><a href="/about">About</a><a href="/submit-case">Submit a Case</a><a href="/privacy-policy">Privacy Policy</a></div><div><h3>Contact</h3><a href="mailto:yzhdentallab@gmail.com">yzhdentallab@gmail.com</a><a href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp: +86 137 1473 0109</a></div></div></footer>
 <script src="/assets/site.js?v=interaction-qa-3" defer></script>
 </body>
 </html>

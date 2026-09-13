@@ -11,7 +11,7 @@ function normalizePublicNavigation() {
     if (active) link.setAttribute("aria-current", "page");
   });
   const services = nav.querySelector(".nav-dropdown");
-  if (services) services.classList.toggle("active", ["/implant-restorations", "/full-arch-all-on-x", "/crown-bridge", "/services/crown-bridge", "/digital-dentistry", "/services/digital-workflow", "/surgical-guides"].includes(path));
+  if (services) services.classList.toggle("active", ["/services", "/services/implant", "/services/full-arch", "/services/crown-bridge", "/services/digital-workflow", "/workflow", "/services/surgical-guide"].includes(path));
 }
 
 function closeNavigation(focusTarget = null) {
@@ -416,11 +416,11 @@ async function applyPublicSiteData() {
       const grid = document.querySelector("#featured-cases .priority-case-grid");
       if (grid && selectedCases?.length) grid.innerHTML = selectedCases.slice(0, 9).map(makeCaseCard).join("");
     }
-    if (location.pathname === "/implant-restorations") {
+    if (location.pathname === "/services/implant") {
       applyManagedPage(pages?.implant);
       applyFeaturedCase(document.querySelector("[data-featured-case='implant']"), pages?.implant?.featuredWork, publishedCases, "Featured Implant Work");
     }
-    if (location.pathname === "/full-arch-all-on-x") {
+    if (location.pathname === "/services/full-arch") {
       applyManagedPage(pages?.fullArch);
       applyFeaturedCase(document.querySelector("[data-featured-case='fullArch']"), pages?.fullArch?.featuredCase, publishedCases, "Featured Full-Arch Case");
       pages?.fullArch?.restorationOptions?.forEach((option, index) => {
