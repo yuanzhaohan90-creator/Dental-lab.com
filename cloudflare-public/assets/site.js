@@ -11,7 +11,7 @@ function normalizePublicNavigation() {
     if (active) link.setAttribute("aria-current", "page");
   });
   const services = nav.querySelector(".nav-dropdown");
-  if (services) services.classList.toggle("active", ["/services", "/services/implant", "/services/full-arch", "/services/crown-bridge", "/services/digital-workflow", "/workflow", "/services/surgical-guide"].includes(path));
+  if (services) services.classList.toggle("active", ["/services", "/services/implant", "/services/full-arch", "/services/crown-bridge", "/services/digital-workflow", "/services/design-only", "/services/surgical-guide"].includes(path));
 }
 
 function closeNavigation(focusTarget = null) {

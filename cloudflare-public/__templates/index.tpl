@@ -113,6 +113,7 @@
         <p class="eyebrow" data-manager-text="workflow.eyebrow">Digital Workflow</p>
         <h2 data-manager-text="workflow.heading">From files to final QC.</h2>
         <p class="copy" data-manager-text="workflow.description">A clear workflow helps overseas partners test one case before moving more work.</p>
+        <div class="cta-row"><a class="btn btn-outline" href="/workflow">View Full Workflow</a></div>
       </div>
       <div class="steps">
         <a class="workflow-step" href="/submit-case" data-manager-href="workflow.items.0.destination"><div class="workflow-step-media" data-manager-media="workflow.items.0.media" data-hide-when-empty hidden></div><span>01</span><h3 data-manager-text="workflow.items.0.label">Receive Case</h3><p>Send STL, scans, photos, prescription, implant details and due date.</p></a>

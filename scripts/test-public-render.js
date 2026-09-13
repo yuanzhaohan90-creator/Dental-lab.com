@@ -10,6 +10,25 @@ assert.match(home, /Services/);
 assert.match(home, /fetchpriority="high"/);
 assert.doesNotMatch(home, />Loading/);
 
+const workflow = renderPublicPage("workflow", data);
+assert.match(workflow, /Submit Files/);
+assert.match(workflow, /Technical Review/);
+assert.match(workflow, /Workflow Confirmation/);
+assert.match(workflow, /CAD \/ Production/);
+assert.match(workflow, /Quality Control/);
+assert.match(workflow, /Delivery/);
+assert.match(workflow, /href="\/submit-case"/);
+
+const designOnly = renderPublicPage("designOnly", data);
+assert.match(designOnly, /Crown \/ Bridge CAD/);
+assert.match(designOnly, /Implant Crown/);
+assert.match(designOnly, /Custom Abutment/);
+assert.match(designOnly, /Full-Arch Design/);
+assert.match(designOnly, /Surgical Guide Design/);
+assert.match(designOnly, /Printable Model/);
+assert.match(designOnly, /Exocad \/ 3Shape Support/);
+assert.match(designOnly, /href="\/submit-case"/);
+
 const cases = renderPublicPage("cases", {
   ...data,
   publishedCases: [{
