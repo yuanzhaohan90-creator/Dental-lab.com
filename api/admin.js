@@ -78,6 +78,7 @@ function adminSubmission(item, detail = false) {
     fields: item.fields || {},
     fileCount: item.files?.length || 0,
     totalFileSize,
+    internalNote: item.internalNote || "",
     trashedAt: item.trashedAt || "",
     trashExpiresAt: item.trashExpiresAt || "",
     filesDeletedAt: item.filesDeletedAt || ""
@@ -252,7 +253,7 @@ async function handleSubmissions(req, res) {
   }
   if (req.method === "PUT") {
     const body = await readJson(req);
-    await saveSubmissionStatus(body.caseId, body.status);
+    await saveSubmissionStatus(body.caseId, body.status, body.internalNote);
     const item = await getSubmission(body.caseId);
     return reply(res, 200, { ok: true, submission: adminSubmission(item, true) });
   }
@@ -266,7 +267,7 @@ async function handleSubmissionManage(req, res) {
   const submission = await getSubmission(caseId);
   if (!submission) return reply(res, 404, { ok: false, error: "Submission not found." });
   if (body.action === "archive") {
-    await saveSubmissionStatus(caseId, "Archived");
+    await saveSubmissionStatus(caseId, "Archived", body.internalNote);
     return reply(res, 200, { ok: true, submission: adminSubmission(await getSubmission(caseId), true) });
   }
   if (body.action === "trash") return reply(res, 200, { ok: true, submission: adminSubmission(await trashSubmission(caseId), true) });

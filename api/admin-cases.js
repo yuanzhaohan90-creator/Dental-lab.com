@@ -193,9 +193,10 @@ module.exports = async function handler(req, res) {
       const record = await duplicateCase(query(req, "id"));
       return reply(res, 201, { ok: true, case: adminRecord(record) });
     }
-    if (req.method === "POST" && ["trash", "restore"].includes(query(req, "action"))) {
+    if (req.method === "POST" && ["archive", "trash", "restore"].includes(query(req, "action"))) {
       const record = await getRecord(query(req, "id"));
       if (!record) return reply(res, 404, { ok: false, error: "Case not found." });
+      if (query(req, "action") === "archive") return reply(res, 200, { ok: true, case: adminRecord(await saveRecord({ ...record, status: "archived", featured: false, updatedAt: new Date().toISOString(), publishedAt: null })) });
       if (query(req, "action") === "trash") return reply(res, 200, { ok: true, case: adminRecord(await trashRecord(record)) });
       return reply(res, 200, { ok: true, case: adminRecord(await restoreRecord(record)) });
     }
