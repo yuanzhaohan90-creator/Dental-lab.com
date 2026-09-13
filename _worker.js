@@ -65,7 +65,10 @@ const adminRedirects = {
   "/admin/homepage": "/admin/website/home",
   "/admin/implant": "/admin/website/implant",
   "/admin/full-arch": "/admin/website/full-arch",
-  "/admin/about": "/admin/website/about"
+  "/admin/about": "/admin/website/about",
+  "/admin/case-library": "/admin/cases",
+  "/admin/media-library": "/admin/media",
+  "/admin/submission": "/admin/submissions"
 };
 const adminPages = new Set([
   "/admin",

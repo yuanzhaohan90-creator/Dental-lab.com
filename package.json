@@ -10,6 +10,7 @@
     "test:case-library": "node scripts/test-case-library.js",
     "test:public-render": "node scripts/test-public-render.js",
     "test:admin": "node scripts/test-admin-v1.js",
+    "test:admin:e2e": "node scripts/test-admin-e2e.js",
     "test:indexnow": "node scripts/test-indexnow.js",
     "test:media-upload": "node scripts/test-media-upload.js",
     "qa:r2-direct-upload": "node scripts/qa-r2-direct-upload.js",

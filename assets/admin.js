@@ -197,7 +197,10 @@ document.addEventListener("keydown", (event) => {
 
 function formatDate(value) {
   if (!value) return "-";
-  return new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  const pad = (number) => String(number).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 function formatBytes(value) {
@@ -208,7 +211,23 @@ function formatBytes(value) {
 }
 
 const CATEGORY_LABELS = { Cases: "案例", Homepage: "网站首页", Implant: "种植修复", "Full-Arch": "全口修复", Lab: "实验室", Products: "产品", Other: "其他" };
-const STATUS_LABELS = { New: "新提交", Reviewed: "已查看", Archived: "已归档", Trash: "回收站", draft: "草稿", published: "已发布" };
+const STATUS_LABELS = {
+  New: "新提交",
+  Reviewing: "审核中",
+  "Quotation Sent": "已发报价",
+  "Waiting for Confirmation": "等待确认",
+  "In Progress": "制作中",
+  QC: "质检中",
+  Completed: "已完成",
+  Closed: "已关闭",
+  Reviewed: "已查看",
+  Archived: "已归档",
+  Trash: "回收站",
+  draft: "草稿",
+  published: "已发布",
+  hidden: "未发布",
+  trash: "回收站"
+};
 function categoryLabel(value) { return CATEGORY_LABELS[value] || value || "-"; }
 function statusLabel(value) { return STATUS_LABELS[value] || value || "-"; }
 
@@ -216,7 +235,7 @@ async function loadDashboard() {
   const stats = document.getElementById("dashboardStats");
   try {
     const data = await api("/api/admin?module=dashboard");
-    stats.innerHTML = `<div class="admin-stat"><strong>${data.counts.newSubmissions}</strong><span>New Submissions</span></div><div class="admin-stat"><strong>${data.counts.draftCases}</strong><span>Draft Cases</span></div><div class="admin-stat"><strong>${data.counts.publishedCases}</strong><span>Published Cases</span></div><div class="admin-stat"><strong>${data.counts.totalMedia}</strong><span>Total Media</span></div><div class="admin-stat"><strong>${data.counts.contentHealth}</strong><span>Content Health</span></div>`;
+    stats.innerHTML = `<div class="admin-stat"><strong>${data.counts.newSubmissions}</strong><span>新提交</span></div><div class="admin-stat"><strong>${data.counts.draftCases}</strong><span>草稿案例</span></div><div class="admin-stat"><strong>${data.counts.publishedCases}</strong><span>已发布案例</span></div><div class="admin-stat"><strong>${data.counts.totalMedia}</strong><span>素材总数</span></div><div class="admin-stat"><strong>${data.counts.contentHealth}</strong><span>待处理事项</span></div>`;
     document.getElementById("dashboardHealth").innerHTML = data.contentHealth?.length ? data.contentHealth.map((item) => `<a href="${escapeHtml(item.href)}"><span><strong>${escapeHtml(item.label)}</strong><small>点击进入对应编辑位置</small></span><b>处理</b></a>`).join("") : '<p class="admin-empty">内容健康良好，没有需要立即处理的问题。</p>';
     document.getElementById("dashboardActivity").innerHTML = data.recentActivity?.length ? data.recentActivity.map((item) => `<a href="${escapeHtml(item.href)}"><span><strong>${escapeHtml(item.type)} · ${escapeHtml(item.label)}</strong><small>${escapeHtml(item.detail || "")}</small></span><small>${formatDate(item.at)}</small></a>`).join("") : '<p class="admin-empty">暂无近期活动。</p>';
     document.getElementById("dashboardPublished").innerHTML = data.recentPublished.length ? data.recentPublished.map((item) => `<a href="/admin/cases?case=${encodeURIComponent(item.id)}"><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(categoryLabel(item.category))}</small></span><small>${formatDate(item.publishedAt)}</small></a>`).join("") : '<p class="admin-empty">暂无已发布作品。</p>';
@@ -274,7 +293,8 @@ async function openSubmission(id) {
     const trashActions = submission.status === "Trash"
       ? `<button class="btn btn-secondary" type="button" data-submission-action="restore">恢复提交</button><button class="btn admin-danger" type="button" data-submission-action="permanent-delete">永久删除</button>`
       : `<button class="btn btn-secondary" type="button" data-submission-action="archive">归档</button><button class="btn admin-danger" type="button" data-submission-action="delete-files" ${submission.fileCount ? "" : "disabled"}>删除附件</button><button class="btn admin-danger" type="button" data-submission-action="trash">删除提交</button>`;
-    detail.innerHTML = `<div class="admin-detail-head"><div><p class="eyebrow">客户提交</p><h2>${escapeHtml(submission.caseId)}</h2></div>${submission.status === "Trash" ? '<span class="admin-status-pill">回收站</span>' : `<select id="submissionStatus"><option value="New" ${submission.status === "New" ? "selected" : ""}>新提交</option><option value="Reviewed" ${submission.status === "Reviewed" ? "selected" : ""}>已查看</option><option value="Archived" ${submission.status === "Archived" ? "selected" : ""}>已归档</option></select>`}</div>${submission.trashedAt ? `<p class="admin-trash-meta">删除时间：${formatDate(submission.trashedAt)} · 30 天后自动清理</p>` : ""}<dl class="admin-detail-grid">${detailItems.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(value || "-")}</dd></div>`).join("")}</dl><div class="admin-instructions"><strong>客户说明</strong><br>${escapeHtml(fields.instructions || "客户未填写说明。")}</div><h3>附件</h3><div class="admin-file-list">${submission.files.length ? submission.files.map((file) => `<div class="admin-file"><span><strong>${escapeHtml(file.originalName || file.filename)}</strong><br><small>${formatBytes(file.size)} · ${escapeHtml(file.contentType)}</small></span><a class="btn btn-secondary" href="${file.downloadUrl}">下载</a></div>`).join("") : '<p class="admin-empty">没有上传文件，或附件已永久删除。</p>'}</div><div class="admin-copy-actions"><button class="btn btn-secondary" type="button" data-copy-value="${escapeHtml(fields.email)}">复制邮箱</button><button class="btn btn-secondary" type="button" data-copy-value="${escapeHtml(fields.whatsapp)}">复制 WhatsApp</button></div><div class="admin-destructive-actions">${trashActions}</div><div class="admin-message" id="submissionMessage" role="status"></div>`;
+    const statusOptions = ["New", "Reviewing", "Quotation Sent", "Waiting for Confirmation", "In Progress", "QC", "Completed", "Closed", "Reviewed", "Archived"].map((status) => `<option value="${escapeHtml(status)}" ${submission.status === status ? "selected" : ""}>${escapeHtml(statusLabel(status))}</option>`).join("");
+    detail.innerHTML = `<div class="admin-detail-head"><div><p class="eyebrow">客户提交</p><h2>${escapeHtml(submission.caseId)}</h2></div>${submission.status === "Trash" ? '<span class="admin-status-pill">回收站</span>' : `<select id="submissionStatus">${statusOptions}</select>`}</div>${submission.trashedAt ? `<p class="admin-trash-meta">删除时间：${formatDate(submission.trashedAt)} · 30 天后自动清理</p>` : ""}<dl class="admin-detail-grid">${detailItems.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(value || "-")}</dd></div>`).join("")}</dl><div class="admin-instructions"><strong>客户说明</strong><br>${escapeHtml(fields.instructions || "客户未填写说明。")}</div><h3>附件</h3><div class="admin-file-list">${submission.files.length ? submission.files.map((file) => `<div class="admin-file"><span><strong>${escapeHtml(file.originalName || file.filename)}</strong><br><small>${formatBytes(file.size)} · ${escapeHtml(file.contentType)}</small></span><a class="btn btn-secondary" href="${file.downloadUrl}">下载</a></div>`).join("") : '<p class="admin-empty">没有上传文件，或附件已永久删除。</p>'}</div><div class="admin-copy-actions"><button class="btn btn-secondary" type="button" data-copy-value="${escapeHtml(fields.email)}">复制邮箱</button><button class="btn btn-secondary" type="button" data-copy-value="${escapeHtml(fields.whatsapp)}">复制 WhatsApp</button></div><div class="admin-destructive-actions">${trashActions}</div><div class="admin-message" id="submissionMessage" role="status"></div>`;
     document.getElementById("submissionStatus")?.addEventListener("change", async (event) => {
       try {
         await api("/api/admin?module=submissions", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ caseId: id, status: event.target.value }) });
@@ -723,20 +743,20 @@ function caseOptions(selected, caseStudyOnly = false) {
 function linkDestinationOptions(selected = "") {
   const option = (value, label) => `<option value="${escapeHtml(value)}" ${value === selected ? "selected" : ""}>${escapeHtml(label)}</option>`;
   const cases = (pageData?.publishedCases || []).map((item) => option(`/cases/${item.slug}`, item.title)).join("");
-  return `${option("", "No Link / 不设置链接")}
-    <optgroup label="Page / 页面">
+  return `${option("", "不设置链接")}
+    <optgroup label="页面">
       ${option("/", "首页")}${option("/implant-restorations", "种植修复")}${option("/full-arch-all-on-x", "全口修复 / All-on-X")}${option("/cases", "案例库")}${option("/digital-dentistry", "数字化工作流程")}${option("/crown-bridge", "牙冠与牙桥")}${option("/surgical-guides", "种植导板")}${option("/about", "关于我们")}
     </optgroup>
-    <optgroup label="Section / 页面区段">
+    <optgroup label="页面区段">
       ${option("/#technical-review", "首页：技术审核")}${option("/#workflow", "首页：工作流程")}${option("/implant-restorations#implant-case-information", "种植页：案例资料要求")}${option("/implant-restorations#implant-quality-control", "种植页：适合度与质检")}${option("/about#production", "关于我们：生产")}
     </optgroup>
-    <optgroup label="Submit Case / 提交案例">${option("/submit-case", "提交案例")}</optgroup>
-    ${cases ? `<optgroup label="Case / 已发布案例">${cases}</optgroup>` : ""}
-    <optgroup label="External URL / 外部链接">${option("https://wa.me/8613714730109", "WhatsApp 技术团队")}</optgroup>`;
+    <optgroup label="提交病例">${option("/submit-case", "提交病例")}</optgroup>
+    ${cases ? `<optgroup label="已发布案例">${cases}</optgroup>` : ""}
+    <optgroup label="外部链接">${option("https://wa.me/8613714730109", "WhatsApp 技术团队")}</optgroup>`;
 }
 
 function linkDestinationEditor(path, value) {
-  return `<label class="field">链接目标 (Link Destination)<select data-path="${path}">${linkDestinationOptions(value || "")}</select></label>`;
+  return `<label class="field">链接目标<select data-path="${path}">${linkDestinationOptions(value || "")}</select></label>`;
 }
 
 function capabilityLinksEditor(value) {
@@ -802,18 +822,18 @@ function workflowEditor(value, section) {
 }
 
 function restorationOptionsEditor(value) {
-  return `<div class="restoration-option-editor">${value.map((option, index) => `<div class="restoration-option"><h3>方案 ${index + 1}</h3>${textFields(`restorationOptions.${index}`, option, {})}${renderMediaEditor(`restorationOptions.${index}.media`, option.media, false, "使用真实修复体图片。", { ratio: "4:3", mobileRatio: "4:3" })}<label class="field">链接目标 (Link Destination)：已发布案例（可选）<select data-path="restorationOptions.${index}.caseId">${caseOptions(option.caseId)}</select></label></div>`).join("")}</div>`;
+  return `<div class="restoration-option-editor">${value.map((option, index) => `<div class="restoration-option"><h3>方案 ${index + 1}</h3>${textFields(`restorationOptions.${index}`, option, {})}${renderMediaEditor(`restorationOptions.${index}.media`, option.media, false, "使用真实修复体图片。", { ratio: "4:3", mobileRatio: "4:3" })}<label class="field">链接目标：已发布案例（可选）<select data-path="restorationOptions.${index}.caseId">${caseOptions(option.caseId)}</select></label></div>`).join("")}</div>`;
 }
 
 function collectionEditor(key, value = [], section = {}) {
   const items = Array.isArray(value) ? value : [];
   return `<div class="collection-editor" data-collection="${key}">
     <div class="collection-toolbar">
-      <button class="btn btn-primary" type="button" data-collection-add="${key}">+ Add Item</button>
-      <button class="btn btn-secondary" type="button" data-collection-batch="${key}">Batch Upload</button>
-      <button class="btn btn-secondary" type="button" data-collection-choose="${key}">Choose from Media</button>
+      <button class="btn btn-primary" type="button" data-collection-add="${key}">新增项目</button>
+      <button class="btn btn-secondary" type="button" data-collection-batch="${key}">批量上传</button>
+      <button class="btn btn-secondary" type="button" data-collection-choose="${key}">从素材库选择</button>
       <input class="visually-hidden" type="file" data-collection-files="${key}" accept="image/jpeg,image/png,image/webp,${section.allowVideo ? VIDEO_ACCEPT : ""}" multiple>
-      <span>${items.length} item${items.length === 1 ? "" : "s"}</span>
+      <span>${items.length} 个项目</span>
     </div>
     <div class="collection-list" data-collection-list="${key}">
       ${items.map((item, index) => collectionItemEditor(key, item, index, section)).join("")}
@@ -825,8 +845,8 @@ function collectionItemEditor(key, item, index, section) {
   const base = `${key}.${index}`;
   return `<article class="collection-item" draggable="true" data-collection-item="${key}" data-index="${index}">
     <div class="collection-item-head">
-      <span class="drag-handle" aria-hidden="true">Drag</span>
-      <strong>${escapeHtml(item.title || `Item ${index + 1}`)}</strong>
+      <span class="drag-handle" aria-hidden="true">拖拽</span>
+      <strong>${escapeHtml(item.title || `项目 ${index + 1}`)}</strong>
       <div class="collection-actions">
         <button class="btn btn-secondary" type="button" data-collection-move="up" data-collection-key="${key}" ${index === 0 ? "disabled" : ""}>上移</button>
         <button class="btn btn-secondary" type="button" data-collection-move="down" data-collection-key="${key}">下移</button>
@@ -836,15 +856,15 @@ function collectionItemEditor(key, item, index, section) {
     <div class="collection-grid">
       ${renderMediaEditor(`${base}.media`, item.media, section.allowVideo, "选择或上传这个项目的图片/视频。", section)}
       <div>
-        <label class="field">Title<input data-path="${base}.title" value="${escapeHtml(item.title || "")}" maxlength="160"></label>
-        <label class="field">Description<textarea data-path="${base}.description" maxlength="800">${escapeHtml(item.description || "")}</textarea></label>
-        <label class="field">Caption<input data-path="${base}.caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label>
+        <label class="field">标题<input data-path="${base}.title" value="${escapeHtml(item.title || "")}" maxlength="160"></label>
+        <label class="field">说明<textarea data-path="${base}.description" maxlength="800">${escapeHtml(item.description || "")}</textarea></label>
+        <label class="field">图片说明<input data-path="${base}.caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label>
         <label class="field">Alt Text<input data-path="${base}.altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label>
         ${section.destination ? linkDestinationEditor(`${base}.destination`, item.destination) : ""}
         <div class="collection-flags">
-          <label class="check-field"><input type="checkbox" data-path="${base}.featured" ${item.featured ? "checked" : ""}> Featured</label>
-          <label class="check-field"><input type="checkbox" data-path="${base}.cover" ${item.cover ? "checked" : ""}> Cover</label>
-          <label class="check-field"><input type="checkbox" data-path="${base}.hidden" ${item.hidden ? "checked" : ""}> Hide</label>
+          <label class="check-field"><input type="checkbox" data-path="${base}.featured" ${item.featured ? "checked" : ""}> 精选</label>
+          <label class="check-field"><input type="checkbox" data-path="${base}.cover" ${item.cover ? "checked" : ""}> 封面</label>
+          <label class="check-field"><input type="checkbox" data-path="${base}.hidden" ${item.hidden ? "checked" : ""}> 隐藏</label>
         </div>
       </div>
     </div>
@@ -853,7 +873,7 @@ function collectionItemEditor(key, item, index, section) {
 
 function renderPageEditor() {
   if (PAGE_META[pageKey]?.readonly) {
-    document.getElementById("pageSections").innerHTML = `<section class="page-section-editor"><div class="page-section-heading"><span>Info</span><div><h2>Submit Case is operational</h2><p>此页面的表单流程由 Submit Case 系统统一管理。联系信息、Logo 和社交链接请在 Settings 修改；客户提交记录请在 Submissions 查看。</p></div></div><div class="admin-quick-actions"><a class="btn btn-primary" href="/submit-case" target="_blank" rel="noopener">打开公开提交页</a><a class="btn btn-secondary" href="/admin/settings">编辑联系信息</a><a class="btn btn-secondary" href="/admin/submissions">查看客户提交</a></div></section>`;
+    document.getElementById("pageSections").innerHTML = `<section class="page-section-editor"><div class="page-section-heading"><span>信息</span><div><h2>Submit Case 表单已启用</h2><p>此页面的表单流程由 Submit Case 系统统一管理。联系信息、Logo 和社交链接请在网站设置修改；客户提交记录请在病例提交查看。</p></div></div><div class="admin-quick-actions"><a class="btn btn-primary" href="/submit-case" target="_blank" rel="noopener">打开公开提交页</a><a class="btn btn-secondary" href="/admin/settings">编辑联系信息</a><a class="btn btn-secondary" href="/admin/submissions">查看客户提交</a></div></section>`;
     return;
   }
   const draft = pageData.config.draft;
@@ -908,7 +928,7 @@ function collectPageDraft() {
   return draft;
 }
 
-function makeCollectionItem(title = "New Item", media = null) {
+function makeCollectionItem(title = "新项目", media = null) {
   return {
     id: `ITEM-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(16).slice(2, 8).toUpperCase()}`,
     title,
@@ -1079,7 +1099,7 @@ function openCollectionMediaPicker(key) {
   const allowed = mediaItems.filter((item) => !item.trashedAt && (section.allowVideo || item.mediaType !== "video"));
   const modal = document.createElement("div");
   modal.className = "admin-modal-backdrop";
-  modal.innerHTML = `<div class="admin-modal media-picker-modal"><div class="admin-modal-head"><h2>Choose Media</h2><button class="icon-command" type="button" data-close-modal>×</button></div><p class="admin-helper">选择现有媒体，一次加入 ${escapeHtml(key)}。不会重复上传资源。</p><input class="media-picker-search" placeholder="Search media"><div class="media-picker-grid">${allowed.map((item) => `<label class="media-picker-item" data-picker-search="${escapeHtml([item.displayName, item.originalFilename, item.category, item.collection, ...(item.tags || [])].join(" ").toLowerCase())}"><input type="checkbox" value="${escapeHtml(item.id)}">${mediaPreview(item, "media-picker-preview")}<span>${escapeHtml(item.displayName || item.originalFilename || item.id)}</span><small>${escapeHtml(item.collection || item.category || "")}</small></label>`).join("")}</div><div class="admin-form-actions"><button class="btn btn-primary" type="button" data-picker-add>Add selected</button><button class="btn btn-secondary" type="button" data-close-modal>Cancel</button></div></div>`;
+  modal.innerHTML = `<div class="admin-modal media-picker-modal"><div class="admin-modal-head"><h2>选择素材</h2><button class="icon-command" type="button" data-close-modal>×</button></div><p class="admin-helper">选择现有媒体，一次加入 ${escapeHtml(key)}。不会重复上传资源。</p><input class="media-picker-search" placeholder="搜索素材"><div class="media-picker-grid">${allowed.map((item) => `<label class="media-picker-item" data-picker-search="${escapeHtml([item.displayName, item.originalFilename, item.category, item.collection, ...(item.tags || [])].join(" ").toLowerCase())}"><input type="checkbox" value="${escapeHtml(item.id)}">${mediaPreview(item, "media-picker-preview")}<span>${escapeHtml(item.displayName || item.originalFilename || item.id)}</span><small>${escapeHtml(item.collection || item.category || "")}</small></label>`).join("")}</div><div class="admin-form-actions"><button class="btn btn-primary" type="button" data-picker-add>添加已选择</button><button class="btn btn-secondary" type="button" data-close-modal>取消</button></div></div>`;
   document.body.append(modal);
   modal.querySelector("[data-close-modal]").focus();
   modal.addEventListener("input", (event) => {
@@ -1249,7 +1269,7 @@ document.getElementById("publishSettings").addEventListener("click", async () =>
 document.getElementById("restoreSettings").addEventListener("click", async () => { if (!confirm("确定恢复上一版已发布设置吗？")) return; try { await api("/api/admin?module=settings&action=restore", { method: "POST" }); showMessage(document.getElementById("settingsMessage"), "已恢复上一版设置。", "success"); await loadSettings(); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
 
 const caseCenterState = { cases: [], categories: [], imageTypes: [], current: null, existing: [], newFiles: [], selectedMedia: [] };
-const caseStatusLabels = { draft: "Draft", published: "Published", hidden: "Hidden", trash: "Trash" };
+const caseStatusLabels = { draft: "草稿", published: "已发布", hidden: "未发布", trash: "回收站" };
 const caseStageLabels = { Before: "Before", Scan: "Scan", Planning: "Planning", Design: "Design", CAD: "CAD", Model: "Model", Framework: "Framework", "Ti-base": "Ti-base", PMMA: "PMMA", "Try-in": "Try-in", Final: "Final", QC: "QC", Delivery: "Delivery", Other: "Other" };
 
 function caseMessage(message, type = "") {
@@ -1262,7 +1282,7 @@ function caseOptionMarkup(values, selected = "", labeler = (value) => value) {
 
 function casePreviewMarkup(item) {
   const src = item.url || item.preview || "";
-  if (!src) return '<div class="case-media-empty">Media</div>';
+  if (!src) return '<div class="case-media-empty">媒体</div>';
   if (item.mediaType === "video" || String(item.contentType || "").startsWith("video/")) return `<video src="${escapeHtml(src)}" muted playsinline controls preload="metadata"></video>`;
   return `<img src="${escapeHtml(src)}" alt="">`;
 }
@@ -1278,8 +1298,8 @@ function renderCaseListCenter() {
   });
   list.innerHTML = filtered.length ? filtered.map((item) => {
     const cover = item.images?.find((image) => image.isCover);
-    return `<button type="button" class="case-center-row ${caseCenterState.current?.id === item.id ? "active" : ""}" data-case-id="${escapeHtml(item.id)}">${cover ? `<img src="${escapeHtml(cover.url)}" alt="">` : '<span class="case-row-empty">No cover</span>'}<span><strong>${escapeHtml(item.title || "Untitled case")}</strong><small>${escapeHtml(item.category || "No category")} · ${escapeHtml(caseStatusLabels[item.status] || item.status || "Draft")} · ${escapeHtml(item.material || "Material not set")} · ${escapeHtml(item.implantSystem || "Implant not set")}</small></span></button>`;
-  }).join("") : '<p class="admin-empty">No cases match this filter.</p>';
+    return `<button type="button" class="case-center-row ${caseCenterState.current?.id === item.id ? "active" : ""}" data-case-id="${escapeHtml(item.id)}">${cover ? `<img src="${escapeHtml(cover.url)}" alt="">` : '<span class="case-row-empty">无封面</span>'}<span><strong>${escapeHtml(item.title || "未命名案例")}</strong><small>${escapeHtml(item.category || "未设置分类")} · ${escapeHtml(caseStatusLabels[item.status] || item.status || "草稿")} · ${escapeHtml(item.material || "未设置材料")} · ${escapeHtml(item.implantSystem || "未设置种植系统")}</small></span></button>`;
+  }).join("") : '<p class="admin-empty">没有符合当前筛选条件的案例。</p>';
 }
 
 function syncCaseMediaInputs() {
@@ -1309,11 +1329,11 @@ function syncCaseMediaInputs() {
 
 function renderCaseMediaCenter() {
   const cover = caseCenterState.existing.find((image) => image.isCover);
-  document.getElementById("caseCoverPreview").innerHTML = cover ? `<figure class="admin-current-cover">${casePreviewMarkup(cover)}<figcaption>Current cover</figcaption></figure>` : '<p class="admin-empty">No cover yet.</p>';
+  document.getElementById("caseCoverPreview").innerHTML = cover ? `<figure class="admin-current-cover">${casePreviewMarkup(cover)}<figcaption>当前封面</figcaption></figure>` : '<p class="admin-empty">尚未设置封面。</p>';
   const existing = caseCenterState.existing.filter((image) => !image.isCover).sort((a, b) => a.sortOrder - b.sortOrder);
-  document.getElementById("caseExistingMedia").innerHTML = existing.map((item) => `<div class="case-media-row" draggable="true" data-case-drag="existing" data-existing-id="${escapeHtml(item.id)}"><span class="drag-handle">Drag</span>${casePreviewMarkup(item)}<div class="case-media-fields"><label class="field">Stage<select data-key="imageType">${caseOptionMarkup(caseCenterState.imageTypes, item.imageType, (value) => caseStageLabels[value] || value)}</select></label><label class="field">Caption<input data-key="caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label><label class="field">Alt<input data-key="altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label></div><button class="icon-command" type="button" data-case-media-remove aria-label="Remove">×</button></div>`).join("");
-  const uploadedRows = caseCenterState.newFiles.map((item, index) => `<div class="case-media-row" draggable="true" data-case-drag="new" data-new-index="${index}"><span class="drag-handle">Drag</span>${casePreviewMarkup(item)}<div class="case-media-fields"><label class="field">Stage<select data-key="imageType">${caseOptionMarkup(caseCenterState.imageTypes, item.imageType, (value) => caseStageLabels[value] || value)}</select></label><label class="field">Caption<input data-key="caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label><label class="field">Alt<input data-key="altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label></div><button class="icon-command" type="button" data-case-new-remove aria-label="Remove">×</button></div>`);
-  const selectedRows = caseCenterState.selectedMedia.map((item, index) => `<div class="case-media-row" draggable="true" data-case-drag="selected" data-selected-media-index="${index}"><span class="drag-handle">Drag</span>${casePreviewMarkup(item)}<div class="case-media-fields"><label class="field">Stage<select data-key="imageType">${caseOptionMarkup(caseCenterState.imageTypes, item.imageType, (value) => caseStageLabels[value] || value)}</select></label><label class="field">Caption<input data-key="caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label><label class="field">Alt<input data-key="altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label></div><button class="icon-command" type="button" data-case-selected-remove aria-label="Remove">×</button></div>`);
+  document.getElementById("caseExistingMedia").innerHTML = existing.map((item) => `<div class="case-media-row" draggable="true" data-case-drag="existing" data-existing-id="${escapeHtml(item.id)}"><span class="drag-handle">拖拽</span>${casePreviewMarkup(item)}<div class="case-media-fields"><label class="field">阶段<select data-key="imageType">${caseOptionMarkup(caseCenterState.imageTypes, item.imageType, (value) => caseStageLabels[value] || value)}</select></label><label class="field">说明<input data-key="caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label><label class="field">ALT<input data-key="altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label></div><button class="icon-command" type="button" data-case-media-remove aria-label="移除">×</button></div>`).join("");
+  const uploadedRows = caseCenterState.newFiles.map((item, index) => `<div class="case-media-row" draggable="true" data-case-drag="new" data-new-index="${index}"><span class="drag-handle">拖拽</span>${casePreviewMarkup(item)}<div class="case-media-fields"><label class="field">阶段<select data-key="imageType">${caseOptionMarkup(caseCenterState.imageTypes, item.imageType, (value) => caseStageLabels[value] || value)}</select></label><label class="field">说明<input data-key="caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label><label class="field">ALT<input data-key="altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label></div><button class="icon-command" type="button" data-case-new-remove aria-label="移除">×</button></div>`);
+  const selectedRows = caseCenterState.selectedMedia.map((item, index) => `<div class="case-media-row" draggable="true" data-case-drag="selected" data-selected-media-index="${index}"><span class="drag-handle">拖拽</span>${casePreviewMarkup(item)}<div class="case-media-fields"><label class="field">阶段<select data-key="imageType">${caseOptionMarkup(caseCenterState.imageTypes, item.imageType, (value) => caseStageLabels[value] || value)}</select></label><label class="field">说明<input data-key="caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label><label class="field">ALT<input data-key="altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label></div><button class="icon-command" type="button" data-case-selected-remove aria-label="移除">×</button></div>`);
   document.getElementById("caseNewMedia").innerHTML = [...uploadedRows, ...selectedRows].join("");
 }
 
@@ -1326,12 +1346,12 @@ function openCaseCenterEditor(item = null) {
   caseCenterState.selectedMedia = [];
   form.reset();
   form.hidden = false;
-  document.getElementById("caseEditorMode").textContent = item ? "Edit Case" : "New Case";
-  document.getElementById("caseEditorTitle").textContent = item?.title || "Untitled Case";
+  document.getElementById("caseEditorMode").textContent = item ? "编辑案例" : "新增案例";
+  document.getElementById("caseEditorTitle").textContent = item?.title || "未命名案例";
   const stateBadge = document.getElementById("caseEditorState");
-  stateBadge.textContent = caseStatusLabels[item?.status] || "Draft";
+  stateBadge.textContent = caseStatusLabels[item?.status] || "草稿";
   stateBadge.classList.toggle("live", item?.status === "published");
-  form.elements.category.innerHTML = '<option value="">Select category</option>' + caseOptionMarkup(caseCenterState.categories, item?.category);
+  form.elements.category.innerHTML = '<option value="">选择分类</option>' + caseOptionMarkup(caseCenterState.categories, item?.category);
   form.elements.relatedCaseIds.innerHTML = caseCenterState.cases.filter((entry) => entry.id !== item?.id).map((entry) => `<option value="${escapeHtml(entry.id)}">${escapeHtml(entry.title || entry.id)}</option>`).join("");
   ["title", "category", "contentType", "status", "restorationType", "technicalSummary", "challenge", "planning", "clinicalNotes", "workflow", "technicalOutcome", "material", "implantSystem", "platform", "shade", "software", "technicalReview", "seoTitle", "metaDescription", "tags"].forEach((name) => {
     if (!form.elements[name]) return;
@@ -1480,7 +1500,7 @@ function openCaseMediaPicker() {
   const allowed = mediaItems.filter((item) => !item.trashedAt && !already.has(item.id) && (item.mediaType !== "video" || item.processingStatus === "ready"));
   const modal = document.createElement("div");
   modal.className = "admin-modal-backdrop";
-  modal.innerHTML = `<div class="admin-modal media-picker-modal"><div class="admin-modal-head"><h2>Choose Case Media</h2><button class="icon-command" type="button" data-close-modal>×</button></div><p class="admin-helper">从 Media Library 批量加入图片/视频，不复制 URL，不重复上传。</p><input class="media-picker-search" placeholder="Search media"><div class="media-picker-grid">${allowed.map((item) => `<label class="media-picker-item" data-picker-search="${escapeHtml([item.displayName, item.originalFilename, item.category, item.collection, ...(item.tags || [])].join(" ").toLowerCase())}"><input type="checkbox" value="${escapeHtml(item.id)}">${mediaPreview(item, "media-picker-preview")}<span>${escapeHtml(item.displayName || item.originalFilename || item.id)}</span><small>${escapeHtml(item.collection || item.category || "")}</small></label>`).join("")}</div><div class="admin-form-actions"><button class="btn btn-primary" type="button" data-picker-add>Add selected</button><button class="btn btn-secondary" type="button" data-close-modal>Cancel</button></div></div>`;
+  modal.innerHTML = `<div class="admin-modal media-picker-modal"><div class="admin-modal-head"><h2>选择案例素材</h2><button class="icon-command" type="button" data-close-modal>×</button></div><p class="admin-helper">从素材库批量加入图片/视频，不复制 URL，不重复上传。</p><input class="media-picker-search" placeholder="搜索素材"><div class="media-picker-grid">${allowed.map((item) => `<label class="media-picker-item" data-picker-search="${escapeHtml([item.displayName, item.originalFilename, item.category, item.collection, ...(item.tags || [])].join(" ").toLowerCase())}"><input type="checkbox" value="${escapeHtml(item.id)}">${mediaPreview(item, "media-picker-preview")}<span>${escapeHtml(item.displayName || item.originalFilename || item.id)}</span><small>${escapeHtml(item.collection || item.category || "")}</small></label>`).join("")}</div><div class="admin-form-actions"><button class="btn btn-primary" type="button" data-picker-add>添加已选择</button><button class="btn btn-secondary" type="button" data-close-modal>取消</button></div></div>`;
   document.body.append(modal);
   modal.querySelector("[data-close-modal]").focus();
   modal.addEventListener("input", (event) => {

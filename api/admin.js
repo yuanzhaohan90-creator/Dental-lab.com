@@ -215,7 +215,7 @@ async function handleDashboard(req, res) {
   }
   const missingAlt = media.filter((item) => !item.altText).slice(0, 6);
   for (const item of missingAlt) health.push({ label: `${item.displayName || item.originalFilename || item.id} 缺少 ALT`, href: `/admin/media#media-${encodeURIComponent(item.id)}` });
-  if (published.filter((item) => item.featured).length < 4) health.push({ label: "Homepage Featured Cases 少于 4 个", href: "/admin/home" });
+  if (published.filter((item) => item.featured).length < 4) health.push({ label: "首页精选案例少于 4 个", href: "/admin/website/home#selectedWork" });
   const activity = [
     ...activeSubmissions.slice(0, 4).map((item) => ({ type: "Submission", label: item.caseId, detail: item.fields?.company || item.fields?.name || "客户提交", at: item.submittedAt, href: `/admin/submissions?case=${encodeURIComponent(item.caseId)}` })),
     ...cases.slice(0, 4).map((item) => ({ type: "Case", label: item.title, detail: item.status, at: item.updatedAt || item.createdAt, href: `/admin/cases?case=${encodeURIComponent(item.id)}` })),
