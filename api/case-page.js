@@ -119,7 +119,7 @@ function render(record, preview, settings, allRecords = []) {
   const finalResult = [item.finalRestoration, item.result, item.shortNote].filter(Boolean).join("\n\n");
   const detailedSections = [
     textSection("Case Overview", "Case Overview", item.caseOverview || item.technicalSummary || item.summary),
-    textSection("Material", "Material and component notes.", [item.material, item.implantSystem, item.platform, item.restorationType].filter(Boolean).join("\n")),
+    textSection("Material", "Material", [item.material, item.implantSystem, item.platform, item.restorationType].filter(Boolean).join("\n")),
     storySection("Technical Considerations", "Planning, design and restorative checkpoints.", technicalConsiderations, [
       ...mediaByStage("Model"),
       ...mediaByStage("CAD"),
@@ -128,8 +128,8 @@ function render(record, preview, settings, allRecords = []) {
       ...mediaByStage("PMMA"),
       ...mediaByStage("Try-in")
     ]),
-    storySection("Quality Control", "Fit, contacts, occlusion and finish review.", qualityControl, mediaByStage("QC")),
-    textSection("Final Result", "Completed restoration.", finalResult)
+    storySection("Quality Control", "Quality Control", qualityControl, mediaByStage("QC")),
+    textSection("Final Result", "Final Result", finalResult)
   ].join("");
   const restorativeDetails = metaItems(item);
   const related = relatedCaseCards(item, allRecords);
