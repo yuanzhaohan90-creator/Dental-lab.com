@@ -66,7 +66,7 @@ const permanentRedirects = {
   "/surgical-guide-design-outsourcing": "/services/surgical-guide"
 };
 const adminRedirects = {
-  "/admin/home": "/admin/website/home",
+  "/admin/home": "/admin",
   "/admin/homepage": "/admin/website/home",
   "/admin/implant": "/admin/website/implant",
   "/admin/full-arch": "/admin/website/full-arch",

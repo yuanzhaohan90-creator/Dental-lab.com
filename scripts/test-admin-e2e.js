@@ -79,7 +79,7 @@ for (const phrase of forbiddenVisibleCopy) {
 }
 
 for (const [from, to] of [
-  ["/admin/home", "/admin/website/home"],
+  ["/admin/home", "/admin"],
   ["/admin/case-library", "/admin/cases"],
   ["/admin/media-library", "/admin/media"],
   ["/admin/submission", "/admin/submissions"]
@@ -96,5 +96,45 @@ for (const status of submissionStatuses) {
 
 if (api.includes('href: "/admin/home"')) fail("dashboard still links to old /admin/home");
 else pass("dashboard does not link to old /admin/home");
+
+if (adminJs.includes("location.replace(`/admin?next=")) fail("admin route still rewrites deep links to /admin?next");
+else pass("admin deep links keep their pathname while showing login");
+
+if (!adminJs.includes("history.pushState") || !adminJs.includes("popstate")) fail("admin navigation does not use history state");
+else pass("admin navigation updates URL and supports back/forward");
+
+const routeExpectations = [
+  ["/admin", "dashboard", "今天需要处理什么？"],
+  ["/admin/website", "website", "公开页面管理"],
+  ["/admin/cases", "cases", "案例管理"],
+  ["/admin/media", "media", "素材管理"],
+  ["/admin/submissions", "submissions", "病例提交"],
+  ["/admin/seo", "seo", "SEO 管理"],
+  ["/admin/settings", "settings", "网站设置"],
+  ["/admin/advanced", "advanced", "系统状态"]
+];
+
+const headings = new Set(routeExpectations.map(([, , heading]) => heading));
+if (headings.size !== routeExpectations.length) fail("admin route headings are not unique");
+else pass("admin route headings are unique");
+
+for (const [, view, heading] of routeExpectations) {
+  const sectionPattern = new RegExp(`<section[^>]+data-view="${view}"[\\s\\S]*?<h1[^>]*>${heading}</h1>`);
+  if (!sectionPattern.test(shell)) fail(`admin view ${view} missing unique heading ${heading}`);
+  else pass(`admin view ${view} has unique heading ${heading}`);
+}
+
+const requiredAdminLoads = [
+  ["dashboard", "loadDashboard()"],
+  ["cases", "loadCaseCenter()"],
+  ["page", "loadPageEditor(editorKey)"],
+  ["submissions", "loadSubmissions()"],
+  ["media", "loadMedia()"],
+  ["settings", "loadSettings()"]
+];
+for (const [view, call] of requiredAdminLoads) {
+  if (!adminJs.includes(`if (view === "${view}") ${call}`)) fail(`admin route ${view} does not call ${call}`);
+  else pass(`admin route ${view} calls ${call}`);
+}
 
 if (process.exitCode) process.exit(process.exitCode);

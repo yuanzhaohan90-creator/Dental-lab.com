@@ -5,7 +5,7 @@ const loginMessage = document.getElementById("ownerLoginMessage");
 const nav = document.getElementById("adminNav");
 const navToggle = document.getElementById("adminNavToggle");
 const ADMIN_SESSION_KEY = "yzh_admin_session";
-const isAdminRoot = /^\/admin\/?$/.test(location.pathname);
+const isAdminRoute = location.pathname === "/admin" || location.pathname.startsWith("/admin/");
 
 function readStoredAdminSession() {
   return sessionStorage.getItem(ADMIN_SESSION_KEY) || localStorage.getItem(ADMIN_SESSION_KEY) || "";
@@ -60,9 +60,10 @@ async function api(url, options = {}) {
   if (sessionToken) headers.set("Authorization", `Bearer ${sessionToken}`);
   const response = await fetch(url, { ...options, headers, credentials: "same-origin" });
   const data = await response.json().catch(() => ({}));
-  if (response.status === 401 && !isAdminRoot) {
+  if (response.status === 401 && isAdminRoute) {
     clearStoredAdminSession();
-    location.replace(`/admin?next=${encodeURIComponent(location.pathname + location.search)}`);
+    loginPanel.hidden = false;
+    shell.hidden = true;
     throw new Error("请先登录管理员后台。");
   }
   if (!response.ok || data.ok === false) {
@@ -120,6 +121,12 @@ function showShell() {
   if (view === "settings") loadSettings();
 }
 
+function navigateAdmin(path) {
+  if (path === `${location.pathname}${location.search}`) return showShell();
+  history.pushState({}, "", path);
+  showShell();
+}
+
 async function applyAdminBranding() {
   try {
     const response = await fetch("/api/admin?module=public-site", { cache: "no-store" });
@@ -142,10 +149,11 @@ async function initialize() {
   try {
     const auth = await api("/api/admin-auth");
     if (auth.authenticated) return showShell();
-    if (!isAdminRoot) return location.replace(`/admin?next=${encodeURIComponent(location.pathname + location.search)}`);
     loginPanel.hidden = false;
+    shell.hidden = true;
   } catch {
     loginPanel.hidden = false;
+    shell.hidden = true;
   }
 }
 
@@ -156,8 +164,6 @@ loginForm.addEventListener("submit", async (event) => {
     const auth = await api("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: loginForm.elements.password.value }) });
     if (auth.sessionToken) storeAdminSession(auth.sessionToken);
     loginForm.reset();
-    const next = new URLSearchParams(location.search).get("next");
-    if (next?.startsWith("/admin") && next !== "/admin") return location.assign(next);
     showShell();
   } catch (error) { showMessage(loginMessage, error.message, "error"); }
 });
@@ -179,14 +185,23 @@ navToggle.addEventListener("keydown", (event) => {
   toggleAdminNavigation();
 });
 nav.addEventListener("click", (event) => {
-  if (!event.target.closest("a")) return;
+  const link = event.target.closest("a");
+  if (!link) return;
   nav.classList.remove("open");
   navToggle.setAttribute("aria-expanded", "false");
+  const url = new URL(link.href, location.origin);
+  if (url.origin !== location.origin || !url.pathname.startsWith("/admin")) return;
+  event.preventDefault();
+  navigateAdmin(`${url.pathname}${url.search}${url.hash}`);
 });
 document.addEventListener("click", (event) => {
   if (!nav.classList.contains("open") || event.target.closest("#adminNav,#adminNavToggle")) return;
   nav.classList.remove("open");
   navToggle.setAttribute("aria-expanded", "false");
+});
+
+window.addEventListener("popstate", () => {
+  if (!shell.hidden) showShell();
 });
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape" || !nav.classList.contains("open")) return;
