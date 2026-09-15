@@ -111,14 +111,14 @@ function render(record, preview, settings, allRecords = []) {
   const mediaByStage = (stage) => gallery.filter((image) => String(image.imageType || "").toLowerCase() === stage.toLowerCase());
   const title = `${item.title} | ${item.category} | YZH Dental Lab`;
   const previewBanner = preview ? `<div class="preview-banner">Private draft preview. This case is not public.</div>` : "";
-  const galleryHtml = gallery.length ? `<section class="section section-soft"><div class="wrap"><div class="section-head"><p class="eyebrow">Case Gallery</p><h2>${isCaseStudy ? "Design, production and quality review." : "Completed work and technical views."}</h2></div><div class="case-library-gallery">${gallery.map((image, index) => `<figure>${galleryMedia(item, image)}<figcaption><span>${escapeHtml(galleryLabel(image, index))}</span>${image.caption ? escapeHtml(image.caption) : ""}</figcaption></figure>`).join("")}</div></div></section>` : "";
+  const galleryHtml = gallery.length ? `<section class="section section-soft"><div class="wrap"><div class="section-head"><p class="eyebrow">Case Gallery</p><h2>Case Gallery</h2></div><div class="case-library-gallery">${gallery.map((image, index) => `<figure>${galleryMedia(item, image)}<figcaption><span>${escapeHtml(galleryLabel(image, index))}</span>${image.caption ? escapeHtml(image.caption) : ""}</figcaption></figure>`).join("")}</div></div></section>` : "";
   const technicalConsiderations = [item.challenge, item.planning, item.technicalReview, item.cadDesign, item.framework, item.workflow, item.clinicalNotes]
     .filter(Boolean)
     .join("\n\n");
   const qualityControl = [item.qc, item.technicalOutcome].filter(Boolean).join("\n\n");
   const finalResult = [item.finalRestoration, item.result, item.shortNote].filter(Boolean).join("\n\n");
   const detailedSections = [
-    textSection("Case Overview", "Restorative details.", item.caseOverview || item.technicalSummary || item.summary),
+    textSection("Case Overview", "Case Overview", item.caseOverview || item.technicalSummary || item.summary),
     textSection("Material", "Material and component notes.", [item.material, item.implantSystem, item.platform, item.restorationType].filter(Boolean).join("\n")),
     storySection("Technical Considerations", "Planning, design and restorative checkpoints.", technicalConsiderations, [
       ...mediaByStage("Model"),
@@ -131,6 +131,7 @@ function render(record, preview, settings, allRecords = []) {
     storySection("Quality Control", "Fit, contacts, occlusion and finish review.", qualityControl, mediaByStage("QC")),
     textSection("Final Result", "Completed restoration.", finalResult)
   ].join("");
+  const restorativeDetails = metaItems(item);
   const related = relatedCaseCards(item, allRecords);
   return `<!DOCTYPE html>
 <html lang="en" data-server-rendered="true"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -141,7 +142,7 @@ ${preview ? '<meta name="robots" content="noindex,nofollow">' : ""}<link rel="ic
 ${headerMarkup("cases", settings)}
 <main><section class="case-library-hero"><div class="wrap case-library-hero-grid"><div><p class="eyebrow">${isCaseStudy ? "Featured Case Study" : "Recent Work"} · ${escapeHtml(item.category)}</p><h1>${escapeHtml(item.title)}</h1>${item.summary ? `<p class="lead">${escapeHtml(item.summary)}</p>` : ""}${heroProofItems(item)}</div>${cover ? `<figure><a class="case-media-zoom" href="${escapeHtml(cover.url)}" target="_blank" rel="noopener" aria-label="Open larger image"><img src="${escapeHtml(cover.url)}" alt="${escapeHtml(item.title)}" width="1200" height="900" loading="eager" fetchpriority="high" decoding="async"></a><figcaption>${escapeHtml(cover.caption || "Final restoration")}</figcaption></figure>` : ""}</div></section>
 ${journeyNav(item, gallery)}
-<section class="section"><div class="wrap case-summary-layout"><div><p class="eyebrow">Restorative Details</p><h2>Restorative details.</h2></div><dl class="case-specs">${metaItems(item)}</dl></div></section>
+${restorativeDetails ? `<section class="section"><div class="wrap case-summary-layout"><div><p class="eyebrow">Restorative Details</p><h2>Restorative details.</h2></div><dl class="case-specs">${restorativeDetails}</dl></div></section>` : ""}
 ${detailedSections}
 ${galleryHtml}
 ${related}

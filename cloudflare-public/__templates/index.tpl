@@ -64,7 +64,7 @@
       <div class="section-head home-v3-section-head">
         <p class="eyebrow" data-manager-text="selectedWork.eyebrow">Selected Cases</p>
         <h2 data-manager-text="selectedWork.heading">Real work comes before claims.</h2>
-        <p class="copy" data-manager-text="selectedWork.description">A focused selection of published implant, full-arch and restorative work. Each card opens the full case detail.</p>
+        <p class="copy" data-manager-text="selectedWork.description">Published implant, full-arch and restorative work selected for technical buyers.</p>
       </div>
       <div class="priority-case-grid">
         <a class="priority-case" href="/cases"><div><p class="case-category">Case Portfolio</p><h3>Review YZH Dental Lab case work.</h3><p>Browse published implant, full-arch and restorative cases selected for technical buyers.</p><span class="text-link">Open Case Portfolio</span></div></a>
