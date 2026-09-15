@@ -120,7 +120,7 @@ function render(record, preview, settings, allRecords = []) {
   const detailedSections = [
     textSection("Case Overview", "Case Overview", item.caseOverview || item.technicalSummary || item.summary),
     textSection("Material", "Material", [item.material, item.implantSystem, item.platform, item.restorationType].filter(Boolean).join("\n")),
-    storySection("Technical Considerations", "Planning, design and restorative checkpoints.", technicalConsiderations, [
+    storySection("Technical Considerations", "Technical Considerations", technicalConsiderations, [
       ...mediaByStage("Model"),
       ...mediaByStage("CAD"),
       ...mediaByStage("Framework"),
