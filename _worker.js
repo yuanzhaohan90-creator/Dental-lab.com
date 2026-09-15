@@ -108,10 +108,11 @@ async function loadTemplates(request, env) {
 
 async function adminShellResponse(request, env) {
   const assetResponse = await env.ASSETS.fetch(routedRequest(request, "/admin-shell.html"));
+  const headers = new Headers(assetResponse.headers);
+  headers.delete("Location");
   return new Response(assetResponse.body, {
-    status: assetResponse.status,
-    statusText: assetResponse.statusText,
-    headers: assetResponse.headers
+    status: 200,
+    headers
   });
 }
 
