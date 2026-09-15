@@ -106,6 +106,15 @@ async function loadTemplates(request, env) {
   globalThis.__YZH_CF_TEMPLATES = await templatesPromise;
 }
 
+async function adminShellResponse(request, env) {
+  const assetResponse = await env.ASSETS.fetch(routedRequest(request, "/admin-shell.html"));
+  return new Response(assetResponse.body, {
+    status: assetResponse.status,
+    statusText: assetResponse.statusText,
+    headers: assetResponse.headers
+  });
+}
+
 function routedRequest(request, path, params = {}) {
   const url = new URL(request.url);
   url.pathname = path;
@@ -129,7 +138,7 @@ export default {
     }
     if (url.pathname.startsWith("/cases/") && url.pathname.length > "/cases/".length) return invoke(routedRequest(request, "/api/case-page", { slug: decodeURIComponent(url.pathname.slice("/cases/".length)) }), env, casePage);
     if (adminRedirects[url.pathname]) return Response.redirect(new URL(`${adminRedirects[url.pathname]}${url.search}`, url), 302);
-    if (adminPages.has(url.pathname)) return env.ASSETS.fetch(routedRequest(request, "/admin-shell.html"));
+    if (adminPages.has(url.pathname)) return adminShellResponse(request, env);
     return env.ASSETS.fetch(request);
   },
 };
