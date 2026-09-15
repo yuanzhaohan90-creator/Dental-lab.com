@@ -126,6 +126,7 @@ for (const [, view, heading] of routeExpectations) {
 
 const requiredAdminLoads = [
   ["dashboard", "loadDashboard()"],
+  ["website", "loadWebsiteOverview()"],
   ["cases", "loadCaseCenter()"],
   ["page", "loadPageEditor(editorKey)"],
   ["submissions", "loadSubmissions()"],

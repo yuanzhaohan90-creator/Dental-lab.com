@@ -114,11 +114,18 @@ function showShell() {
     else link.removeAttribute("aria-current");
   });
   if (view === "dashboard") loadDashboard();
+  if (view === "website") loadWebsiteOverview();
   if (view === "cases") loadCaseCenter();
   if (view === "page") loadPageEditor(editorKey);
   if (view === "submissions") loadSubmissions();
   if (view === "media") loadMedia();
   if (view === "settings") loadSettings();
+}
+
+async function loadWebsiteOverview() {
+  try {
+    await api("/api/admin?module=public-site");
+  } catch {}
 }
 
 function navigateAdmin(path) {
