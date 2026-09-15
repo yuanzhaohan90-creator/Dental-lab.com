@@ -107,7 +107,8 @@ async function loadTemplates(request, env) {
 }
 
 async function adminShellResponse(request, env) {
-  const assetResponse = await env.ASSETS.fetch(routedRequest(request, "/admin-shell.html"));
+  let assetResponse = await env.ASSETS.fetch(routedRequest(request, "/admin-shell"));
+  if (!assetResponse.ok) assetResponse = await env.ASSETS.fetch(routedRequest(request, "/admin-shell.html"));
   const headers = new Headers(assetResponse.headers);
   headers.delete("Location");
   return new Response(assetResponse.body, {
