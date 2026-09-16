@@ -9,28 +9,34 @@ const { createR2UploadUrl, isR2Backend, storageClient } = require("../lib/object
 const {
   DEFAULT_HOMEPAGE,
   DEFAULT_PAGE_CONFIGS,
+  DEFAULT_SEO_CONFIG,
   DEFAULT_SETTINGS,
   MEDIA_CATEGORIES,
+  SEO_PAGE_DEFINITIONS,
   assertPublishableMedia,
   isValidLinkedInUrl,
   deleteSubmissionFiles,
   deleteMedia,
   getConfig,
   getMedia,
+  getSeoConfig,
   getSubmission,
   listMedia,
   listSubmissions,
   mediaUsage,
   normalizeHomepage,
   normalizePageConfig,
+  normalizeSeoConfig,
   normalizeSettings,
   permanentlyDeleteSubmission,
   publishConfig,
   restoreConfig,
   restoreMedia,
+  restoreSeoDefaults,
   restoreSubmission,
   saveConfigDraft,
   saveMedia,
+  saveSeoConfig,
   saveSubmissionStatus,
   storeClientMedia,
   storeMediaFile,
@@ -690,6 +696,49 @@ async function handleSettings(req, res) {
   return reply(res, 405, { ok: false, error: "Method not allowed." });
 }
 
+async function handleSeo(req, res) {
+  if (req.method === "GET") {
+    const current = await getSeoConfig();
+    return reply(res, 200, { ok: true, pages: SEO_PAGE_DEFINITIONS, seo: current });
+  }
+  if (req.method === "PUT") {
+    const body = await readJson(req);
+    const saved = await saveSeoConfig(body.seo || body);
+    return reply(res, 200, { ok: true, pages: SEO_PAGE_DEFINITIONS, seo: saved });
+  }
+  if (req.method === "POST") {
+    if (query(req, "action") !== "restore-defaults") return reply(res, 400, { ok: false, error: "Invalid SEO action." });
+    const saved = await restoreSeoDefaults();
+    return reply(res, 200, { ok: true, pages: SEO_PAGE_DEFINITIONS, seo: saved });
+  }
+  return reply(res, 405, { ok: false, error: "Method not allowed." });
+}
+
+async function handleSystemStatus(req, res) {
+  if (req.method !== "GET") return reply(res, 405, { ok: false, error: "Method not allowed." });
+  const [media, submissions, cases] = await Promise.all([
+    listMedia().catch(() => []),
+    listSubmissions().catch(() => []),
+    listRecords().catch(() => [])
+  ]);
+  return reply(res, 200, {
+    ok: true,
+    status: {
+      environment: process.env.SITE_URL?.includes("workers.dev") ? "Preview" : "Production",
+      deployment: process.env.SITE_URL || "当前 Worker",
+      version: process.env.CF_VERSION_METADATA || "Worker Preview",
+      storageBackend: process.env.STORAGE_BACKEND || "r2",
+      r2Bucket: process.env.R2_BUCKET_NAME || "MEDIA_BUCKET",
+      r2Status: "已连接",
+      apiStatus: "正常",
+      mediaCount: media.length,
+      submissionCount: submissions.length,
+      caseCount: cases.length,
+      updatedAt: new Date().toISOString()
+    }
+  });
+}
+
 async function handlePublicSite(req, res) {
   if (req.method !== "GET") {
     res.statusCode = 405;
@@ -724,6 +773,8 @@ module.exports = async function handler(req, res) {
     if (moduleName === "homepage") return await handleHomepage(req, res);
     if (moduleName === "page-editor") return await handlePageEditor(req, res);
     if (moduleName === "settings") return await handleSettings(req, res);
+    if (moduleName === "seo") return await handleSeo(req, res);
+    if (moduleName === "system-status") return await handleSystemStatus(req, res);
     if (moduleName === "public-site") return await handlePublicSite(req, res);
     return reply(res, 404, { ok: false, error: "Admin module not found." });
   } catch (error) {

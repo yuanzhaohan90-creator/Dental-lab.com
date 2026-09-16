@@ -75,6 +75,29 @@ for (const phrase of requiredOperationalCopy) {
   else pass(`operations copy/hook present: ${phrase}`);
 }
 
+const requiredSeoCopy = [
+  "SEO 标题",
+  "页面描述",
+  "Canonical URL",
+  "Open Graph 标题",
+  "Open Graph 描述",
+  "Open Graph 图片",
+  "搜索引擎索引",
+  "允许索引",
+  "禁止索引",
+  "保存修改",
+  "恢复默认值",
+  "预览页面",
+  "系统状态",
+  "当前环境",
+  "R2 存储状态",
+  "API 健康状态"
+];
+for (const phrase of requiredSeoCopy) {
+  if (!shell.includes(phrase) && !adminJs.includes(phrase)) fail(`missing SEO/system status copy: ${phrase}`);
+  else pass(`SEO/system status copy present: ${phrase}`);
+}
+
 const forbiddenVisibleCopy = [
   "Dashboard</a>",
   "Website</a>",
@@ -167,5 +190,14 @@ else pass("case completion check wired");
 
 if (!adminJs.includes("missing.length") || !adminJs.includes('[data-case-tab="related"]')) fail("publish does not block incomplete cases and route user to checklist");
 else pass("publish blocks incomplete cases and opens checklist");
+
+if (!adminJs.includes('api("/api/admin?module=seo"') || !adminJs.includes("saveSeoCurrent")) fail("SEO editor is not connected to admin API");
+else pass("SEO editor is connected to admin API");
+
+const advancedStart = shell.indexOf('id="advancedView"');
+const advancedEnd = shell.indexOf('<script src=', advancedStart);
+const advancedSection = advancedStart >= 0 ? shell.slice(advancedStart, advancedEnd > advancedStart ? advancedEnd : undefined) : "";
+if (!adminJs.includes("module=system-status") || /删除|清空|重置/.test(advancedSection)) fail("Advanced system status is unsafe or not connected");
+else pass("Advanced system status is safe and connected");
 
 if (process.exitCode) process.exit(process.exitCode);

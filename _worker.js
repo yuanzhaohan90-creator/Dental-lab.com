@@ -6,10 +6,11 @@ import casePage from "./api/case-page.js";
 import cases from "./api/cases.js";
 import downloadCaseFile from "./api/download-case-file.js";
 import publicPage from "./api/public-page.js";
+import seoStatic from "./api/seo-static.js";
 import submitCase from "./api/submit-case.js";
 import { Readable, Writable } from "node:stream";
 
-const handlers = { "/api/admin-auth": adminAuth, "/api/admin": admin, "/api/admin-cases": adminCases, "/api/case-image": caseImage, "/api/case-page": casePage, "/api/cases": cases, "/api/download-case-file": downloadCaseFile, "/api/public-page": publicPage, "/api/submit-case": submitCase };
+const handlers = { "/api/admin-auth": adminAuth, "/api/admin": admin, "/api/admin-cases": adminCases, "/api/case-image": caseImage, "/api/case-page": casePage, "/api/cases": cases, "/api/download-case-file": downloadCaseFile, "/api/public-page": publicPage, "/api/submit-case": submitCase, "/robots.txt": seoStatic, "/sitemap.xml": seoStatic };
 
 function requestStream(request) {
   if (!request.body) return null;

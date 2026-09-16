@@ -8,7 +8,34 @@ assert.match(home, /data-server-rendered="true"/);
 assert.match(home, /Complex Implant Cases\. Solved\./);
 assert.match(home, /Services/);
 assert.match(home, /fetchpriority="high"/);
+assert.match(home, /<link rel="canonical" href="https:\/\/yzhdentallab\.com\/">/);
+assert.match(home, /property="og:title"/);
+assert.match(home, /property="og:description"/);
+assert.match(home, /property="og:url"/);
+assert.equal((home.match(/rel="canonical"/g) || []).length, 1);
 assert.doesNotMatch(home, />Loading/);
+
+const homeSeo = renderPublicPage("home", {
+  ...data,
+  seo: {
+    ...data.seo,
+    home: {
+      ...data.seo.home,
+      title: "QA SEO Home Title | YZH Dental Lab",
+      description: "QA SEO home description for render verification.",
+      canonicalUrl: "https://yzhdentallab.com/",
+      ogTitle: "QA OG Home Title",
+      ogDescription: "QA OG description.",
+      ogImage: "/assets/real/hero-full-arch-premium-01.jpg",
+      noindex: true,
+      nofollow: true
+    }
+  }
+}, { adminPreview: false });
+assert.match(homeSeo, /<title>QA SEO Home Title \| YZH Dental Lab<\/title>/);
+assert.match(homeSeo, /content="QA SEO home description for render verification\."/);
+assert.match(homeSeo, /content="QA OG Home Title"/);
+assert.match(homeSeo, /content="noindex,nofollow"/);
 
 const workflow = renderPublicPage("workflow", data);
 assert.match(workflow, /Submit Files/);

@@ -120,6 +120,8 @@ function showShell() {
   if (view === "submissions") loadSubmissions();
   if (view === "media") loadMedia();
   if (view === "settings") loadSettings();
+  if (view === "seo") loadSeo();
+  if (view === "advanced") loadSystemStatus();
 }
 
 async function loadWebsiteOverview() {
@@ -1300,6 +1302,146 @@ document.getElementById("mediaList").addEventListener("change", async (event) =>
 document.getElementById("previewSettings").addEventListener("click", async () => { try { await saveSettingsDraft(); window.open("/?adminPreview=settings", "_blank", "noopener"); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
 document.getElementById("publishSettings").addEventListener("click", async () => { if (!confirm("确定发布这些公开网站设置吗？")) return; try { await saveSettingsDraft(); await api("/api/admin?module=settings&action=publish", { method: "POST" }); showMessage(document.getElementById("settingsMessage"), "网站设置已发布。", "success"); await loadSettings(); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
 document.getElementById("restoreSettings").addEventListener("click", async () => { if (!confirm("确定恢复上一版已发布设置吗？")) return; try { await api("/api/admin?module=settings&action=restore", { method: "POST" }); showMessage(document.getElementById("settingsMessage"), "已恢复上一版设置。", "success"); await loadSettings(); } catch (error) { showMessage(document.getElementById("settingsMessage"), error.message, "error"); } });
+
+const seoState = { pages: [], seo: {}, currentKey: "home", saving: false };
+
+function currentSeoRecord() {
+  return seoState.seo?.[seoState.currentKey] || {};
+}
+
+function renderSeoPageList() {
+  const list = document.getElementById("seoPageList");
+  list.innerHTML = seoState.pages.map((page) => {
+    const item = seoState.seo[page.key] || {};
+    const state = item.noindex ? "禁止索引" : "允许索引";
+    return `<button type="button" class="${page.key === seoState.currentKey ? "active" : ""}" data-seo-page="${escapeHtml(page.key)}"><strong>${escapeHtml(page.label)}</strong><small>${escapeHtml(page.path)} · ${state}</small></button>`;
+  }).join("");
+}
+
+function renderSeoEditor() {
+  const form = document.getElementById("seoEditorForm");
+  const page = seoState.pages.find((item) => item.key === seoState.currentKey) || seoState.pages[0];
+  const item = currentSeoRecord();
+  if (!page || !form) return;
+  document.getElementById("seoPagePath").textContent = page.path;
+  document.getElementById("seoPageTitle").textContent = `${page.label} · SEO 设置`;
+  document.getElementById("seoIndexState").textContent = item.noindex ? "禁止索引" : "允许索引";
+  document.getElementById("seoIndexState").classList.toggle("live", !item.noindex);
+  form.elements.title.value = item.title || "";
+  form.elements.description.value = item.description || "";
+  form.elements.canonicalUrl.value = item.canonicalUrl || "";
+  form.elements.ogTitle.value = item.ogTitle || "";
+  form.elements.ogDescription.value = item.ogDescription || "";
+  form.elements.ogImage.value = item.ogImage || "";
+  form.elements.noindex.value = item.noindex ? "true" : "false";
+  form.elements.nofollow.value = item.nofollow ? "true" : "false";
+  showMessage(document.getElementById("seoMessage"), "");
+}
+
+async function loadSeo() {
+  const list = document.getElementById("seoPageList");
+  try {
+    const data = await api("/api/admin?module=seo");
+    seoState.pages = data.pages || [];
+    seoState.seo = data.seo?.published || data.seo?.draft || {};
+    if (!seoState.pages.some((page) => page.key === seoState.currentKey)) seoState.currentKey = seoState.pages[0]?.key || "home";
+    renderSeoPageList();
+    renderSeoEditor();
+  } catch (error) {
+    list.innerHTML = `<p class="admin-empty">${escapeHtml(error.message)}</p>`;
+  }
+}
+
+function collectSeoPayload() {
+  const form = document.getElementById("seoEditorForm");
+  return {
+    title: form.elements.title.value,
+    description: form.elements.description.value,
+    canonicalUrl: form.elements.canonicalUrl.value,
+    ogTitle: form.elements.ogTitle.value,
+    ogDescription: form.elements.ogDescription.value,
+    ogImage: form.elements.ogImage.value,
+    noindex: form.elements.noindex.value === "true",
+    nofollow: form.elements.nofollow.value === "true"
+  };
+}
+
+async function saveSeoCurrent() {
+  if (seoState.saving) return;
+  const form = document.getElementById("seoEditorForm");
+  if (!form.reportValidity()) return;
+  const message = document.getElementById("seoMessage");
+  const button = form.querySelector('button[type="submit"]');
+  seoState.saving = true;
+  button.disabled = true;
+  showMessage(message, "正在保存…");
+  try {
+    seoState.seo[seoState.currentKey] = collectSeoPayload();
+    const data = await api("/api/admin?module=seo", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seo: seoState.seo }) });
+    seoState.seo = data.seo?.published || data.seo?.draft || seoState.seo;
+    renderSeoPageList();
+    renderSeoEditor();
+    showMessage(message, "保存成功", "success");
+  } catch (error) {
+    showMessage(message, `保存失败：${error.message || "网络错误，请稍后再试。"}`, "error");
+  } finally {
+    seoState.saving = false;
+    button.disabled = false;
+  }
+}
+
+document.getElementById("seoPageList")?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-seo-page]");
+  if (!button) return;
+  seoState.currentKey = button.dataset.seoPage;
+  renderSeoPageList();
+  renderSeoEditor();
+});
+
+document.getElementById("seoEditorForm")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await saveSeoCurrent();
+});
+
+document.getElementById("seoRestoreDefaults")?.addEventListener("click", async () => {
+  if (!confirm("确定恢复所有页面的默认 SEO 设置吗？")) return;
+  const message = document.getElementById("seoMessage");
+  showMessage(message, "正在保存…");
+  try {
+    const data = await api("/api/admin?module=seo&action=restore-defaults", { method: "POST" });
+    seoState.seo = data.seo?.published || data.seo?.draft || {};
+    renderSeoPageList();
+    renderSeoEditor();
+    showMessage(message, "保存成功", "success");
+  } catch (error) {
+    showMessage(message, `保存失败：${error.message || "网络错误，请稍后再试。"}`, "error");
+  }
+});
+
+document.getElementById("seoPreviewPage")?.addEventListener("click", () => {
+  const page = seoState.pages.find((item) => item.key === seoState.currentKey);
+  if (page?.path) window.open(page.path === "/404" ? "/not-found-preview" : page.path, "_blank", "noopener");
+});
+
+async function loadSystemStatus() {
+  const grid = document.getElementById("systemStatusGrid");
+  try {
+    const data = await api("/api/admin?module=system-status");
+    const status = data.status || {};
+    const rows = [
+      ["当前环境", status.environment],
+      ["Preview / Production 状态", status.deployment],
+      ["当前版本", status.version],
+      ["R2 存储状态", `${status.r2Status} · ${status.r2Bucket}`],
+      ["API 健康状态", status.apiStatus],
+      ["素材 / 病例 / 案例", `${status.mediaCount} / ${status.submissionCount} / ${status.caseCount}`],
+      ["最近更新时间", formatDate(status.updatedAt)]
+    ];
+    grid.innerHTML = rows.map(([label, value]) => `<article class="system-status-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value || "-")}</strong></article>`).join("");
+  } catch (error) {
+    grid.innerHTML = `<p class="admin-empty">${escapeHtml(error.message)}</p>`;
+  }
+}
 
 const caseCenterState = { cases: [], categories: [], imageTypes: [], current: null, existing: [], newFiles: [], selectedMedia: [] };
 const caseStatusLabels = { draft: "草稿", published: "已发布", hidden: "未发布", archived: "已归档", trash: "回收站" };
