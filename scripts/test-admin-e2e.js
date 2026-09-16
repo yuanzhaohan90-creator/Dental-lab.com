@@ -57,6 +57,24 @@ for (const label of requiredChineseNav) {
   else pass(`Chinese admin label ${label}`);
 }
 
+const requiredOperationalCopy = [
+  "待处理病例",
+  "最近提交",
+  "最近案例",
+  "加入精选作品",
+  "发布检查",
+  "caseCompletionPanel",
+  "casePublishChecklist",
+  "发布前请补齐",
+  "Before（术前）",
+  "QC（质检）"
+];
+for (const phrase of requiredOperationalCopy) {
+  const source = shell.includes(phrase) || adminJs.includes(phrase);
+  if (!source) fail(`missing simplified operations copy or hook: ${phrase}`);
+  else pass(`operations copy/hook present: ${phrase}`);
+}
+
 const forbiddenVisibleCopy = [
   "Dashboard</a>",
   "Website</a>",
@@ -96,6 +114,12 @@ for (const status of submissionStatuses) {
 
 if (api.includes('href: "/admin/home"')) fail("dashboard still links to old /admin/home");
 else pass("dashboard does not link to old /admin/home");
+
+if (shell.includes("dashboardHealth") || shell.includes("dashboardMedia")) fail("dashboard still exposes extra technical dashboard columns");
+else pass("dashboard only keeps recent submissions and cases columns");
+
+if (!adminJs.includes("admin-stat-link") || !adminJs.includes("/admin/submissions") || !adminJs.includes("/admin/media")) fail("dashboard stat cards are not clickable operation shortcuts");
+else pass("dashboard stat cards are clickable operation shortcuts");
 
 if (adminJs.includes("location.replace(`/admin?next=")) fail("admin route still rewrites deep links to /admin?next");
 else pass("admin deep links keep their pathname while showing login");
@@ -137,5 +161,11 @@ for (const [view, call] of requiredAdminLoads) {
   if (!adminJs.includes(`if (view === "${view}") ${call}`)) fail(`admin route ${view} does not call ${call}`);
   else pass(`admin route ${view} calls ${call}`);
 }
+
+if (!adminJs.includes("getCaseCompletion") || !adminJs.includes("renderCaseCompletion")) fail("case completion check is not wired");
+else pass("case completion check wired");
+
+if (!adminJs.includes("missing.length") || !adminJs.includes('[data-case-tab="related"]')) fail("publish does not block incomplete cases and route user to checklist");
+else pass("publish blocks incomplete cases and opens checklist");
 
 if (process.exitCode) process.exit(process.exitCode);

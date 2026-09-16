@@ -258,11 +258,9 @@ async function loadDashboard() {
   const stats = document.getElementById("dashboardStats");
   try {
     const data = await api("/api/admin?module=dashboard");
-    stats.innerHTML = `<div class="admin-stat"><strong>${data.counts.newSubmissions}</strong><span>新提交</span></div><div class="admin-stat"><strong>${data.counts.draftCases}</strong><span>草稿案例</span></div><div class="admin-stat"><strong>${data.counts.publishedCases}</strong><span>已发布案例</span></div><div class="admin-stat"><strong>${data.counts.totalMedia}</strong><span>素材总数</span></div><div class="admin-stat"><strong>${data.counts.contentHealth}</strong><span>待处理事项</span></div>`;
-    document.getElementById("dashboardHealth").innerHTML = data.contentHealth?.length ? data.contentHealth.map((item) => `<a href="${escapeHtml(item.href)}"><span><strong>${escapeHtml(item.label)}</strong><small>点击进入对应编辑位置</small></span><b>处理</b></a>`).join("") : '<p class="admin-empty">内容健康良好，没有需要立即处理的问题。</p>';
+    stats.innerHTML = `<a class="admin-stat admin-stat-link" href="/admin/submissions"><strong>${data.counts.newSubmissions}</strong><span>待处理病例</span></a><a class="admin-stat admin-stat-link" href="/admin/cases?status=draft"><strong>${data.counts.draftCases}</strong><span>草稿案例</span></a><a class="admin-stat admin-stat-link" href="/admin/cases?status=published"><strong>${data.counts.publishedCases}</strong><span>已发布案例</span></a><a class="admin-stat admin-stat-link" href="/admin/media"><strong>${data.counts.totalMedia}</strong><span>素材数量</span></a>`;
     document.getElementById("dashboardActivity").innerHTML = data.recentActivity?.length ? data.recentActivity.map((item) => `<a href="${escapeHtml(item.href)}"><span><strong>${escapeHtml(item.type)} · ${escapeHtml(item.label)}</strong><small>${escapeHtml(item.detail || "")}</small></span><small>${formatDate(item.at)}</small></a>`).join("") : '<p class="admin-empty">暂无近期活动。</p>';
     document.getElementById("dashboardPublished").innerHTML = data.recentPublished.length ? data.recentPublished.map((item) => `<a href="/admin/cases?case=${encodeURIComponent(item.id)}"><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(categoryLabel(item.category))}</small></span><small>${formatDate(item.publishedAt)}</small></a>`).join("") : '<p class="admin-empty">暂无已发布作品。</p>';
-    document.getElementById("dashboardMedia").innerHTML = data.recentMedia?.length ? data.recentMedia.map((item) => `<a href="/admin/media#media-${encodeURIComponent(item.id)}"><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(categoryLabel(item.category))}</small></span><small>${formatDate(item.createdAt)}</small></a>`).join("") : '<p class="admin-empty">暂无媒体。</p>';
   } catch (error) { stats.innerHTML = `<p class="admin-empty">${escapeHtml(error.message)}</p>`; }
 }
 
@@ -1305,7 +1303,7 @@ document.getElementById("restoreSettings").addEventListener("click", async () =>
 
 const caseCenterState = { cases: [], categories: [], imageTypes: [], current: null, existing: [], newFiles: [], selectedMedia: [] };
 const caseStatusLabels = { draft: "草稿", published: "已发布", hidden: "未发布", archived: "已归档", trash: "回收站" };
-const caseStageLabels = { Before: "Before", Scan: "Scan", Planning: "Planning", Design: "Design", CAD: "CAD", Model: "Model", Framework: "Framework", "Ti-base": "Ti-base", PMMA: "PMMA", "Try-in": "Try-in", Final: "Final", QC: "QC", Delivery: "Delivery", Other: "Other" };
+const caseStageLabels = { Before: "Before（术前）", Scan: "Scan（扫描）", Planning: "Planning（计划）", Design: "Design（设计）", CAD: "CAD", Model: "Model（模型）", Framework: "Framework（支架）", "Ti-base": "Ti-base", PMMA: "PMMA", "Try-in": "Try-in（试戴）", Final: "Final（最终）", QC: "QC（质检）", Delivery: "Delivery（交付）", Other: "Other（其他）" };
 
 function caseMessage(message, type = "") {
   showMessage(document.getElementById("caseCenterMessage"), message, type);
@@ -1322,6 +1320,65 @@ function casePreviewMarkup(item) {
   return `<img src="${escapeHtml(src)}" alt="">`;
 }
 
+function caseMediaItemsForCompletion() {
+  const existing = caseCenterState.existing || [];
+  const uploaded = (caseCenterState.newFiles || []).map((item) => ({ ...item, isCover: false }));
+  const selected = (caseCenterState.selectedMedia || []).map((item) => ({ ...item, isCover: false }));
+  return [...existing, ...uploaded, ...selected];
+}
+
+function getCaseCompletion(source = null) {
+  const form = document.getElementById("caseCenterEditor");
+  const item = source || {};
+  const fromForm = !source && form && !form.hidden;
+  const media = fromForm ? caseMediaItemsForCompletion() : (item.images || []);
+  const hasCover = fromForm ? Boolean(form.elements.coverImage?.files?.[0] || media.some((image) => image.isCover)) : Boolean(media.some((image) => image.isCover));
+  const gallery = media.filter((image) => !image.isCover);
+  const altReady = gallery.length > 0 && gallery.every((image) => String(image.altText || "").trim());
+  const values = fromForm ? {
+    title: form.elements.title?.value,
+    category: form.elements.category?.value,
+    description: form.elements.technicalSummary?.value || form.elements.challenge?.value || form.elements.planning?.value || form.elements.technicalOutcome?.value,
+    technical: form.elements.material?.value || form.elements.implantSystem?.value || form.elements.platform?.value || form.elements.technicalReview?.value,
+    seo: form.elements.seoTitle?.value && form.elements.metaDescription?.value
+  } : {
+    title: item.title,
+    category: item.category,
+    description: item.technicalSummary || item.challenge || item.planning || item.technicalOutcome,
+    technical: item.material || item.implantSystem || item.platform || item.technicalReview,
+    seo: item.seoTitle && item.metaDescription
+  };
+  const checks = [
+    ["title", "案例标题", Boolean(String(values.title || "").trim())],
+    ["category", "案例分类", Boolean(String(values.category || "").trim())],
+    ["cover", "封面图", hasCover],
+    ["description", "案例说明", Boolean(String(values.description || "").trim())],
+    ["technical", "技术信息", Boolean(String(values.technical || "").trim())],
+    ["alt", "图片 ALT", altReady],
+    ["seo", "SEO 标题和描述", Boolean(values.seo)]
+  ];
+  const done = checks.filter(([, , passed]) => passed).length;
+  return { checks, done, total: checks.length, percent: Math.round((done / checks.length) * 100), mediaCount: media.length, galleryCount: gallery.length, altDone: gallery.filter((image) => String(image.altText || "").trim()).length };
+}
+
+function renderCaseCompletion() {
+  const panel = document.getElementById("caseCompletionPanel");
+  const checklist = document.getElementById("casePublishChecklist");
+  const summary = document.getElementById("caseMediaSummary");
+  if (!panel) return;
+  const completion = getCaseCompletion();
+  const missing = completion.checks.filter(([, , passed]) => !passed).map(([, label]) => label);
+  panel.innerHTML = `<div><strong>完成度 ${completion.percent}%</strong><span>${completion.done}/${completion.total} 项已完成</span></div><div class="case-completion-bar" aria-hidden="true"><span style="width:${completion.percent}%"></span></div><small>${missing.length ? `还缺：${missing.map(escapeHtml).join("、")}` : "已具备发布条件，发布前仍需确认不包含患者隐私。"}</small>`;
+  if (summary) summary.textContent = `媒体 ${completion.mediaCount} 个 · 图片/视频 ${completion.galleryCount} 个 · ALT ${completion.altDone}/${completion.galleryCount}`;
+  if (checklist) {
+    checklist.innerHTML = completion.checks.map(([, label, passed]) => `<div class="${passed ? "done" : "missing"}"><span>${passed ? "✓" : "!"}</span><strong>${escapeHtml(label)}</strong><small>${passed ? "已完成" : "待补充"}</small></div>`).join("");
+  }
+}
+
+function caseUpdatedLabel(item) {
+  return formatDate(item.updatedAt || item.publishedAt || item.createdAt);
+}
+
 function renderCaseListCenter() {
   const list = document.getElementById("caseCenterList");
   const search = document.getElementById("caseSearch").value.trim().toLowerCase();
@@ -1333,7 +1390,8 @@ function renderCaseListCenter() {
   });
   list.innerHTML = filtered.length ? filtered.map((item) => {
     const cover = item.images?.find((image) => image.isCover);
-    return `<button type="button" class="case-center-row ${caseCenterState.current?.id === item.id ? "active" : ""}" data-case-id="${escapeHtml(item.id)}">${cover ? `<img src="${escapeHtml(cover.url)}" alt="">` : '<span class="case-row-empty">无封面</span>'}<span><strong>${escapeHtml(item.title || "未命名案例")}</strong><small>${escapeHtml(item.category || "未设置分类")} · ${escapeHtml(caseStatusLabels[item.status] || item.status || "草稿")} · ${escapeHtml(item.material || "未设置材料")} · ${escapeHtml(item.implantSystem || "未设置种植系统")}</small></span></button>`;
+    const completion = getCaseCompletion(item);
+    return `<button type="button" class="case-center-row ${caseCenterState.current?.id === item.id ? "active" : ""}" data-case-id="${escapeHtml(item.id)}">${cover ? `<img src="${escapeHtml(cover.url)}" alt="">` : '<span class="case-row-empty">无封面</span>'}<span><strong>${escapeHtml(item.title || "未命名案例")}</strong><small>${escapeHtml(caseStatusLabels[item.status] || item.status || "草稿")} · ${escapeHtml(item.category || "未设置分类")} · ${completion.mediaCount} 个素材</small><small>完成度 ${completion.percent}% · 最后修改 ${escapeHtml(caseUpdatedLabel(item))}</small></span></button>`;
   }).join("") : '<p class="admin-empty">没有符合当前筛选条件的案例。</p>';
 }
 
@@ -1360,6 +1418,7 @@ function syncCaseMediaInputs() {
     item.imageType = row.querySelector('[data-key="imageType"]').value;
     item.altText = row.querySelector('[data-key="altText"]').value;
   });
+  renderCaseCompletion();
 }
 
 function renderCaseMediaCenter() {
@@ -1370,6 +1429,7 @@ function renderCaseMediaCenter() {
   const uploadedRows = caseCenterState.newFiles.map((item, index) => `<div class="case-media-row" draggable="true" data-case-drag="new" data-new-index="${index}"><span class="drag-handle">拖拽</span>${casePreviewMarkup(item)}<div class="case-media-fields"><label class="field">阶段<select data-key="imageType">${caseOptionMarkup(caseCenterState.imageTypes, item.imageType, (value) => caseStageLabels[value] || value)}</select></label><label class="field">说明<input data-key="caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label><label class="field">ALT<input data-key="altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label></div><button class="icon-command" type="button" data-case-new-remove aria-label="移除">×</button></div>`);
   const selectedRows = caseCenterState.selectedMedia.map((item, index) => `<div class="case-media-row" draggable="true" data-case-drag="selected" data-selected-media-index="${index}"><span class="drag-handle">拖拽</span>${casePreviewMarkup(item)}<div class="case-media-fields"><label class="field">阶段<select data-key="imageType">${caseOptionMarkup(caseCenterState.imageTypes, item.imageType, (value) => caseStageLabels[value] || value)}</select></label><label class="field">说明<input data-key="caption" value="${escapeHtml(item.caption || "")}" maxlength="240"></label><label class="field">ALT<input data-key="altText" value="${escapeHtml(item.altText || "")}" maxlength="240"></label></div><button class="icon-command" type="button" data-case-selected-remove aria-label="移除">×</button></div>`);
   document.getElementById("caseNewMedia").innerHTML = [...uploadedRows, ...selectedRows].join("");
+  renderCaseCompletion();
 }
 
 function openCaseCenterEditor(item = null) {
@@ -1403,6 +1463,7 @@ function openCaseCenterEditor(item = null) {
   document.getElementById("casePermanentDeleteButton").hidden = !item || item.status !== "trash";
   caseMessage("");
   renderCaseMediaCenter();
+  renderCaseCompletion();
   renderCaseListCenter();
 }
 
@@ -1413,8 +1474,10 @@ async function loadCaseCenter() {
     caseCenterState.categories = data.categories;
     caseCenterState.imageTypes = data.imageTypes;
     document.getElementById("caseCategoryFilter").innerHTML = '<option value="">All categories</option>' + caseOptionMarkup(data.categories);
-    renderCaseListCenter();
     const params = new URLSearchParams(location.search);
+    const requestedStatus = params.get("status");
+    if (requestedStatus) document.getElementById("caseStatusFilter").value = requestedStatus;
+    renderCaseListCenter();
     const requested = params.get("case");
     if (requested) {
       const found = caseCenterState.cases.find((item) => item.id === requested);
@@ -1459,6 +1522,15 @@ async function saveCaseCenter(statusOverride) {
   syncCaseMediaInputs();
   if (!form.reportValidity()) return null;
   const isPublishing = (statusOverride || form.elements.status.value) === "published" && caseCenterState.current?.status !== "published";
+  if ((statusOverride || form.elements.status.value) === "published") {
+    const completion = getCaseCompletion();
+    const missing = completion.checks.filter(([, , passed]) => !passed).map(([, label]) => label);
+    if (missing.length) {
+      caseMessage(`发布前请补齐：${missing.join("、")}。`, "error");
+      document.querySelector('[data-case-tab="related"]')?.click();
+      return null;
+    }
+  }
   if (isPublishing && !confirm("发布前请确认不包含患者姓名、病历号、正脸或其他未经授权的身份信息。")) return null;
   const formData = new FormData();
   formData.append("case", JSON.stringify(serializeCaseCenter(statusOverride)));
@@ -1503,12 +1575,21 @@ document.getElementById("caseCenterEditor").elements.galleryImages.addEventListe
   caseCenterState.newFiles = [...event.target.files].map((file) => ({ file, preview: URL.createObjectURL(file), caption: "", altText: "", imageType: "Other", mediaType: file.type.startsWith("video/") ? "video" : "image", contentType: file.type }));
   renderCaseMediaCenter();
 });
+document.getElementById("caseCenterEditor").addEventListener("input", (event) => {
+  if (event.target.closest("#caseExistingMedia") || event.target.closest("#caseNewMedia")) return;
+  renderCaseCompletion();
+});
+document.getElementById("caseCenterEditor").addEventListener("change", (event) => {
+  if (event.target.closest("#caseExistingMedia") || event.target.closest("#caseNewMedia")) return;
+  renderCaseCompletion();
+});
 document.getElementById("caseChooseMediaButton")?.addEventListener("click", () => openCaseMediaPicker());
 document.getElementById("caseExistingMedia").addEventListener("input", syncCaseMediaInputs);
 document.getElementById("caseNewMedia").addEventListener("input", syncCaseMediaInputs);
 document.getElementById("caseExistingMedia").addEventListener("click", (event) => {
   const row = event.target.closest("[data-existing-id]");
   if (!row || !event.target.closest("[data-case-media-remove]")) return;
+  if (!confirm("确定移除这张案例图片？保存后才会正式生效。")) return;
   syncCaseMediaInputs();
   caseCenterState.existing = caseCenterState.existing.filter((item) => item.id !== row.dataset.existingId);
   renderCaseMediaCenter();
@@ -1517,11 +1598,13 @@ document.getElementById("caseNewMedia").addEventListener("click", (event) => {
   const row = event.target.closest("[data-new-index]");
   const selectedRow = event.target.closest("[data-selected-media-index]");
   if (row && event.target.closest("[data-case-new-remove]")) {
+    if (!confirm("确定移除这个待上传素材？")) return;
     const index = Number(row.dataset.newIndex);
     URL.revokeObjectURL(caseCenterState.newFiles[index].preview);
     caseCenterState.newFiles.splice(index, 1);
   }
   if (selectedRow && event.target.closest("[data-case-selected-remove]")) {
+    if (!confirm("确定移除这个已选择素材？")) return;
     caseCenterState.selectedMedia.splice(Number(selectedRow.dataset.selectedMediaIndex), 1);
   }
   if (!row && !selectedRow) return;
