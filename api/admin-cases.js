@@ -11,6 +11,8 @@ const {
   listRecords,
   makeId,
   mediaImage,
+  mergeExistingImageMetadata,
+  normalizeImageMetadata,
   normalizeFields,
   restoreRecord,
   saveRecord,
@@ -75,8 +77,9 @@ function safeJson(value, fallback) {
 function adminRecord(record) {
   return {
     ...record,
-    images: record.images.map(({ pathname, contentType, ...image }) => ({
+    images: record.images.map(({ pathname, contentType, ...image }, index) => ({
       ...image,
+      ...normalizeImageMetadata(image, image, index),
       url: `/api/case-image?caseId=${encodeURIComponent(record.id)}&imageId=${encodeURIComponent(image.id)}`
     }))
   };
@@ -108,20 +111,9 @@ async function writeCase(req, isUpdate) {
     publishedAt: fieldsNormalized.status === "published" ? (current?.publishedAt || now) : null
   };
 
-  const keepIds = new Set(existing.map((item) => item.id));
+  const keepIds = new Set(existing.map((item) => String(item.id || "")));
   if (current) {
-    for (const oldImage of current.images) {
-      const incoming = existing.find((item) => item.id === oldImage.id);
-      if (!incoming) continue;
-      record.images.push({
-        ...oldImage,
-        caption: String(incoming.caption || "").trim().slice(0, 240),
-        altText: String(incoming.altText || "").trim().slice(0, 240),
-        imageType: IMAGE_TYPES.includes(incoming.imageType) ? incoming.imageType : "Other",
-        sortOrder: Number(incoming.sortOrder) || 0,
-        isCover: Boolean(incoming.isCover)
-      });
-    }
+    record.images.push(...mergeExistingImageMetadata(current.images, existing));
   }
 
   const coverFile = files.find((file) => file.field === "coverImage");

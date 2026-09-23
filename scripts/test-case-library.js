@@ -1,7 +1,7 @@
 const assert = require("assert");
 const crypto = require("crypto");
 const { createSession, isAdmin, pbkdf2Hex, PBKDF2_ITERATIONS, verifyPassword, verifySession } = require("../lib/case-auth");
-const { CATEGORIES, IMAGE_TYPES, duplicateRecordData, normalizeFields, validateRecord } = require("../lib/case-store");
+const { CATEGORIES, IMAGE_TYPES, duplicateRecordData, getRecord, mergeExistingImageMetadata, normalizeFields, normalizeImageMetadata, saveRecord, validateRecord } = require("../lib/case-store");
 const { CANONICAL_CASE_SLUG, canonicalPublicRecords, canonicalSlugFor, normalizePublicCase } = require("../lib/public-cases");
 
 const password = "test-admin-password";
@@ -47,6 +47,65 @@ assert.equal(normalized.featured, true);
 assert.deepEqual(normalized.tags, ["zirconia", "MUA", "zirconia"]);
 assert.equal(IMAGE_TYPES.includes("QC"), true);
 assert.equal(IMAGE_TYPES.includes("Ti-base"), true);
+
+const originalImages = [
+  { id: "IMG-COVER", pathname: "cover.webp", caption: "Cover", altText: "Original cover ALT", imageType: "Final", sortOrder: -1, isCover: true },
+  { id: "IMG-GALLERY", pathname: "gallery.webp", caption: "Old caption", altText: "Old ALT", imageType: "Design", sortOrder: 4, isCover: false }
+];
+const mergedImages = mergeExistingImageMetadata(originalImages, [
+  { id: "IMG-COVER", caption: "Updated cover", altText: "Updated cover ALT", imageType: "Final", sortOrder: -1, isCover: true },
+  { id: "IMG-GALLERY", caption: "Updated caption", altText: "Six ultra-thin anterior veneers after precision verification", imageType: "QC", sortOrder: 1, isCover: false }
+]);
+assert.equal(mergedImages.length, 2);
+assert.equal(mergedImages[1].altText, "Six ultra-thin anterior veneers after precision verification");
+assert.equal(mergedImages[1].caption, "Updated caption");
+assert.equal(mergedImages[1].imageType, "QC");
+assert.equal(mergedImages[1].sortOrder, 1);
+assert.equal(mergedImages[1].isCover, false);
+assert.equal(mergedImages[1].pathname, "gallery.webp");
+const legacyMetadata = normalizeImageMetadata({ caption: "Legacy" }, { altText: "Preserved ALT", imageType: "Design", sortOrder: 3, isCover: false });
+assert.equal(legacyMetadata.altText, "Preserved ALT");
+assert.equal(legacyMetadata.imageType, "Design");
+assert.equal(legacyMetadata.sortOrder, 3);
+assert.equal(legacyMetadata.isCover, false);
+const clearedMetadata = normalizeImageMetadata({ altText: "" }, { altText: "Old ALT" });
+assert.equal(clearedMetadata.altText, "");
+
+const storedObjects = new Map();
+globalThis.__YZH_CF_ENV = {
+  MEDIA_BUCKET: {
+    async put(key, value) { storedObjects.set(key, Buffer.from(value)); },
+    async get(key) {
+      const value = storedObjects.get(key);
+      return value ? { body: new Blob([value]).stream(), size: value.length, httpMetadata: { contentType: "application/json" } } : null;
+    },
+    async list({ prefix = "" } = {}) {
+      return { objects: [...storedObjects.entries()].filter(([key]) => key.startsWith(prefix)).map(([key, value]) => ({ key, size: value.length })), truncated: false };
+    },
+    async head(key) { return storedObjects.has(key) ? { key } : null; },
+    async delete(keys) { for (const key of Array.isArray(keys) ? keys : [keys]) storedObjects.delete(key); }
+  }
+};
+process.env.STORAGE_BACKEND = "r2";
+process.env.R2_BUCKET_NAME = "unit-test-case-media";
+const roundTripRecord = {
+  ...normalized,
+  id: "CASE-ALT-ROUNDTRIP",
+  slug: "alt-roundtrip",
+  status: "draft",
+  images: mergedImages,
+  createdAt: "2026-09-23T00:00:00.000Z",
+  updatedAt: "2026-09-23T00:00:00.000Z",
+  publishedAt: null
+};
+await saveRecord(roundTripRecord);
+const reloadedRecord = await getRecord(roundTripRecord.id);
+assert.equal(reloadedRecord.status, "draft");
+assert.equal(reloadedRecord.images[1].altText, "Six ultra-thin anterior veneers after precision verification");
+assert.equal(reloadedRecord.images[1].caption, "Updated caption");
+assert.equal(reloadedRecord.images[1].imageType, "QC");
+assert.equal(reloadedRecord.images[1].sortOrder, 1);
+assert.equal(reloadedRecord.images[1].isCover, false);
 
 assert.doesNotThrow(() => validateRecord({
   ...normalized,
