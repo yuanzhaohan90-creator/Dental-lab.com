@@ -51,12 +51,7 @@ async function invoke(request, env, handler) {
 }
 
 function videoUnsupported(request) {
-  const hostname = new URL(request.url).hostname;
-  const isPreview = hostname.includes("yzh-dental-lab-preview") || hostname.endsWith(".workers.dev");
-  if (isPreview) {
-    return Response.json({ ok: true, deferred: true, status: "pending", message: "Video uploaded successfully. Conversion is unavailable in Preview and will run in Production." }, { status: 202, headers: { "Cache-Control": "no-store" } });
-  }
-  return Response.json({ ok: false, error: "Automatic HEVC/MOV video conversion is unavailable in this runtime." }, { status: 501, headers: { "Cache-Control": "no-store" } });
+  return Response.json({ ok: false, error: "Cloudflare Stream is required for HEVC/MOV conversion and is not configured for this Worker." }, { status: 503, headers: { "Cache-Control": "no-store" } });
 }
 
 const publicPages = { "/": "home", "/implant-restorations": "implant", "/full-arch-all-on-x": "fullArch", "/cases": "cases", "/crown-bridge": "crownBridge", "/services/crown-bridge": "crownBridge", "/digital-dentistry": "digital", "/services/digital-workflow": "digital", "/exocad-design-outsourcing": "exocadOutsourcing", "/all-on-x-full-arch-cad-design": "allOnXCadDesign", "/implant-bar-design": "implantBarDesign", "/custom-abutment-implant-design": "customAbutmentDesign", "/surgical-guide-design-outsourcing": "surgicalGuideOutsourcing", "/surgical-guides": "surgicalGuides", "/about": "about", "/submit-case": "submitCase", "/privacy-policy": "privacy", "/terms": "terms" };

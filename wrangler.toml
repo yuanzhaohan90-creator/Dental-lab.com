@@ -10,6 +10,7 @@ R2_BUCKET_NAME = "yzh-dental-lab-media-preview"
 SITE_URL = "https://yzh-dental-lab-preview.yzh-dental-lab-site.workers.dev"
 CASE_NOTIFICATION_EMAIL = "yzhdentallab@gmail.com"
 CASE_FROM_EMAIL = "cases@yzhdentallab.com"
+CLOUDFLARE_ACCOUNT_ID = "1ce2d7630efa6c5c079bf1e6905af7f8"
 
 [assets]
 directory = "./cloudflare-public"

@@ -85,6 +85,7 @@ function journeyNav(item, gallery) {
 function galleryMedia(item, image) {
   const alt = escapeHtml(image.caption || `${item.title} additional view`);
   if (image.mediaType === "video" || String(image.contentType || "").startsWith("video/")) {
+    if (image.streamPlayerUrl) return `<iframe src="${escapeHtml(image.streamPlayerUrl)}" title="${alt}" loading="lazy" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
     return `<video src="${escapeHtml(image.url)}" controls playsinline preload="metadata" aria-label="${alt}"></video>`;
   }
   return `<a class="case-media-zoom" href="${escapeHtml(image.url)}" target="_blank" rel="noopener" aria-label="Open larger image"><img src="${escapeHtml(image.url)}" alt="${alt}" width="1200" height="900" loading="lazy" decoding="async"></a>`;
