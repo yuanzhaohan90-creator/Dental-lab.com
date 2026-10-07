@@ -75,6 +75,12 @@ for (const phrase of requiredOperationalCopy) {
   else pass(`operations copy/hook present: ${phrase}`);
 }
 
+if (adminJs.includes("...(value.caseIds || []), ...frontendIds")) {
+  fail("featured editor must not reinsert removed live cases into the saved draft");
+} else {
+  pass("featured editor preserves removals from the saved draft");
+}
+
 const requiredSeoCopy = [
   "SEO 标题",
   "页面描述",
