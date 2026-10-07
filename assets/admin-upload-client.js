@@ -2,6 +2,7 @@ const MAX_MEDIA_BYTES = 100 * 1024 * 1024;
 const UPLOAD_VIDEO_ACCEPT = "video/*,.mp4,.mov,.m4v";
 const VIDEO_EXTENSIONS = new Set(["mp4", "mov", "m4v"]);
 const VIDEO_MIME_TYPES = new Set(["video/mp4", "video/quicktime", "video/x-m4v"]);
+const INCOMPATIBLE_VIDEO_MESSAGE = "This iPhone video uses HEVC/MOV format. Please convert it to H.264 MP4 before uploading.";
 
 function extensionOf(name) {
   return String(name || "").split(".").pop().toLowerCase();
@@ -88,6 +89,7 @@ async function inspectMedia(file) {
   if (!isIsoBmff(bytes)) throw new Error("Unable to read this video file.");
   const format = extension === "mov" || mime === "video/quicktime" ? "MOV" : extension === "m4v" || mime === "video/x-m4v" ? "M4V" : "MP4";
   const codec = detectCodec(bytes);
+  if (format !== "MP4" || codec !== "h264") throw new Error(INCOMPATIBLE_VIDEO_MESSAGE);
   const metadata = await readVideoMetadata(file);
   return { mediaType: "video", format, codec, contentType: canonicalVideoType(extension, mime), ...metadata, webCompatible: format === "MP4" && codec === "h264" };
 }
@@ -99,6 +101,7 @@ function normalizedUploadFile(file, inspection) {
 
 function friendlyUploadError(error) {
   const message = String(error?.message || "");
+  if (message === INCOMPATIBLE_VIDEO_MESSAGE) return new Error(message);
   if (/too large|maximum|100\\s*mb/i.test(message)) return new Error("Video is larger than 100 MB.");
   if (/network|fetch|abort|interrupted/i.test(message)) return new Error("Upload interrupted. Please try again.");
   if (/content.?type|unsupported|invalid/i.test(message)) return new Error("Unable to read this video file.");

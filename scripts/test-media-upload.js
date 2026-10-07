@@ -53,6 +53,9 @@ assert.equal(objectStore.includes("BLOB_READ_WRITE_TOKEN"), false);
 assert.match(objectStore, /Unsupported storage backend/);
 assert.match(uploadClient, /XMLHttpRequest/);
 assert.match(uploadClient, /request\.open\("PUT", uploadUrl\)/);
+assert.match(uploadClient, /This iPhone video uses HEVC\/MOV format\. Please convert it to H\.264 MP4 before uploading\./);
+assert.match(uploadClient, /format !== "MP4" \|\| codec !== "h264"/);
+assert.match(uploadClient, /throw new Error\(INCOMPATIBLE_VIDEO_MESSAGE\)/);
 assert.match(adminApi, /createR2UploadUrl/);
 
 console.log("media upload compatibility tests passed");

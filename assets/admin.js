@@ -481,8 +481,7 @@ async function processVideoAndWait(media, onStatus, retry = false) {
   onStatus?.("视频已上传，正在生成 H.264 网页播放版本和海报...");
   const started = await api("/api/video-process", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: media.id, action: retry ? "retry" : "start" }) });
   if (started.deferred) {
-    onStatus?.(started.message || "视频原文件已保存，Preview 暂不转换，Production 将继续处理。");
-    return { ...media, processingStatus: "processing", processingMessage: started.message || media.processingMessage };
+    throw new Error("This video is not web-compatible. Please replace it with an H.264 MP4 file.");
   }
   for (let attempt = 0; attempt < 105; attempt += 1) {
     await delay(3000);
@@ -510,7 +509,7 @@ mediaFileInput.accept = `image/jpeg,image/png,image/webp,image/svg+xml,${VIDEO_A
 mediaFileInput.multiple = true;
 const mediaFileInfo = document.createElement("div");
 mediaFileInfo.className = "admin-file-selection";
-mediaFileInfo.innerHTML = "<strong>最大视频大小：100 MB</strong><span>支持 MP4、MOV、M4V，包括从 iPhone 照片中选择的视频。</span>";
+mediaFileInfo.innerHTML = "<strong>Recommended: MP4 (H.264 + AAC)</strong><span>Maximum video size: 100 MB<br>iPhone HEVC/MOV videos should be converted to MP4 before upload.</span>";
 mediaFileInput.closest("label").append(mediaFileInfo);
 mediaFileInput.addEventListener("change", async () => {
   const files = [...(mediaFileInput.files || [])];
@@ -530,9 +529,11 @@ mediaFileInput.addEventListener("change", async () => {
     const info = await window.yzhInspectMedia(file);
     mediaFileInfo.innerHTML = `<strong>${escapeHtml(file.name)}</strong><span>${formatBytes(file.size)}${info.mediaType === "video" ? ` · ${escapeHtml(info.format)} · ${formatDuration(info.duration)}` : ""}</span>`;
   } catch (error) {
-    mediaFileInfo.innerHTML = `<strong>${escapeHtml(file.name)}</strong><span class="error">${escapeHtml(error.message)}</span>`;
+    mediaFileInput.value = "";
+    mediaFileInfo.innerHTML = `<strong>${escapeHtml(error.message)}</strong><button class="btn btn-secondary" type="button" data-choose-another-video>Choose Another Video</button>`;
   }
 });
+mediaFileInfo.addEventListener("click", (event) => { if (event.target.closest("[data-choose-another-video]")) mediaFileInput.click(); });
 
 mediaUploadForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -561,7 +562,7 @@ mediaUploadForm.addEventListener("submit", async (event) => {
       }
     }
     showMessage(message, failed.length ? `${files.length - failed.length} 个成功，${failed.length} 个失败，可重试失败文件。` : "批量上传完成，媒体已进入媒体库。", failed.length ? "error" : "success");
-    form.reset(); progress.hidden = true; progress.querySelector("span").style.width = "0"; mediaFileInfo.innerHTML = "<strong>最大视频大小：100 MB</strong><span>支持 MP4、MOV、M4V，包括从 iPhone 照片中选择的视频。</span>"; await loadMedia();
+    form.reset(); progress.hidden = true; progress.querySelector("span").style.width = "0"; mediaFileInfo.innerHTML = "<strong>Recommended: MP4 (H.264 + AAC)</strong><span>Maximum video size: 100 MB<br>iPhone HEVC/MOV videos should be converted to MP4 before upload.</span>"; await loadMedia();
   } catch (error) { progress.hidden = true; showMessage(message, error.message || "上传中断，请重试。", "error"); await loadMedia(); }
 });
 
@@ -1724,9 +1725,23 @@ document.getElementById("caseDuplicateButton").addEventListener("click", async (
 document.getElementById("caseTrashButton").addEventListener("click", async () => { if (!caseCenterState.current || !confirm("将这个案例移入回收站？")) return; try { await api(`/api/admin-cases?action=trash&id=${encodeURIComponent(caseCenterState.current.id)}`, { method: "POST" }); await loadCaseCenter(); openCaseCenterEditor(caseCenterState.cases.find((item) => item.id === caseCenterState.current?.id)); } catch (error) { caseMessage(error.message, "error"); } });
 document.getElementById("caseRestoreButton").addEventListener("click", async () => { if (!caseCenterState.current) return; try { await api(`/api/admin-cases?action=restore&id=${encodeURIComponent(caseCenterState.current.id)}`, { method: "POST" }); await loadCaseCenter(); openCaseCenterEditor(caseCenterState.cases.find((item) => item.id === caseCenterState.current?.id)); } catch (error) { caseMessage(error.message, "error"); } });
 document.getElementById("casePermanentDeleteButton").addEventListener("click", async () => { if (!caseCenterState.current || !confirm("永久删除这个案例和它不再被引用的专属媒体？此操作无法撤销。")) return; try { await api(`/api/admin-cases?id=${encodeURIComponent(caseCenterState.current.id)}`, { method: "DELETE" }); document.getElementById("caseCenterEditor").hidden = true; caseCenterState.current = null; await loadCaseCenter(); } catch (error) { caseMessage(error.message, "error"); } });
-document.getElementById("caseCenterEditor").elements.galleryImages.addEventListener("change", (event) => {
+document.getElementById("caseCenterEditor").elements.galleryImages.addEventListener("change", async (event) => {
   caseCenterState.newFiles.forEach((entry) => URL.revokeObjectURL(entry.preview));
-  caseCenterState.newFiles = [...event.target.files].map((file) => ({ file, preview: URL.createObjectURL(file), caption: "", altText: "", imageType: "Other", mediaType: file.type.startsWith("video/") ? "video" : "image", contentType: file.type }));
+  const accepted = [];
+  for (const file of [...event.target.files]) {
+    try {
+      const inspection = await window.yzhInspectMedia(file);
+      accepted.push({ file, preview: URL.createObjectURL(file), caption: "", altText: "", imageType: "Other", mediaType: inspection.mediaType, contentType: inspection.contentType });
+    } catch (error) {
+      accepted.forEach((entry) => URL.revokeObjectURL(entry.preview));
+      event.target.value = "";
+      caseCenterState.newFiles = [];
+      caseMessage(error.message, "error");
+      renderCaseMediaCenter();
+      return;
+    }
+  }
+  caseCenterState.newFiles = accepted;
   renderCaseMediaCenter();
 });
 document.getElementById("caseCenterEditor").addEventListener("input", (event) => {
