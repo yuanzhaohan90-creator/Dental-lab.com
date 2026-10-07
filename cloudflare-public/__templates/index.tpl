@@ -13,7 +13,7 @@
 <meta property="og:description" content="Implant restorations, full-arch and CAD/CAM support for overseas dental laboratories and clinics.">
 <meta property="og:image" content="https://yzhdentallab.com/assets/real/hero-full-arch-premium-01.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/assets/site.css?v=homepage-v3-2">
+<link rel="stylesheet" href="/assets/site.css?v=featured-cases-responsive-1">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Organization","name":"YZH Dental Lab","url":"https://yzhdentallab.com/","email":"yzhdentallab@gmail.com","contactPoint":{"@type":"ContactPoint","contactType":"sales","email":"yzhdentallab@gmail.com","telephone":"+86-137-1473-0109","availableLanguage":["English","Chinese"]},"knowsAbout":["Digital dental lab China","Dental lab outsourcing China","Implant restorations","Full arch dental lab","All-on-X dental lab","Custom abutment dental lab","CAD/CAM dental laboratory"]}
 </script>

@@ -400,3 +400,19 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
   .case-filter{grid-template-columns:1fr;gap:8px}
   .case-filter button{width:100%}
 }
+
+/* Featured Cases responsive contract. Keep these rules last so the ID-level
+   desktop grid cannot override tablet and mobile layouts. */
+@media (min-width:761px) and (max-width:1060px){
+  #featured-cases .priority-case-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:760px){
+  #featured-cases .priority-case-grid{grid-template-columns:minmax(0,1fr);gap:20px}
+  #featured-cases .priority-case,
+  #featured-cases .priority-case>div,
+  #featured-cases .priority-case h3{min-width:0}
+  #featured-cases .priority-case{width:100%;max-width:none}
+  #featured-cases .priority-case h3{font-size:clamp(1.35rem,6vw,1.75rem);overflow-wrap:anywhere;word-break:normal}
+  #featured-cases .priority-case img,
+  #featured-cases .priority-case.large img{width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+}
