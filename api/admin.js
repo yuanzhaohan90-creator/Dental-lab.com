@@ -115,10 +115,10 @@ async function adminMedia(record, options = {}) {
       })
     : [];
   const mediaType = String(record.contentType || "").startsWith("video/") ? "video" : "image";
-  const posterUrl = record.streamPosterUrl || (record.posterMediaId
+  const posterUrl = record.posterMediaId
     ? `/api/admin?module=media-image&id=${encodeURIComponent(record.posterMediaId)}`
-    : record.posterPathname ? `/api/admin?module=media-image&id=${encodeURIComponent(record.id)}&variant=poster` : "");
-  return { ...record, pathname: undefined, originalPathname: undefined, playbackPathname: undefined, mediaType, url: record.streamPlayerUrl || `/api/admin?module=media-image&id=${encodeURIComponent(record.id)}`, posterUrl, processingStatus: record.processingStatus || "ready", usedIn };
+    : record.posterPathname ? `/api/admin?module=media-image&id=${encodeURIComponent(record.id)}&variant=poster` : "";
+  return { ...record, pathname: undefined, originalPathname: undefined, playbackPathname: undefined, mediaType, url: `/api/admin?module=media-image&id=${encodeURIComponent(record.id)}`, posterUrl, processingStatus: record.processingStatus || "ready", usedIn };
 }
 
 async function validateSelection(value) {
@@ -577,13 +577,6 @@ async function handleMediaImage(req, res) {
   const isVideo = String(record.contentType || "").startsWith("video/");
   const isReady = (record.processingStatus || "ready") === "ready";
   const posterRequest = query(req, "variant") === "poster";
-  const originalRequest = query(req, "variant") === "original";
-  if (isVideo && isReady && record.streamPlaybackUrl && !posterRequest && !originalRequest) {
-    res.statusCode = 302;
-    res.setHeader("Location", record.streamPlaybackUrl);
-    res.setHeader("Cache-Control", "no-store");
-    return res.end();
-  }
   if (posterRequest && !record.posterPathname) {
     res.statusCode = 404;
     return res.end("Poster not found");
@@ -592,9 +585,7 @@ async function handleMediaImage(req, res) {
     res.statusCode = 425;
     return res.end("Video is still being prepared for web playback");
   }
-  const pathname = originalRequest
-    ? (record.originalPathname || record.pathname)
-    : posterRequest
+  const pathname = posterRequest
     ? record.posterPathname
     : isVideo ? (record.playbackPathname || (isReady ? record.pathname : record.originalPathname || record.pathname)) : record.pathname;
   const { get } = await storageClient();

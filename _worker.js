@@ -8,7 +8,6 @@ import downloadCaseFile from "./api/download-case-file.js";
 import publicPage from "./api/public-page.js";
 import seoStatic from "./api/seo-static.js";
 import submitCase from "./api/submit-case.js";
-import videoProcessWorker from "./api/video-process-worker.js";
 import { Readable, Writable } from "node:stream";
 
 const handlers = { "/api/admin-auth": adminAuth, "/api/admin": admin, "/api/admin-cases": adminCases, "/api/case-image": caseImage, "/api/case-page": casePage, "/api/cases": cases, "/api/download-case-file": downloadCaseFile, "/api/public-page": publicPage, "/api/submit-case": submitCase, "/robots.txt": seoStatic, "/sitemap.xml": seoStatic };
@@ -47,7 +46,7 @@ function makeNodeResponse() {
 
 async function invoke(request, env, handler) {
   globalThis.__YZH_CF_ENV = env;
-  for (const name of ["STORAGE_BACKEND", "R2_ENDPOINT", "R2_BUCKET_NAME", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_SESSION_TOKEN", "CASE_ADMIN_PASSWORD_HASH", "CASE_SESSION_SECRET", "CASE_DOWNLOAD_SECRET", "CASE_NOTIFICATION_EMAIL", "CASE_FROM_EMAIL", "RESEND_API_KEY", "SITE_URL", "CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_STREAM_API_TOKEN"]) {
+  for (const name of ["STORAGE_BACKEND", "R2_ENDPOINT", "R2_BUCKET_NAME", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_SESSION_TOKEN", "CASE_ADMIN_PASSWORD_HASH", "CASE_SESSION_SECRET", "CASE_DOWNLOAD_SECRET", "CASE_NOTIFICATION_EMAIL", "CASE_FROM_EMAIL", "RESEND_API_KEY", "SITE_URL"]) {
     if (env[name] !== undefined) process.env[name] = String(env[name]);
   }
   const nodeRequest = makeNodeRequest(request);
@@ -55,6 +54,15 @@ async function invoke(request, env, handler) {
   await handler(nodeRequest, nodeResponse);
   await nodeResponse._finishPromise;
   return nodeResponse._response();
+}
+
+function videoUnsupported(request) {
+  const hostname = new URL(request.url).hostname;
+  const isPreview = hostname.includes("yzh-dental-lab-preview") || hostname.endsWith(".workers.dev");
+  if (isPreview) {
+    return Response.json({ ok: true, deferred: true, status: "pending", message: "Video uploaded successfully. Conversion is unavailable in Preview and will run in Production." }, { status: 202, headers: { "Cache-Control": "no-store" } });
+  }
+  return Response.json({ ok: false, error: "Automatic HEVC/MOV video conversion is unavailable in this runtime." }, { status: 501, headers: { "Cache-Control": "no-store" } });
 }
 
 const publicPages = { "/": "home", "/services": "services", "/workflow": "workflow", "/services/implant": "implant", "/implant-restorations": "implant", "/services/full-arch": "fullArch", "/full-arch-all-on-x": "fullArch", "/cases": "cases", "/services/crown-bridge": "crownBridge", "/crown-bridge": "crownBridge", "/services/digital-workflow": "digital", "/digital-dentistry": "digital", "/services/design-only": "designOnly", "/services/surgical-guide": "surgicalGuides", "/exocad-design-outsourcing": "exocadOutsourcing", "/all-on-x-full-arch-cad-design": "allOnXCadDesign", "/implant-bar-design": "implantBarDesign", "/custom-abutment-implant-design": "customAbutmentDesign", "/surgical-guide-design-outsourcing": "surgicalGuideOutsourcing", "/surgical-guides": "surgicalGuides", "/about": "about", "/submit-case": "submitCase", "/privacy-policy": "privacy", "/privacy": "privacy", "/terms": "terms" };
@@ -129,7 +137,7 @@ export default {
     const url = new URL(request.url);
     if (url.hostname === "www.yzhdentallab.com") return Response.redirect(`https://yzhdentallab.com${url.pathname}${url.search}`, 301);
     const handler = handlers[url.pathname];
-    if (url.pathname === "/api/video-process") return invoke(request, env, videoProcessWorker);
+    if (url.pathname === "/api/video-process") return videoUnsupported(request);
     if (handler) return invoke(request, env, handler);
     if (permanentRedirects[url.pathname]) return Response.redirect(new URL(permanentRedirects[url.pathname], url), 308);
     if (publicPages[url.pathname]) {

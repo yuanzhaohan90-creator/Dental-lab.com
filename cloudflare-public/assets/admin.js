@@ -397,7 +397,6 @@ async function loadMedia() {
 }
 
 function mediaPreview(item, className = "") {
-  if (item.mediaType === "video" && item.processingStatus === "ready" && item.streamPlayerUrl) return `<iframe class="${className}" src="${escapeHtml(item.streamPlayerUrl)}" title="${escapeHtml(item.displayName || "Video preview")}" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
   if (item.mediaType === "video" && item.posterUrl) return `<img class="${className}" src="${item.posterUrl}" alt="${escapeHtml(item.displayName || "Video poster")}">`;
   if (item.mediaType === "video" && item.processingStatus !== "ready") return `<div class="admin-video-placeholder ${className}"><strong>${escapeHtml(item.format || "Video")}</strong><span>${escapeHtml(processingLabels[item.processingStatus] || "处理中")}</span></div>`;
   if (item.mediaType === "video") return `<video class="${className}" src="${item.url}" muted playsinline preload="metadata"></video>`;
@@ -481,9 +480,12 @@ async function processVideoAndWait(media, onStatus, retry = false) {
   if (media.mediaType !== "video" || media.processingStatus === "ready") return media;
   onStatus?.("视频已上传，正在生成 H.264 网页播放版本和海报...");
   const started = await api("/api/video-process", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: media.id, action: retry ? "retry" : "start" }) });
+  if (started.deferred) {
+    onStatus?.(started.message || "视频原文件已保存，Preview 暂不转换，Production 将继续处理。");
+    return { ...media, processingStatus: "processing", processingMessage: started.message || media.processingMessage };
+  }
   for (let attempt = 0; attempt < 105; attempt += 1) {
     await delay(3000);
-    await api("/api/video-process", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: media.id, action: "status" }) });
     const data = await api("/api/admin?module=media");
     const current = data.media.find((item) => item.id === media.id);
     if (!current) throw new Error("视频记录不存在，请刷新媒体库。");
