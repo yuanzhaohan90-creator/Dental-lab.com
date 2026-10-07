@@ -50,8 +50,13 @@ async function invoke(request, env, handler) {
   return nodeResponse._response();
 }
 
-function videoUnsupported() {
-  return Response.json({ ok: false, error: "Automatic HEVC/MOV video conversion is not supported in Cloudflare Preview yet. Upload an H.264/AAC MP4 for playback." }, { status: 501, headers: { "Cache-Control": "no-store" } });
+function videoUnsupported(request) {
+  const hostname = new URL(request.url).hostname;
+  const isPreview = hostname.includes("yzh-dental-lab-preview") || hostname.endsWith(".workers.dev");
+  if (isPreview) {
+    return Response.json({ ok: true, deferred: true, status: "pending", message: "Video uploaded successfully. Conversion is unavailable in Preview and will run in Production." }, { status: 202, headers: { "Cache-Control": "no-store" } });
+  }
+  return Response.json({ ok: false, error: "Automatic HEVC/MOV video conversion is unavailable in this runtime." }, { status: 501, headers: { "Cache-Control": "no-store" } });
 }
 
 const publicPages = { "/": "home", "/implant-restorations": "implant", "/full-arch-all-on-x": "fullArch", "/cases": "cases", "/crown-bridge": "crownBridge", "/services/crown-bridge": "crownBridge", "/digital-dentistry": "digital", "/services/digital-workflow": "digital", "/exocad-design-outsourcing": "exocadOutsourcing", "/all-on-x-full-arch-cad-design": "allOnXCadDesign", "/implant-bar-design": "implantBarDesign", "/custom-abutment-implant-design": "customAbutmentDesign", "/surgical-guide-design-outsourcing": "surgicalGuideOutsourcing", "/surgical-guides": "surgicalGuides", "/about": "about", "/submit-case": "submitCase", "/privacy-policy": "privacy", "/terms": "terms" };
@@ -69,7 +74,7 @@ export default {
     const url = new URL(request.url);
     if (url.hostname === "www.yzhdentallab.com") return Response.redirect(`https://yzhdentallab.com${url.pathname}${url.search}`, 301);
     const handler = handlers[url.pathname];
-    if (url.pathname === "/api/video-process") return videoUnsupported();
+    if (url.pathname === "/api/video-process") return videoUnsupported(request);
     if (handler) return invoke(request, env, handler);
     if (publicPages[url.pathname]) return invoke(routedRequest(request, "/api/public-page", { page: publicPages[url.pathname] }), env, publicPage);
     if (url.pathname.startsWith("/cases/") && url.pathname.length > "/cases/".length) return invoke(routedRequest(request, "/api/case-page", { slug: decodeURIComponent(url.pathname.slice("/cases/".length)) }), env, casePage);

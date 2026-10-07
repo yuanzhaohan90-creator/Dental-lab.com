@@ -169,7 +169,17 @@ async function syncFeaturedCases(ids) {
 
 async function homepageData(config) {
   const cases = await listRecords();
-  return { config, publishedCases: cases.filter((item) => item.status === "published").map((item) => publicRecord(item)) };
+  const publishedCases = cases.filter((item) => item.status === "published").map((item) => publicRecord(item));
+  const publishedIds = config?.published?.selectedWork?.caseIds || [];
+  const frontendFeaturedCases = cases
+    .filter((item) => item.status === "published" && item.featured)
+    .sort((left, right) => {
+      const leftIndex = publishedIds.indexOf(left.id);
+      const rightIndex = publishedIds.indexOf(right.id);
+      return (leftIndex === -1 ? 999 : leftIndex) - (rightIndex === -1 ? 999 : rightIndex);
+    })
+    .map((item) => publicRecord(item));
+  return { config, publishedCases, frontendFeaturedCases };
 }
 
 async function mediaUrl(id, fallback) {

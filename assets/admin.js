@@ -479,7 +479,11 @@ function delay(milliseconds) {
 async function processVideoAndWait(media, onStatus, retry = false) {
   if (media.mediaType !== "video" || media.processingStatus === "ready") return media;
   onStatus?.("视频已上传，正在生成 H.264 网页播放版本和海报...");
-  await api("/api/video-process", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: media.id, action: retry ? "retry" : "start" }) });
+  const started = await api("/api/video-process", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: media.id, action: retry ? "retry" : "start" }) });
+  if (started.deferred) {
+    onStatus?.(started.message || "视频原文件已保存，Preview 暂不转换，Production 将继续处理。");
+    return { ...media, processingStatus: "processing", processingMessage: started.message || media.processingMessage };
+  }
   for (let attempt = 0; attempt < 105; attempt += 1) {
     await delay(3000);
     const data = await api("/api/admin?module=media");
@@ -848,8 +852,9 @@ function textFields(path, value, section) {
 }
 
 function selectedWorkEditor(value) {
-  const ids = [...(value.caseIds || [])]; while (ids.length < 9) ids.push("");
-  return `<div class="selected-work-editor">${ids.map((id, index) => { const item = pageData.publishedCases.find((entry) => entry.id === id); return `<div class="selected-work-slot" data-case-index="${index}">${item?.coverImage ? `<img src="${item.coverImage.url}" alt="${escapeHtml(item.title)}">` : '<div class="case-slot-empty">空位置</div>'}<label class="field">位置 ${index + 1}<select data-case-slot="${index}">${caseOptions(id)}</select></label><div class="slot-actions"><button type="button" class="btn btn-secondary" data-case-move="up" ${index === 0 ? "disabled" : ""}>上移</button><button type="button" class="btn btn-secondary" data-case-move="down" ${index === 8 ? "disabled" : ""}>下移</button></div></div>`; }).join("")}</div>`;
+  const frontendIds = (pageData.frontendFeaturedCases || []).map((item) => item.id);
+  const ids = [...new Set([...(value.caseIds || []), ...frontendIds])]; while (ids.length < 9) ids.push("");
+  return `<p class="admin-helper">当前公开首页精选：${frontendIds.length} 个。这里直接管理原始 Case 和首页排序，不会创建副本。</p><div class="selected-work-editor">${ids.slice(0, 9).map((id, index) => { const item = pageData.publishedCases.find((entry) => entry.id === id); return `<div class="selected-work-slot" data-case-index="${index}">${item?.coverImage ? `<img src="${item.coverImage.url}" alt="${escapeHtml(item.title)}">` : '<div class="case-slot-empty">空位置</div>'}<label class="field">位置 ${index + 1}<select data-case-slot="${index}">${caseOptions(id)}</select></label>${item ? `<div class="featured-case-meta"><strong>${escapeHtml(item.title)}</strong><small>Case ID: ${escapeHtml(item.id)}</small><small>${item.status === "published" ? "已发布" : "草稿"} · Featured: ${item.featured ? "ON" : "OFF"}</small><small>更新：${escapeHtml(formatDate(item.updatedAt))}</small></div>` : ""}<div class="slot-actions">${item ? `<a class="btn btn-secondary" href="/admin/cases?case=${encodeURIComponent(item.id)}">编辑案例</a><a class="btn btn-secondary" href="/cases/${encodeURIComponent(item.slug)}" target="_blank" rel="noopener">查看案例</a><button type="button" class="btn btn-secondary" data-case-remove>移除精选</button>` : ""}<button type="button" class="btn btn-secondary" data-case-move="up" ${index === 0 ? "disabled" : ""}>上移</button><button type="button" class="btn btn-secondary" data-case-move="down" ${index === 8 ? "disabled" : ""}>下移</button></div></div>`; }).join("")}</div>`;
 }
 
 function workflowEditor(value, section) {
@@ -1066,6 +1071,13 @@ document.getElementById("pageSections").addEventListener("click", (event) => {
     const ids = [...pageData.config.draft.selectedWork.caseIds]; while (ids.length < 9) ids.push("");
     [ids[index], ids[next]] = [ids[next], ids[index]];
     pageData.config.draft.selectedWork.caseIds = ids.filter(Boolean);
+    renderPageEditor();
+  }
+  const removeFeatured = event.target.closest("[data-case-remove]");
+  if (removeFeatured) {
+    pageData.config.draft = collectPageDraft();
+    const index = Number(removeFeatured.closest("[data-case-index]").dataset.caseIndex);
+    pageData.config.draft.selectedWork.caseIds.splice(index, 1);
     renderPageEditor();
   }
   const add = event.target.closest("[data-collection-add]");
