@@ -854,8 +854,18 @@ function textFields(path, value, section) {
 
 function selectedWorkEditor(value) {
   const frontendIds = (pageData.frontendFeaturedCases || []).map((item) => item.id);
-  const ids = [...new Set(value.caseIds || [])]; while (ids.length < 9) ids.push("");
-  return `<p class="admin-helper">当前公开首页精选：${frontendIds.length} 个。这里直接管理原始 Case 和首页排序，不会创建副本。</p><div class="selected-work-editor">${ids.slice(0, 9).map((id, index) => { const item = pageData.publishedCases.find((entry) => entry.id === id); return `<div class="selected-work-slot" data-case-index="${index}">${item?.coverImage ? `<img src="${item.coverImage.url}" alt="${escapeHtml(item.title)}">` : '<div class="case-slot-empty">空位置</div>'}<label class="field">位置 ${index + 1}<select data-case-slot="${index}">${caseOptions(id)}</select></label>${item ? `<div class="featured-case-meta"><strong>${escapeHtml(item.title)}</strong><small>Case ID: ${escapeHtml(item.id)}</small><small>${item.status === "published" ? "已发布" : "草稿"} · Featured: ${item.featured ? "ON" : "OFF"}</small><small>更新：${escapeHtml(formatDate(item.updatedAt))}</small></div>` : ""}<div class="slot-actions">${item ? `<a class="btn btn-secondary" href="/admin/cases?case=${encodeURIComponent(item.id)}">编辑案例</a><a class="btn btn-secondary" href="/cases/${encodeURIComponent(item.slug)}" target="_blank" rel="noopener">查看案例</a><button type="button" class="btn btn-secondary" data-case-remove>移除精选</button>` : ""}<button type="button" class="btn btn-secondary" data-case-move="up" ${index === 0 ? "disabled" : ""}>上移</button><button type="button" class="btn btn-secondary" data-case-move="down" ${index === 8 ? "disabled" : ""}>下移</button></div></div>`; }).join("")}</div>`;
+  const configuredIds = [...new Set((value.caseIds || []).filter(Boolean))];
+  const effectiveIds = configuredIds.length ? configuredIds : frontendIds;
+  const ids = [...effectiveIds]; while (ids.length < 9) ids.push("");
+  const recovered = !configuredIds.length && frontendIds.length;
+  return `<p class="admin-helper">当前公开首页精选：${frontendIds.length} 个。这里直接管理原始 Case 和首页排序，不会创建副本。${recovered ? " 已从当前公开精选恢复排序；保存草稿后会写入页面配置。" : ""}</p><div class="selected-work-editor">${ids.slice(0, 9).map((id, index) => {
+    const item = pageData.publishedCases.find((entry) => entry.id === id);
+    let preview = '<div class="case-slot-empty">尚未选择案例</div>';
+    if (id && !item) preview = `<div class="case-slot-empty case-slot-warning"><strong>案例关联异常</strong><span>Case ID: ${escapeHtml(id)}</span><span>案例不存在或尚未发布，请重新选择。</span></div>`;
+    else if (item && !item.coverImage?.url) preview = `<div class="case-slot-empty case-slot-warning"><strong>案例缺少封面</strong><span>${escapeHtml(item.title)}</span><span>请进入案例管理选择封面后再保存。</span></div>`;
+    else if (item) preview = `<img src="${escapeHtml(item.coverImage.url)}" alt="${escapeHtml(item.title)}">`;
+    return `<div class="selected-work-slot" data-case-index="${index}">${preview}<label class="field">位置 ${index + 1}<select data-case-slot="${index}">${caseOptions(id)}</select></label>${item ? `<div class="featured-case-meta"><strong>${escapeHtml(item.title)}</strong><small>Case ID: ${escapeHtml(item.id)}</small><small>${item.status === "published" ? "已发布" : "草稿"} · Featured: ${item.featured ? "ON" : "OFF"}</small><small>更新：${escapeHtml(formatDate(item.updatedAt))}</small></div>` : ""}<div class="slot-actions">${item ? `<a class="btn btn-secondary" href="/admin/cases?case=${encodeURIComponent(item.id)}">编辑案例</a><a class="btn btn-secondary" href="/cases/${encodeURIComponent(item.slug)}" target="_blank" rel="noopener">查看案例</a><button type="button" class="btn btn-secondary" data-case-remove>移除精选</button>` : ""}<button type="button" class="btn btn-secondary" data-case-move="up" ${index === 0 ? "disabled" : ""}>上移</button><button type="button" class="btn btn-secondary" data-case-move="down" ${index === 8 ? "disabled" : ""}>下移</button></div></div>`;
+  }).join("")}</div>`;
 }
 
 function workflowEditor(value, section) {

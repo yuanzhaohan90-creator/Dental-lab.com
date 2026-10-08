@@ -81,6 +81,16 @@ if (adminJs.includes("...(value.caseIds || []), ...frontendIds")) {
   pass("featured editor preserves removals from the saved draft");
 }
 
+if (!adminJs.includes("const effectiveIds = configuredIds.length ? configuredIds : frontendIds")) {
+  fail("featured editor must recover public Featured cases when homepage ordering is empty");
+} else {
+  pass("featured editor recovers public Featured cases when homepage ordering is empty");
+}
+for (const diagnostic of ["案例关联异常", "案例缺少封面", "尚未选择案例"]) {
+  if (!adminJs.includes(diagnostic)) fail(`featured editor missing actionable state: ${diagnostic}`);
+  else pass(`featured editor actionable state present: ${diagnostic}`);
+}
+
 const requiredSeoCopy = [
   "SEO 标题",
   "页面描述",
