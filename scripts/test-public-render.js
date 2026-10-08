@@ -104,3 +104,26 @@ assert.match(fullArch, /href="\/cases\/owner-approved-full-arch-work"/);
 assert.doesNotMatch(fullArch, /data-featured-case="fullArch" hidden/);
 
 console.log("public SSR render tests passed");
+
+const { load } = require("cheerio");
+const portfolio = load(renderPublicPage("cases", { ...data, publishedCases: [featuredRecord] }));
+assert.equal(portfolio(`a[href='/cases/${featuredRecord.slug}']`).length, 1, "featured cases must not repeat in all cases");
+const about = load(renderPublicPage("about", {
+  ...data,
+  pages: { ...data.pages, about: { ...data.pages.about,
+    workflowSteps: [{ title: "New Item" }, { title: "Review", description: "Review records." }],
+    laboratoryGallery: [{ title: "Laboratory", media: {}, caption: "微信图片_20260101.jpg" }],
+    equipmentGallery: [], qualityCollection: []
+  } }
+}));
+assert.doesNotMatch(about("main").text(), /New Item|微信图片/);
+assert.equal(about("[data-manager-media]:empty").length, 0, "empty media boxes must be absent");
+const { renderCasePage } = require("../api/case-page");
+const detail = load(renderCasePage({ ...featuredRecord, images: [
+  { id: "cover", isCover: true, pathname: "cover.jpg", altText: "Cover" },
+  { id: "design", pathname: "design.jpg", imageType: "Design", altText: "Design" }
+] }, false, {}, []));
+assert.equal(detail("#case-design img").length, 1);
+assert.equal(detail("#case-gallery img").length, 0, "stage images must not repeat in gallery");
+assert.equal(JSON.parse(detail('script[type="application/ld+json"]').text())["@type"], "Article");
+console.log("public audit regression tests passed");

@@ -67,6 +67,12 @@ function videoUnsupported(request) {
 
 const publicPages = { "/": "home", "/services": "services", "/workflow": "workflow", "/services/implant": "implant", "/implant-restorations": "implant", "/services/full-arch": "fullArch", "/full-arch-all-on-x": "fullArch", "/cases": "cases", "/services/crown-bridge": "crownBridge", "/crown-bridge": "crownBridge", "/services/digital-workflow": "digital", "/digital-dentistry": "digital", "/services/design-only": "designOnly", "/services/surgical-guide": "surgicalGuides", "/exocad-design-outsourcing": "exocadOutsourcing", "/all-on-x-full-arch-cad-design": "allOnXCadDesign", "/implant-bar-design": "implantBarDesign", "/custom-abutment-implant-design": "customAbutmentDesign", "/surgical-guide-design-outsourcing": "surgicalGuideOutsourcing", "/surgical-guides": "surgicalGuides", "/about": "about", "/submit-case": "submitCase", "/privacy-policy": "privacy", "/privacy": "privacy", "/terms": "terms" };
 const permanentRedirects = {
+  "/implant-restorations": "/services/implant",
+  "/full-arch-all-on-x": "/services/full-arch",
+  "/crown-bridge": "/services/crown-bridge",
+  "/digital-dentistry": "/services/digital-workflow",
+  "/surgical-guides": "/services/surgical-guide",
+  "/privacy": "/privacy-policy",
   "/custom-abutment-implant-design": "/services/implant#custom-abutment",
   "/all-on-x-full-arch-cad-design": "/services/full-arch#cad-design",
   "/surgical-guide-design-outsourcing": "/services/surgical-guide"

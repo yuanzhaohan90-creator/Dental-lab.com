@@ -137,6 +137,15 @@ async function writeCase(req, isUpdate) {
       record.images.push(mediaImage(media, item, false));
     }
     record.images.sort((a, b) => a.sortOrder - b.sortOrder).forEach((image, index) => { image.sortOrder = image.isCover ? -1 : index; });
+    if (record.status === "published" && current?.status !== "published") {
+      const missing = [];
+      if (record.title.trim().split(/\s+/).length < 3) missing.push("专业案例标题（至少三个词）");
+      if (!(record.technicalSummary || record.caseOverview || record.shortNote)) missing.push("真实案例说明");
+      if (!(record.material || record.restorationType || record.implantSystem)) missing.push("修复体技术信息");
+      if (record.images.some((image) => !String(image.altText || "").trim())) missing.push("所有图片的 ALT");
+      if (!record.seoTitle || !record.metaDescription) missing.push("SEO 标题和描述");
+      if (missing.length) throw Object.assign(new Error(`发布前请补齐：${missing.join("、")}`), { statusCode: 400 });
+    }
     await saveRecord(record);
     if (record.status === "published") {
       await submitIndexNowSoon(caseUrl(record));

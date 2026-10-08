@@ -98,12 +98,15 @@ function render(record, preview, settings, allRecords = []) {
   const cover = item.coverImage;
   const canonical = `https://yzhdentallab.com/cases/${encodeURIComponent(item.slug)}`;
   const isCaseStudy = item.contentType === "case_study";
-  const description = (item.summary || `${item.title}, ${item.category} work by YZH Dental Lab.`).slice(0, 160);
+  const description = (record.metaDescription || item.technicalSummary || item.summary || item.title).slice(0, 160);
   const gallery = item.images.filter((image) => !image.isCover);
   const mediaByStage = (stage) => gallery.filter((image) => String(image.imageType || "").toLowerCase() === stage.toLowerCase());
-  const title = `${item.title} | ${item.category} | YZH Dental Lab`;
+  const titleBase = record.seoTitle || item.title;
+  const title = titleBase.length > 65 ? `${titleBase.slice(0, 62).replace(/\s+\S*$/, "")}…` : titleBase.includes("YZH Dental Lab") ? titleBase : `${titleBase} | YZH Dental Lab`;
   const previewBanner = preview ? `<div class="preview-banner">Private draft preview. This case is not public.</div>` : "";
-  const galleryHtml = gallery.length ? `<section class="section section-soft" id="case-gallery"><div class="wrap"><div class="section-head"><p class="eyebrow">Case Gallery</p><h2>Case Gallery</h2></div><div class="case-library-gallery">${gallery.map((image, index) => `<figure>${galleryMedia(item, image)}<figcaption><span>${escapeHtml(galleryLabel(image, index))}</span>${image.caption ? escapeHtml(image.caption) : ""}</figcaption></figure>`).join("")}</div></div></section>` : "";
+  const storyStages = new Set(["planning", "model", "design", "cad", "framework", "ti-base", "pmma", "try-in", "qc", "final"]);
+  const remainingGallery = gallery.filter((image) => !storyStages.has(String(image.imageType || "").toLowerCase()));
+  const galleryHtml = remainingGallery.length ? `<section class="section section-soft" id="case-gallery"><div class="wrap"><div class="section-head"><p class="eyebrow">Case Gallery</p><h2>Case Gallery</h2></div><div class="case-library-gallery">${remainingGallery.map((image, index) => `<figure>${galleryMedia(item, image)}<figcaption><span>${escapeHtml(galleryLabel(image, index))}</span>${image.caption ? escapeHtml(image.caption) : ""}</figcaption></figure>`).join("")}</div></div></section>` : "";
   const restorativeDetails = metaItems(item);
   const sections = [
     { id: "overview", label: "Case Story", html: textSection("overview", "Case Overview", "Case Overview", item.caseOverview || item.technicalSummary || item.summary) },
@@ -124,7 +127,8 @@ function render(record, preview, settings, allRecords = []) {
 <title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${canonical}">
 ${preview ? '<meta name="robots" content="noindex,nofollow">' : ""}<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="${escapeHtml(item.title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:type" content="article"><meta property="og:url" content="${canonical}">${cover ? `<meta property="og:image" content="https://yzhdentallab.com${escapeHtml(cover.url)}">` : ""}
-<link rel="preload" as="image" href="${cover ? escapeHtml(cover.url) : ""}" fetchpriority="high"><link rel="stylesheet" href="/assets/site.css?v=case-nav-1"></head><body>${previewBanner}
+<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@type": "Article", headline: item.title, description, url: canonical, image: item.images.map((image) => new URL(image.url, "https://yzhdentallab.com").href), ...(record.publishedAt ? { datePublished: record.publishedAt } : {}), ...(record.updatedAt ? { dateModified: record.updatedAt } : {}), author: { "@type": "Organization", name: "YZH Dental Lab" } }).replace(/</g, "\\u003c")}</script>
+<link rel="preload" as="image" href="${cover ? escapeHtml(cover.url) : ""}" fetchpriority="high"><link rel="stylesheet" href="/assets/site.css?v=public-qa-2"></head><body>${previewBanner}
 ${headerMarkup("cases", settings)}
 <main><section class="case-library-hero"><div class="wrap case-library-hero-grid"><div><p class="eyebrow">${isCaseStudy ? "Featured Case Study" : "Recent Work"} · ${escapeHtml(item.category)}</p><h1>${escapeHtml(item.title)}</h1>${item.summary ? `<p class="lead">${escapeHtml(item.summary)}</p>` : ""}${heroProofItems(item)}</div>${cover ? `<figure><a class="case-media-zoom" href="${escapeHtml(cover.url)}" target="_blank" rel="noopener" aria-label="Open larger image"><img src="${escapeHtml(cover.url)}" alt="${escapeHtml(item.title)}" width="1200" height="900" loading="eager" fetchpriority="high" decoding="async"></a><figcaption>${escapeHtml(cover.caption || "Final restoration")}</figcaption></figure>` : ""}</div></section>
 ${journeyNav(sections)}
