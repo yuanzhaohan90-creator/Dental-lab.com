@@ -7,7 +7,7 @@ async function main() {
   if (!new URL(base).hostname.startsWith("yzh-dental-lab-preview.")) throw new Error("Preview-only browser audit");
   const output = path.join(process.cwd(), "test-results", "public-audit");
   fs.mkdirSync(output, { recursive: true });
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ channel: "chrome", headless: true });
   const results = [];
   const context = await browser.newContext();
   const api = await context.request.get(`${base}/api/cases`);
@@ -18,14 +18,20 @@ async function main() {
     const page = await context.newPage();
     await page.setViewportSize({ width, height: 900 });
     for (const route of routes) {
+      console.log(`Browser audit ${width}px ${route}`);
       const errors = [];
       const onError = error => errors.push(error.message);
       page.on("pageerror", onError);
-      const response = await page.goto(`${base}${route}?qa=${Date.now()}`, { waitUntil: "networkidle", timeout: 60000 });
-      await page.evaluate(async () => {
-        for (let top = 0; top < document.body.scrollHeight; top += 700) { window.scrollTo(0, top); await new Promise(resolve => setTimeout(resolve, 70)); }
-        window.scrollTo(0, 0);
-      });
+      const response = await page.goto(`${base}${route}?qa=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 60000 });
+      await page.waitForTimeout(1200);
+      const height = await page.evaluate(() => document.body.scrollHeight);
+      for (let top = 0; top < height; top += 900) {
+        await page.evaluate(top => window.scrollTo({ top, behavior: "instant" }), top);
+        await page.waitForTimeout(70);
+      }
+      await page.waitForTimeout(1500);
+      await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+      await page.waitForTimeout(300);
       const state = await page.evaluate(() => ({
         overflow: document.documentElement.scrollWidth > innerWidth + 1,
         brokenImages: [...document.images].filter(image => image.offsetParent !== null && image.complete && !image.naturalWidth).map(image => image.src),

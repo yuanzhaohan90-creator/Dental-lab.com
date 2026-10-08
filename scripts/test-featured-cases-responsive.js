@@ -41,7 +41,7 @@ async function main() {
         const page = await browser.newPage({ viewport });
         const consoleErrors = [];
         page.on("console", (message) => { if (message.type() === "error") consoleErrors.push(message.text()); });
-        await page.setContent(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main><section id="featured-cases"><div class="wrap"><div class="priority-case-grid">${cards(count)}</div></div></section></main></body></html>`);
+        await page.setContent(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main><section id="featured-cases" class="home-v3-selected"><div class="wrap"><div class="priority-case-grid">${cards(count)}</div></div></section></main></body></html>`);
         const metrics = await page.evaluate(() => {
           const grid = document.querySelector("#featured-cases .priority-case-grid");
           const items = [...document.querySelectorAll("#featured-cases .priority-case")];
@@ -71,6 +71,7 @@ async function main() {
         assert.equal(metrics.columns, viewport.columns, `${count} cards at ${viewport.width}px use the wrong grid definition`);
         assert.ok(metrics.overflow <= 0, `${count} cards at ${viewport.width}px overflow horizontally by ${metrics.overflow}px`);
         for (const card of metrics.cards) {
+          if (count === 1) assert.ok(card.width >= metrics.gridWidth - 1, `single featured case must fill the grid at ${viewport.width}px`);
           if (viewport.width <= 760) assert.ok(card.width >= metrics.gridWidth - 1, `mobile card is not full width at ${viewport.width}px`);
           assert.ok(Math.abs(card.imageRatio - 4 / 3) < 0.02, `image ratio is not 4:3 at ${viewport.width}px`);
           assert.ok(card.titleVisible && card.labelVisible && card.descriptionVisible, `card content is clipped at ${viewport.width}px`);

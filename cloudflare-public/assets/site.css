@@ -56,6 +56,7 @@ h1{font-size:clamp(3.25rem,4.15vw,5.05rem);line-height:1.01;color:var(--ink);let
 .home-v3-section-head{max-width:920px;margin-left:auto;margin-right:auto;text-align:center}
 .home-v3-selected{padding-top:78px}
 .home-v3-selected .priority-case-grid>.priority-case:only-child{grid-column:1/-1;width:100%;max-width:none}
+@media(min-width:1061px){.home-v3-selected .priority-case-grid>.priority-case:only-child{grid-template-columns:1.2fr 1fr;grid-template-rows:1fr;align-items:center}}
 .home-v3-services .service-card{min-height:230px}
 .home-v3-proof{padding:84px 0}
 .home-v3-proof .section-head{margin-bottom:28px}
