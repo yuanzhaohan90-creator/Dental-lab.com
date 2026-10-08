@@ -2,7 +2,7 @@ const MAX_MEDIA_BYTES = 100 * 1024 * 1024;
 const UPLOAD_VIDEO_ACCEPT = "video/*,.mp4,.mov,.m4v";
 const VIDEO_EXTENSIONS = new Set(["mp4", "mov", "m4v"]);
 const VIDEO_MIME_TYPES = new Set(["video/mp4", "video/quicktime", "video/x-m4v"]);
-const INCOMPATIBLE_VIDEO_MESSAGE = "This iPhone video uses HEVC/MOV format. Please convert it to H.264 MP4 before uploading.";
+const INCOMPATIBLE_VIDEO_MESSAGE = "This iPhone video uses HEVC/H.265 encoding. Please convert it to H.264 MP4 before uploading.";
 
 function extensionOf(name) {
   return String(name || "").split(".").pop().toLowerCase();
@@ -26,6 +26,12 @@ function detectCodec(bytes) {
   if (/hvc1|hev1/.test(text)) return "hevc";
   if (/dvhe|dvh1/.test(text)) return "dolby-vision";
   if (/avc1|avc3/.test(text)) return "h264";
+  return "unknown";
+}
+
+function detectAudioCodec(bytes) {
+  const text = ascii(bytes);
+  if (/mp4a/.test(text)) return "aac";
   return "unknown";
 }
 
@@ -89,9 +95,12 @@ async function inspectMedia(file) {
   if (!isIsoBmff(bytes)) throw new Error("Unable to read this video file.");
   const format = extension === "mov" || mime === "video/quicktime" ? "MOV" : extension === "m4v" || mime === "video/x-m4v" ? "M4V" : "MP4";
   const codec = detectCodec(bytes);
-  if (format !== "MP4" || codec !== "h264") throw new Error(INCOMPATIBLE_VIDEO_MESSAGE);
+  const audioCodec = detectAudioCodec(bytes);
+  if (codec === "hevc" || codec === "dolby-vision") throw new Error(INCOMPATIBLE_VIDEO_MESSAGE);
   const metadata = await readVideoMetadata(file);
-  return { mediaType: "video", format, codec, contentType: canonicalVideoType(extension, mime), ...metadata, webCompatible: format === "MP4" && codec === "h264" };
+  const webCompatible = codec === "h264" || (codec === "unknown" && metadata.browserPlayable);
+  if (!webCompatible) throw new Error("Unable to confirm that this video uses H.264. Please convert it to H.264 MP4 before uploading.");
+  return { mediaType: "video", format, codec, audioCodec, contentType: canonicalVideoType(extension, mime), ...metadata, webCompatible };
 }
 
 function normalizedUploadFile(file, inspection) {
@@ -109,11 +118,13 @@ function friendlyUploadError(error) {
 }
 
 async function createR2Upload(file, inspection) {
+  const requestContentType = inspection.contentType || "application/octet-stream";
+  console.info("[media-upload-selection]", { fileName: file.name, fileType: file.type || "", fileSize: file.size, requestContentType, codec: inspection.codec || "unknown", format: inspection.format || "" });
   const response = await fetch("/api/admin?module=media-upload", {
     method: "POST",
     credentials: "same-origin",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ filename: file.name, size: file.size, contentType: inspection.contentType || "application/octet-stream" })
+    body: JSON.stringify({ filename: file.name, size: file.size, contentType: requestContentType, sourceFileType: file.type || "" })
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(payload.error || "Upload interrupted. Please try again.");

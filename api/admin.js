@@ -471,6 +471,12 @@ async function handleMediaUpload(req, res) {
   const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/svg+xml", "video/mp4", "video/quicktime", "video/x-m4v", "application/octet-stream"]);
   const contentType = String(body.contentType || "application/octet-stream").toLowerCase();
   if (!allowedTypes.has(contentType)) throw Object.assign(new Error("Unable to read this media file."), { statusCode: 400 });
+  console.info("[media-upload-request]", {
+    fileName: String(body.filename || "media").slice(0, 160),
+    fileType: String(body.sourceFileType || "").slice(0, 100),
+    fileSize: size,
+    requestContentType: contentType
+  });
   const safeName = String(body.filename || "media")
     .normalize("NFKD")
     .replace(/[^a-zA-Z0-9._-]+/g, "-")
@@ -520,6 +526,11 @@ async function handleMediaUploadPut(req, res) {
   if (!pathname.startsWith("admin/media/files/") || !tokenData) {
     return reply(res, 401, { ok: false, error: "Upload authorization expired. Please try again." });
   }
+  console.info("[media-upload-put]", {
+    pathname,
+    requestContentType: contentType,
+    contentLength: size
+  });
   const uploadBody = req.webBody || Readable.toWeb(req);
   await binding.put(pathname, uploadBody, { httpMetadata: { contentType: tokenData.contentType, cacheControl: "private, no-store" } });
   return reply(res, 200, { ok: true });

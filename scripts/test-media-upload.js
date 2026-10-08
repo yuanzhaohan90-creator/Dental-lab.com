@@ -12,16 +12,22 @@ function isoBmff(codec = "avc1") {
   ]);
 }
 
+function isoBmffWithAudio(codec = "avc1") {
+  return Buffer.concat([isoBmff(codec), Buffer.from("mp4a", "ascii")]);
+}
+
 const mp4 = validateMediaFile({ filename: "test landscape.mp4", contentType: "video/mp4", size: 1024, bytes: isoBmff("avc1") });
 assert.equal(mp4.mediaType, "video");
 assert.equal(mp4.format, "MP4");
 assert.equal(mp4.codec, "h264");
 assert.equal(mp4.webCompatible, true);
 
-const mov = validateMediaFile({ filename: "iPhone 标准视频.MOV", contentType: "video/quicktime", size: 2048, bytes: isoBmff("avc1") });
+const mov = validateMediaFile({ filename: "iPhone 标准视频.MOV", contentType: "video/quicktime", size: 2048, bytes: isoBmffWithAudio("avc1") });
 assert.equal(mov.format, "MOV");
 assert.equal(mov.contentType, "video/quicktime");
-assert.equal(mov.webCompatible, false);
+assert.equal(mov.codec, "h264");
+assert.equal(mov.audioCodec, "aac");
+assert.equal(mov.webCompatible, true);
 
 const hevc = validateMediaFile({ filename: "IMG_1234.MOV", contentType: "", size: 4096, bytes: isoBmff("hvc1") });
 assert.equal(hevc.codec, "hevc");
@@ -53,9 +59,14 @@ assert.equal(objectStore.includes("BLOB_READ_WRITE_TOKEN"), false);
 assert.match(objectStore, /Unsupported storage backend/);
 assert.match(uploadClient, /XMLHttpRequest/);
 assert.match(uploadClient, /request\.open\("PUT", uploadUrl\)/);
-assert.match(uploadClient, /This iPhone video uses HEVC\/MOV format\. Please convert it to H\.264 MP4 before uploading\./);
-assert.match(uploadClient, /format !== "MP4" \|\| codec !== "h264"/);
+assert.doesNotMatch(uploadClient, /const VIDEO_ACCEPT\s*=/);
+assert.match(uploadClient, /const UPLOAD_VIDEO_ACCEPT\s*=/);
+assert.match(uploadClient, /This iPhone video uses HEVC\/H\.265 encoding\. Please convert it to H\.264 MP4 before uploading\./);
+assert.doesNotMatch(uploadClient, /format !== "MP4"/);
+assert.match(uploadClient, /codec === "hevc" \|\| codec === "dolby-vision"/);
 assert.match(uploadClient, /throw new Error\(INCOMPATIBLE_VIDEO_MESSAGE\)/);
+assert.match(uploadClient, /\[media-upload-selection\]/);
+assert.match(adminApi, /\[media-upload-request\]/);
 assert.match(adminApi, /createR2UploadUrl/);
 
 console.log("media upload compatibility tests passed");

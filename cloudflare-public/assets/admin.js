@@ -509,7 +509,7 @@ mediaFileInput.accept = `image/jpeg,image/png,image/webp,image/svg+xml,${VIDEO_A
 mediaFileInput.multiple = true;
 const mediaFileInfo = document.createElement("div");
 mediaFileInfo.className = "admin-file-selection";
-mediaFileInfo.innerHTML = "<strong>Recommended: MP4 (H.264 + AAC)</strong><span>Maximum video size: 100 MB<br>iPhone HEVC/MOV videos should be converted to MP4 before upload.</span>";
+mediaFileInfo.innerHTML = "<strong>Recommended: MP4 (H.264 + AAC)</strong><span>Maximum video size: 100 MB<br>iPhone HEVC/H.265 videos should be converted to H.264 MP4 before upload. H.264 video selected from Photos is supported even when Safari labels it as MOV.</span>";
 mediaFileInput.closest("label").append(mediaFileInfo);
 mediaFileInput.addEventListener("change", async () => {
   const files = [...(mediaFileInput.files || [])];
@@ -562,7 +562,7 @@ mediaUploadForm.addEventListener("submit", async (event) => {
       }
     }
     showMessage(message, failed.length ? `${files.length - failed.length} 个成功，${failed.length} 个失败，可重试失败文件。` : "批量上传完成，媒体已进入媒体库。", failed.length ? "error" : "success");
-    form.reset(); progress.hidden = true; progress.querySelector("span").style.width = "0"; mediaFileInfo.innerHTML = "<strong>Recommended: MP4 (H.264 + AAC)</strong><span>Maximum video size: 100 MB<br>iPhone HEVC/MOV videos should be converted to MP4 before upload.</span>"; await loadMedia();
+    form.reset(); progress.hidden = true; progress.querySelector("span").style.width = "0"; mediaFileInfo.innerHTML = "<strong>Recommended: MP4 (H.264 + AAC)</strong><span>Maximum video size: 100 MB<br>iPhone HEVC/H.265 videos should be converted to H.264 MP4 before upload. H.264 video selected from Photos is supported even when Safari labels it as MOV.</span>"; await loadMedia();
   } catch (error) { progress.hidden = true; showMessage(message, error.message || "上传中断，请重试。", "error"); await loadMedia(); }
 });
 
