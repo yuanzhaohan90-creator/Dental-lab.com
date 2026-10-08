@@ -58,28 +58,20 @@ function galleryLabel(image, index) {
   return ["Detail View", "Smile View", "Additional View"][index] || "Additional View";
 }
 
-function textSection(eyebrow, title, value) {
+function textSection(id, eyebrow, title, value) {
   if (!value) return "";
-  return `<section class="section case-detail-section"><div class="wrap case-reading"><p class="eyebrow">${escapeHtml(eyebrow)}</p><h2>${escapeHtml(title)}</h2><div class="case-rich-text"><p>${paragraph(value)}</p></div></div></section>`;
+  return `<section class="section case-detail-section" id="case-${escapeHtml(id)}"><div class="wrap case-reading"><p class="eyebrow">${escapeHtml(eyebrow)}</p><h2>${escapeHtml(title)}</h2><div class="case-rich-text"><p>${paragraph(value)}</p></div></div></section>`;
 }
 
-function storySection(key, title, value, mediaItems = []) {
+function storySection(id, eyebrow, title, value, mediaItems = []) {
   if (!value && !mediaItems.length) return "";
   const media = mediaItems.length ? `<div class="case-stage-media">${mediaItems.map((image) => `<figure>${galleryMedia({ title }, image)}${image.caption ? `<figcaption>${escapeHtml(image.caption)}</figcaption>` : ""}</figure>`).join("")}</div>` : "";
-  return `<section class="section case-detail-stage" id="case-${escapeHtml(key)}"><div class="wrap case-stage-grid"><div><p class="eyebrow">${escapeHtml(key)}</p><h2>${escapeHtml(title)}</h2>${value ? `<div class="case-rich-text"><p>${paragraph(value)}</p></div>` : ""}</div>${media}</div></section>`;
+  return `<section class="section case-detail-stage" id="case-${escapeHtml(id)}"><div class="wrap case-stage-grid"><div><p class="eyebrow">${escapeHtml(eyebrow)}</p><h2>${escapeHtml(title)}</h2>${value ? `<div class="case-rich-text"><p>${paragraph(value)}</p></div>` : ""}</div>${media}</div></section>`;
 }
 
-function journeyNav(item, gallery) {
-  const stages = [
-    ["Challenge", item.challenge],
-    ["Planning", item.planning || item.recordsReceived || item.technicalReview || gallery.some((image) => image.imageType === "Model")],
-    ["Design", item.cadDesign || gallery.some((image) => image.imageType === "CAD")],
-    ["Framework", item.framework || item.provisional || gallery.some((image) => ["Framework", "Ti-base", "PMMA"].includes(image.imageType))],
-    ["Try-in", item.workflow || item.clinicalNotes || gallery.some((image) => image.imageType === "Try-in")],
-    ["Final", item.finalRestoration || item.technicalOutcome || gallery.some((image) => ["Final", "QC"].includes(image.imageType))]
-  ].filter(([, available]) => available);
+function journeyNav(stages) {
   if (!stages.length) return "";
-  return `<section class="case-journey-nav"><div class="wrap"><p class="eyebrow">Case Story</p><div>${stages.map(([label]) => `<a href="#case-${escapeHtml(label)}">${escapeHtml(label)}</a>`).join("")}</div></div></section>`;
+  return `<nav class="case-journey-nav" aria-label="Case sections"><div class="wrap"><p class="eyebrow">Case Story</p><div class="case-journey-links">${stages.map(({ id, label }) => `<a href="#case-${escapeHtml(id)}">${escapeHtml(label)}</a>`).join("")}</div></div></nav>`;
 }
 
 function galleryMedia(item, image) {
@@ -111,43 +103,35 @@ function render(record, preview, settings, allRecords = []) {
   const mediaByStage = (stage) => gallery.filter((image) => String(image.imageType || "").toLowerCase() === stage.toLowerCase());
   const title = `${item.title} | ${item.category} | YZH Dental Lab`;
   const previewBanner = preview ? `<div class="preview-banner">Private draft preview. This case is not public.</div>` : "";
-  const galleryHtml = gallery.length ? `<section class="section section-soft"><div class="wrap"><div class="section-head"><p class="eyebrow">Case Gallery</p><h2>Case Gallery</h2></div><div class="case-library-gallery">${gallery.map((image, index) => `<figure>${galleryMedia(item, image)}<figcaption><span>${escapeHtml(galleryLabel(image, index))}</span>${image.caption ? escapeHtml(image.caption) : ""}</figcaption></figure>`).join("")}</div></div></section>` : "";
-  const technicalConsiderations = [item.challenge, item.planning, item.technicalReview, item.cadDesign, item.framework, item.workflow, item.clinicalNotes]
-    .filter(Boolean)
-    .join("\n\n");
-  const qualityControl = [item.qc, item.technicalOutcome].filter(Boolean).join("\n\n");
-  const finalResult = [item.finalRestoration, item.result, item.shortNote].filter(Boolean).join("\n\n");
-  const detailedSections = [
-    textSection("Case Overview", "Case Overview", item.caseOverview || item.technicalSummary || item.summary),
-    textSection("Material", "Material", [item.material, item.implantSystem, item.platform, item.restorationType].filter(Boolean).join("\n")),
-    storySection("Technical Considerations", "Technical Considerations", technicalConsiderations, [
-      ...mediaByStage("Model"),
-      ...mediaByStage("CAD"),
-      ...mediaByStage("Framework"),
-      ...mediaByStage("Ti-base"),
-      ...mediaByStage("PMMA"),
-      ...mediaByStage("Try-in")
-    ]),
-    storySection("Quality Control", "Quality Control", qualityControl, mediaByStage("QC")),
-    textSection("Final Result", "Final Result", finalResult)
-  ].join("");
+  const galleryHtml = gallery.length ? `<section class="section section-soft" id="case-gallery"><div class="wrap"><div class="section-head"><p class="eyebrow">Case Gallery</p><h2>Case Gallery</h2></div><div class="case-library-gallery">${gallery.map((image, index) => `<figure>${galleryMedia(item, image)}<figcaption><span>${escapeHtml(galleryLabel(image, index))}</span>${image.caption ? escapeHtml(image.caption) : ""}</figcaption></figure>`).join("")}</div></div></section>` : "";
   const restorativeDetails = metaItems(item);
+  const sections = [
+    { id: "overview", label: "Case Story", html: textSection("overview", "Case Overview", "Case Overview", item.caseOverview || item.technicalSummary || item.summary) },
+    { id: "restorative-details", label: "Technical Details", html: restorativeDetails ? `<section class="section" id="case-restorative-details"><div class="wrap case-summary-layout"><div><p class="eyebrow">Restorative Details</p><h2>Restoration Technical Details</h2></div><dl class="case-specs">${restorativeDetails}</dl></div></section>` : "" },
+    { id: "challenge", label: "Challenge", html: storySection("challenge", "Challenge", "Challenge", item.challenge) },
+    { id: "planning", label: "Planning", html: storySection("planning", "Planning", "Planning", item.planning || item.recordsReceived || item.technicalReview, [...mediaByStage("Planning"), ...mediaByStage("Model")]) },
+    { id: "design", label: "Design", html: storySection("design", "Design", "Design", item.cadDesign, [...mediaByStage("Design"), ...mediaByStage("CAD")]) },
+    { id: "framework", label: "Framework", html: storySection("framework", "Framework", "Framework", item.framework || item.provisional, [...mediaByStage("Framework"), ...mediaByStage("Ti-base"), ...mediaByStage("PMMA")]) },
+    { id: "try-in", label: "Clinical Try-in", html: storySection("try-in", "Clinical Try-in", "Clinical Try-in", item.workflow || item.clinicalNotes, mediaByStage("Try-in")) },
+    { id: "quality-control", label: "Quality Control", html: storySection("quality-control", "Quality Control", "Quality Control", item.qc, mediaByStage("QC")) },
+    { id: "final", label: "Final Restoration", html: storySection("final", "Final Restoration", "Final Restoration", item.finalRestoration || item.technicalOutcome || item.result || item.shortNote, mediaByStage("Final")) },
+    { id: "gallery", label: "Case Gallery", html: galleryHtml }
+  ].filter((section) => section.html);
+  const detailedSections = sections.map((section) => section.html).join("");
   const related = relatedCaseCards(item, allRecords);
   return `<!DOCTYPE html>
 <html lang="en" data-server-rendered="true"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${canonical}">
 ${preview ? '<meta name="robots" content="noindex,nofollow">' : ""}<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="${escapeHtml(item.title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:type" content="article"><meta property="og:url" content="${canonical}">${cover ? `<meta property="og:image" content="https://yzhdentallab.com${escapeHtml(cover.url)}">` : ""}
-<link rel="preload" as="image" href="${cover ? escapeHtml(cover.url) : ""}" fetchpriority="high"><link rel="stylesheet" href="/assets/site.css?v=cases-v3-1"></head><body>${previewBanner}
+<link rel="preload" as="image" href="${cover ? escapeHtml(cover.url) : ""}" fetchpriority="high"><link rel="stylesheet" href="/assets/site.css?v=case-nav-1"></head><body>${previewBanner}
 ${headerMarkup("cases", settings)}
 <main><section class="case-library-hero"><div class="wrap case-library-hero-grid"><div><p class="eyebrow">${isCaseStudy ? "Featured Case Study" : "Recent Work"} · ${escapeHtml(item.category)}</p><h1>${escapeHtml(item.title)}</h1>${item.summary ? `<p class="lead">${escapeHtml(item.summary)}</p>` : ""}${heroProofItems(item)}</div>${cover ? `<figure><a class="case-media-zoom" href="${escapeHtml(cover.url)}" target="_blank" rel="noopener" aria-label="Open larger image"><img src="${escapeHtml(cover.url)}" alt="${escapeHtml(item.title)}" width="1200" height="900" loading="eager" fetchpriority="high" decoding="async"></a><figcaption>${escapeHtml(cover.caption || "Final restoration")}</figcaption></figure>` : ""}</div></section>
-${journeyNav(item, gallery)}
-${restorativeDetails ? `<section class="section"><div class="wrap case-summary-layout"><div><p class="eyebrow">Restorative Details</p><h2>Restorative details.</h2></div><dl class="case-specs">${restorativeDetails}</dl></div></section>` : ""}
+${journeyNav(sections)}
 ${detailedSections}
-${galleryHtml}
 ${related}
 <section class="section trial"><div class="wrap two-col"><div><p class="eyebrow">Technical Case Review</p><h2>Send a Similar Case</h2><p class="copy">Share the available files and restoration requirements. Our technical team will review the records before production.</p></div><div class="cta-panel"><a class="btn btn-primary" href="/submit-case">Send a Similar Case</a><a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a></div></div></section></main>
-${footerMarkup(settings)}<script src="/assets/site.js?v=cases-v3-1" defer></script></body></html>`;
+${footerMarkup(settings)}<script src="/assets/site.js?v=case-nav-1" defer></script></body></html>`;
 }
 
 module.exports = async function handler(req, res) {
@@ -186,3 +170,5 @@ module.exports = async function handler(req, res) {
     return res.end("<!doctype html><title>Case Library Unavailable</title><h1>Case library temporarily unavailable</h1>");
   }
 };
+
+module.exports.renderCasePage = render;

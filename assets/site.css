@@ -345,12 +345,14 @@ summary{font-weight:900;color:var(--ink);cursor:pointer}
 .case-proof-strip span{display:flex;flex-direction:column;gap:4px;padding:13px 14px;border:1px solid #c7d7e6;border-radius:8px;background:rgba(255,255,255,.78);color:var(--ink);font-size:14px}
 .case-proof-strip strong{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
 .case-journey-nav{position:sticky;top:72px;z-index:12;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 8px 22px rgba(16,42,67,.06)}
-.case-journey-nav .wrap{display:flex;align-items:center;gap:18px;padding-top:12px;padding-bottom:12px;overflow-x:auto}
+.case-journey-nav .wrap{display:flex;min-width:0;align-items:center;gap:18px;padding-top:12px;padding-bottom:12px;overflow:hidden}
 .case-journey-nav .eyebrow{margin:0;white-space:nowrap}
-.case-journey-nav div{display:flex;gap:8px}
+.case-journey-links{display:flex;min-width:0;max-width:100%;gap:8px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin}
 .case-journey-nav a{display:inline-flex;min-height:36px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:999px;color:var(--ink);font-weight:850;text-decoration:none;white-space:nowrap}
 .case-journey-nav a:hover,.case-journey-nav a:focus-visible{border-color:var(--blue);color:var(--blue);outline:none}
-@media(max-width:760px){.case-proof-strip{grid-template-columns:1fr}.case-journey-nav{top:64px}.case-journey-nav .wrap{align-items:flex-start;gap:10px}.case-journey-nav div{overflow-x:auto;padding-bottom:2px}}
+.case-journey-nav a.active,.case-journey-nav a[aria-current="location"]{border-color:var(--ink);background:var(--ink);color:#fff}
+[id^="case-"]{scroll-margin-top:146px}
+@media(max-width:760px){.case-proof-strip{grid-template-columns:1fr}.case-journey-nav{top:64px}.case-journey-nav .wrap{display:block;padding-top:10px;padding-bottom:10px}.case-journey-nav .eyebrow{margin-bottom:8px}.case-journey-links{width:100%;padding-bottom:4px}[id^="case-"]{scroll-margin-top:138px}}
 .case-library-skeleton{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;grid-column:1/-1}
 .case-library-skeleton span{display:block;min-height:420px;border:1px solid var(--line);border-radius:8px;background:linear-gradient(100deg,#eef5fa 30%,#f8fbfd 50%,#eef5fa 70%);background-size:220% 100%;animation:case-skeleton 1.4s ease-in-out infinite}
 @keyframes case-skeleton{to{background-position:-220% 0}}

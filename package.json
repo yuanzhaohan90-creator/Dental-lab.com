@@ -8,6 +8,7 @@
     "check": "node scripts/check-site.js",
     "test:submit-case": "node scripts/test-submit-case.js",
     "test:case-library": "node scripts/test-case-library.js",
+    "test:case-navigation": "node scripts/test-case-navigation.js",
     "test:public-render": "node scripts/test-public-render.js",
     "test:featured-cases": "node scripts/test-featured-cases-responsive.js",
     "test:admin": "node scripts/test-admin-v1.js",

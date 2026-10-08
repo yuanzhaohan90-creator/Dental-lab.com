@@ -441,6 +441,67 @@ const serverRendered = document.documentElement.dataset.serverRendered === "true
 bindCopyEmailActions();
 if (!serverRendered) applyPublicSiteData();
 
+function initCaseJourneyNavigation() {
+  const navigation = document.querySelector(".case-journey-nav");
+  if (!navigation) return;
+
+  const entries = [...navigation.querySelectorAll('a[href^="#case-"]')]
+    .map((link) => ({ link, section: document.getElementById(link.hash.slice(1)) }))
+    .filter((entry) => entry.section);
+
+  if (!entries.length) {
+    navigation.remove();
+    return;
+  }
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let activeLink = null;
+  let updateQueued = false;
+
+  function setActive(link, reveal = false) {
+    if (link === activeLink) return;
+    activeLink = link;
+    entries.forEach((entry) => {
+      const active = entry.link === link;
+      entry.link.classList.toggle("active", active);
+      if (active) entry.link.setAttribute("aria-current", "location");
+      else entry.link.removeAttribute("aria-current");
+    });
+    if (reveal) link.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "nearest", inline: "center" });
+  }
+
+  function updateActiveSection() {
+    const threshold = navigation.getBoundingClientRect().height + 96;
+    let current = entries[0];
+    entries.forEach((entry) => {
+      if (entry.section.getBoundingClientRect().top <= threshold) current = entry;
+    });
+    setActive(current.link, true);
+  }
+
+  entries.forEach((entry) => {
+    entry.link.addEventListener("click", (event) => {
+      event.preventDefault();
+      entry.section.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+      history.replaceState(null, "", entry.link.hash);
+      setActive(entry.link, true);
+    });
+  });
+
+  window.addEventListener("scroll", () => {
+    if (updateQueued) return;
+    updateQueued = true;
+    window.requestAnimationFrame(() => {
+      updateActiveSection();
+      updateQueued = false;
+    });
+  }, { passive: true });
+  window.addEventListener("resize", updateActiveSection);
+  updateActiveSection();
+}
+
+initCaseJourneyNavigation();
+
 const form = document.getElementById("caseForm");
 const statusBox = document.getElementById("formStatus");
 const allowedExtensions = new Set(["stl", "ply", "zip", "pdf", "jpg", "jpeg", "png"]);
