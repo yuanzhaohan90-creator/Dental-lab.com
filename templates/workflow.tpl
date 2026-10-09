@@ -12,7 +12,7 @@
 <meta property="og:title" content="Digital Dental Lab Workflow | YZH Dental Lab">
 <meta property="og:description" content="Submit files, confirm case requirements, review CAD and move through production, QC and delivery.">
 <meta property="og:image" content="https://yzhdentallab.com/assets/real/full-arch-cad-design-05.jpg">
-<link rel="stylesheet" href="/assets/site.css?v=public-v3-2">
+<link rel="stylesheet" href="/assets/site.css?v=953efb4c79c7">
 </head>
 <body>
 <header class="site-header"></header>
@@ -71,6 +71,6 @@
   </section>
 </main>
 <footer class="site-footer"></footer>
-<script src="/assets/site.js?v=public-v3-2" defer></script>
+<script src="/assets/site.js?v=e4e41b894695" defer></script>
 </body>
 </html>

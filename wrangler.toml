@@ -14,7 +14,7 @@ CASE_FROM_EMAIL = "cases@yzhdentallab.com"
 [assets]
 directory = "./cloudflare-public"
 binding = "ASSETS"
-run_worker_first = ["/admin", "/admin/*", "/api/*", "/cases/*", "/sitemap.xml", "/robots.txt", "/implant-restorations", "/full-arch-all-on-x", "/crown-bridge", "/digital-dentistry", "/surgical-guides", "/privacy"]
+run_worker_first = ["/admin", "/admin/*", "/api/*", "/cases/*", "/sitemap.xml", "/robots.txt", "/implant-restorations", "/full-arch-all-on-x", "/crown-bridge", "/digital-dentistry", "/surgical-guides", "/privacy", "/assets/site.js", "/assets/site.css", "/assets/cases.js", "/assets/admin.js"]
 html_handling = "none"
 
 [[r2_buckets]]

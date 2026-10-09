@@ -9,6 +9,7 @@ import publicPage from "./api/public-page.js";
 import seoStatic from "./api/seo-static.js";
 import submitCase from "./api/submit-case.js";
 import { Readable, Writable } from "node:stream";
+import assetVersions from "./lib/asset-versions.js";
 
 const handlers = { "/api/admin-auth": adminAuth, "/api/admin": admin, "/api/admin-cases": adminCases, "/api/case-image": caseImage, "/api/case-page": casePage, "/api/cases": cases, "/api/download-case-file": downloadCaseFile, "/api/public-page": publicPage, "/api/submit-case": submitCase, "/robots.txt": seoStatic, "/sitemap.xml": seoStatic };
 
@@ -148,6 +149,10 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.hostname === "www.yzhdentallab.com") return Response.redirect(`https://yzhdentallab.com${url.pathname}${url.search}`, 301);
+    const legacyAsset = assetVersions.legacyAssetPath(url);
+    if (legacyAsset && ["GET", "HEAD"].includes(request.method)) {
+      return env.ASSETS.fetch(routedRequest(request, legacyAsset));
+    }
     const handler = handlers[url.pathname];
     if (url.pathname === "/api/video-process") return videoUnsupported(request);
     if (handler) return invoke(request, env, handler);

@@ -6,6 +6,7 @@
     "postinstall": "node scripts/test-video-transcode.js",
     "start": "vercel dev",
     "check": "node scripts/check-site.js",
+    "test:asset-cache": "node scripts/test-asset-cache.js",
     "test:submit-case": "node scripts/test-submit-case.js",
     "test:case-library": "node scripts/test-case-library.js",
     "test:case-publication": "node scripts/test-case-publication-policy.js",

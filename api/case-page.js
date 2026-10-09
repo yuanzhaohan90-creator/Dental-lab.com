@@ -3,6 +3,7 @@ const { getRecordBySlug, listRecords, publicRecord } = require("../lib/case-stor
 const { DEFAULT_SETTINGS, getConfig, normalizeSettings } = require("../lib/admin-store");
 const { canonicalPublicRecords, canonicalSlugFor, isDuplicateCaseSlug, normalizePublicCase } = require("../lib/public-cases");
 const { footerMarkup, headerMarkup } = require("../lib/public-page-renderer");
+const { versionedAsset } = require("../lib/asset-versions");
 
 function query(req, key) {
   if (req.query && req.query[key]) return String(req.query[key]);
@@ -128,14 +129,14 @@ function render(record, preview, settings, allRecords = []) {
 ${preview ? '<meta name="robots" content="noindex,nofollow">' : ""}<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="${escapeHtml(item.title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:type" content="article"><meta property="og:url" content="${canonical}">${cover ? `<meta property="og:image" content="https://yzhdentallab.com${escapeHtml(cover.url)}">` : ""}
 <script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@type": "Article", headline: item.title, description, url: canonical, image: item.images.map((image) => new URL(image.url, "https://yzhdentallab.com").href), ...(record.publishedAt ? { datePublished: record.publishedAt } : {}), ...(record.updatedAt ? { dateModified: record.updatedAt } : {}), author: { "@type": "Organization", name: "YZH Dental Lab" } }).replace(/</g, "\\u003c")}</script>
-<link rel="preload" as="image" href="${cover ? escapeHtml(cover.url) : ""}" fetchpriority="high"><link rel="stylesheet" href="/assets/site.css?v=public-qa-2"></head><body>${previewBanner}
+<link rel="preload" as="image" href="${cover ? escapeHtml(cover.url) : ""}" fetchpriority="high"><link rel="stylesheet" href="${versionedAsset("/assets/site.css")}"></head><body>${previewBanner}
 ${headerMarkup("cases", settings)}
 <main><section class="case-library-hero"><div class="wrap case-library-hero-grid"><div><p class="eyebrow">${isCaseStudy ? "Featured Case Study" : "Recent Work"} · ${escapeHtml(item.category)}</p><h1>${escapeHtml(item.title)}</h1>${item.summary ? `<p class="lead">${escapeHtml(item.summary)}</p>` : ""}${heroProofItems(item)}</div>${cover ? `<figure><a class="case-media-zoom" href="${escapeHtml(cover.url)}" target="_blank" rel="noopener" aria-label="Open larger image"><img src="${escapeHtml(cover.url)}" alt="${escapeHtml(item.title)}" width="1200" height="900" loading="eager" fetchpriority="high" decoding="async"></a><figcaption>${escapeHtml(cover.caption || "Final restoration")}</figcaption></figure>` : ""}</div></section>
 ${journeyNav(sections)}
 ${detailedSections}
 ${related}
 <section class="section trial"><div class="wrap two-col"><div><p class="eyebrow">Technical Case Review</p><h2>Send a Similar Case</h2><p class="copy">Share the available files and restoration requirements. Our technical team will review the records before production.</p></div><div class="cta-panel"><a class="btn btn-primary" href="/submit-case">Send a Similar Case</a><a class="btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a></div></div></section></main>
-${footerMarkup(settings)}<script src="/assets/site.js?v=case-nav-1" defer></script></body></html>`;
+${footerMarkup(settings)}<script src="${versionedAsset("/assets/site.js")}" defer></script></body></html>`;
 }
 
 module.exports = async function handler(req, res) {

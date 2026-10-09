@@ -12,7 +12,7 @@
 <meta property="og:title" content="Dental Lab Services | YZH Dental Lab">
 <meta property="og:description" content="Focused dental laboratory support for implant, full-arch and digital restorative workflows.">
 <meta property="og:image" content="https://yzhdentallab.com/assets/real/hero-full-arch-premium-01.jpg">
-<link rel="stylesheet" href="/assets/site.css?v=public-v3-1">
+<link rel="stylesheet" href="/assets/site.css?v=953efb4c79c7">
 </head>
 <body>
 <header class="site-header"></header>
@@ -72,6 +72,6 @@
   </section>
 </main>
 <footer class="site-footer"></footer>
-<script src="/assets/site.js?v=public-v3-1" defer></script>
+<script src="/assets/site.js?v=e4e41b894695" defer></script>
 </body>
 </html>
