@@ -119,12 +119,18 @@ async function loadTemplates(request, env) {
 }
 
 async function adminShellResponse(request, env) {
-  let assetResponse = await env.ASSETS.fetch(routedRequest(request, "/admin-shell"));
-  if (!assetResponse.ok) assetResponse = await env.ASSETS.fetch(routedRequest(request, "/admin-shell.html"));
+  const assetRequest = routedRequest(request, "/admin-shell.html");
+  // A conditional 304 has no body and must not become an empty 200 shell.
+  assetRequest.headers.delete("If-None-Match");
+  assetRequest.headers.delete("If-Modified-Since");
+  const assetResponse = await env.ASSETS.fetch(assetRequest);
   const headers = new Headers(assetResponse.headers);
   headers.delete("Location");
+  headers.delete("ETag");
+  headers.delete("Last-Modified");
+  headers.set("Cache-Control", "no-store");
   return new Response(assetResponse.body, {
-    status: 200,
+    status: assetResponse.status,
     headers
   });
 }

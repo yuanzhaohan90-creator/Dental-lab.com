@@ -1,0 +1,28 @@
+name = "yzh-dental-lab-production"
+compatibility_date = "2026-09-03"
+compatibility_flags = ["nodejs_compat"]
+main = "_worker.js"
+
+routes = [
+  { pattern = "yzhdentallab.com/*", zone_name = "yzhdentallab.com" },
+  { pattern = "www.yzhdentallab.com/*", zone_name = "yzhdentallab.com" }
+]
+
+[vars]
+STORAGE_BACKEND = "r2"
+R2_ENDPOINT = "https://1ce2d7630efa6c5c079bf1e6905af7f8.r2.cloudflarestorage.com"
+R2_BUCKET_NAME = "yzh-dental-lab-media"
+SITE_URL = "https://yzhdentallab.com"
+CASE_NOTIFICATION_EMAIL = "yzhdentallab@gmail.com"
+CASE_FROM_EMAIL = "cases@yzhdentallab.com"
+
+[assets]
+directory = "./cloudflare-public"
+binding = "ASSETS"
+run_worker_first = ["/admin", "/admin/*", "/api/*", "/cases/*", "/sitemap.xml", "/robots.txt", "/implant-restorations", "/full-arch-all-on-x", "/crown-bridge", "/digital-dentistry", "/surgical-guides", "/privacy"]
+html_handling = "none"
+
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "yzh-dental-lab-media"
+preview_bucket_name = "yzh-dental-lab-media"

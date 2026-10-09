@@ -1561,6 +1561,9 @@ function renderCaseListCenter() {
 }
 
 function syncCaseMediaInputs() {
+  const cover = caseCenterState.existing.find((image) => image.isCover);
+  const coverAlt = document.getElementById("caseCenterEditor").elements.coverAltText;
+  if (cover && coverAlt) cover.altText = coverAlt.value;
   document.querySelectorAll("#caseExistingMedia [data-existing-id]").forEach((row, index) => {
     const item = caseCenterState.existing.find((entry) => entry.id === row.dataset.existingId);
     if (!item) return;
@@ -1605,6 +1608,7 @@ function openCaseCenterEditor(item = null) {
   caseCenterState.newFiles = [];
   caseCenterState.selectedMedia = [];
   form.reset();
+  if (form.elements.coverAltText) form.elements.coverAltText.value = item?.images?.find((image) => image.isCover)?.altText || "";
   form.hidden = false;
   document.getElementById("caseEditorMode").textContent = item ? "编辑案例" : "新增案例";
   document.getElementById("caseEditorTitle").textContent = item?.title || "未命名案例";
@@ -1656,6 +1660,7 @@ async function loadCaseCenter() {
 function serializeCaseCenter(statusOverride) {
   const form = document.getElementById("caseCenterEditor");
   return {
+    coverAltText: form.elements.coverAltText?.value || "",
     id: caseCenterState.current?.id,
     title: form.elements.title.value,
     category: form.elements.category.value,
@@ -1688,8 +1693,10 @@ async function saveCaseCenter(statusOverride) {
   if (!form.reportValidity()) return null;
   const isPublishing = (statusOverride || form.elements.status.value) === "published" && caseCenterState.current?.status !== "published";
   if ((statusOverride || form.elements.status.value) === "published") {
-    const completion = getCaseCompletion();
-    const missing = completion.checks.filter(([, , passed]) => !passed).map(([, label]) => label);
+    const input = { ...(caseCenterState.current || {}), ...serializeCaseCenter(statusOverride) };
+    input.images = caseMediaItemsForCompletion();
+    if (form.elements.coverImage.files[0]) input.images = [...input.images.filter((image) => !image.isCover), { isCover: true, altText: form.elements.coverAltText.value }];
+    const missing = CasePublicationPolicy.publicationErrors(input, caseCenterState.current);
     if (missing.length) {
       caseMessage(`发布前请补齐：${missing.join("、")}。`, "error");
       document.querySelector('[data-case-tab="related"]')?.click();

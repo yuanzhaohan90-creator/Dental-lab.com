@@ -22,6 +22,7 @@ const {
 } = require("../lib/case-store");
 const { getMedia } = require("../lib/admin-store");
 const { caseUrl, submitIndexNowSoon } = require("../lib/indexnow");
+const { hasPublicationHistory, publicationErrors } = require("../assets/case-publication-policy");
 
 const MAX_TOTAL_BYTES = 140 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -77,6 +78,7 @@ function safeJson(value, fallback) {
 function adminRecord(record) {
   return {
     ...record,
+    hasBeenPublished: hasPublicationHistory(record),
     images: record.images.map(({ pathname, contentType, ...image }, index) => ({
       ...image,
       ...normalizeImageMetadata(image, image, index),
@@ -99,7 +101,7 @@ async function writeCase(req, isUpdate) {
 
   const id = current ? current.id : makeId("CASE");
   const now = new Date().toISOString();
-  const fieldsNormalized = normalizeFields(input);
+  const fieldsNormalized = normalizeFields({ ...(current || {}), ...input });
   const requestedSlug = String(input.slug || current?.slug || "").trim();
   const record = {
     id,
@@ -108,7 +110,8 @@ async function writeCase(req, isUpdate) {
     images: [],
     createdAt: current ? current.createdAt : now,
     updatedAt: now,
-    publishedAt: fieldsNormalized.status === "published" ? (current?.publishedAt || now) : null
+    publishedAt: fieldsNormalized.status === "published" ? (current?.publishedAt || now) : null,
+    firstPublishedAt: hasPublicationHistory(current) ? (current.firstPublishedAt || current.publishedAt || current.updatedAt || now) : null
   };
 
   const keepIds = new Set(existing.map((item) => String(item.id || "")));
@@ -122,7 +125,7 @@ async function writeCase(req, isUpdate) {
   try {
     if (coverFile) {
       record.images.forEach((image) => { image.isCover = false; });
-      const cover = await storeImage(id, coverFile, { caption: input.coverCaption || "", imageType: "Final", sortOrder: -1 }, true);
+      const cover = await storeImage(id, coverFile, { caption: input.coverCaption || "", altText: input.coverAltText || "", imageType: "Final", sortOrder: -1 }, true);
       record.images.push(cover);
       uploadedPaths.push(cover.pathname);
     }
@@ -137,17 +140,10 @@ async function writeCase(req, isUpdate) {
       record.images.push(mediaImage(media, item, false));
     }
     record.images.sort((a, b) => a.sortOrder - b.sortOrder).forEach((image, index) => { image.sortOrder = image.isCover ? -1 : index; });
-    if (record.status === "published" && current?.status !== "published") {
-      const missing = [];
-      if (record.title.trim().split(/\s+/).length < 3) missing.push("专业案例标题（至少三个词）");
-      if (!(record.technicalSummary || record.caseOverview || record.shortNote)) missing.push("真实案例说明");
-      if (!(record.material || record.restorationType || record.implantSystem)) missing.push("修复体技术信息");
-      if (record.images.some((image) => !String(image.altText || "").trim())) missing.push("所有图片的 ALT");
-      if (!record.seoTitle || !record.metaDescription) missing.push("SEO 标题和描述");
-      if (missing.length) throw Object.assign(new Error(`发布前请补齐：${missing.join("、")}`), { statusCode: 400 });
-    }
+    const missing = publicationErrors(record, current);
+    if (missing.length) throw Object.assign(new Error(`发布前请补齐：${missing.join("、")}`), { statusCode: 400 });
     await saveRecord(record);
-    if (record.status === "published") {
+    if (record.status === "published" && new URL(process.env.SITE_URL || "https://yzhdentallab.com").hostname === "yzhdentallab.com") {
       await submitIndexNowSoon(caseUrl(record));
     }
   } catch (error) {
@@ -197,7 +193,7 @@ module.exports = async function handler(req, res) {
     if (req.method === "POST" && ["archive", "trash", "restore"].includes(query(req, "action"))) {
       const record = await getRecord(query(req, "id"));
       if (!record) return reply(res, 404, { ok: false, error: "Case not found." });
-      if (query(req, "action") === "archive") return reply(res, 200, { ok: true, case: adminRecord(await saveRecord({ ...record, status: "archived", featured: false, updatedAt: new Date().toISOString(), publishedAt: null })) });
+      if (query(req, "action") === "archive") return reply(res, 200, { ok: true, case: adminRecord(await saveRecord({ ...record, firstPublishedAt: hasPublicationHistory(record) ? (record.firstPublishedAt || record.publishedAt || record.updatedAt) : null, status: "archived", featured: false, updatedAt: new Date().toISOString(), publishedAt: null })) });
       if (query(req, "action") === "trash") return reply(res, 200, { ok: true, case: adminRecord(await trashRecord(record)) });
       return reply(res, 200, { ok: true, case: adminRecord(await restoreRecord(record)) });
     }
