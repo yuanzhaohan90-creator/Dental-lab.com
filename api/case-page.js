@@ -1,5 +1,5 @@
 const { isAdmin } = require("../lib/case-auth");
-const { getRecordBySlug, listRecords, publicRecord } = require("../lib/case-store");
+const { listRecords, publicRecord } = require("../lib/case-store");
 const { DEFAULT_SETTINGS, getConfig, normalizeSettings } = require("../lib/admin-store");
 const { canonicalPublicRecords, canonicalSlugFor, isDuplicateCaseSlug, normalizePublicCase } = require("../lib/public-cases");
 const { footerMarkup, headerMarkup } = require("../lib/public-page-renderer");
@@ -153,11 +153,11 @@ module.exports = async function handler(req, res) {
       res.setHeader("Cache-Control", "public, max-age=3600");
       return res.end();
     }
-    const [record, settingsConfig, records] = await Promise.all([
-      getRecordBySlug(requestedSlug),
+    const [settingsConfig, records] = await Promise.all([
       getConfig("settings", DEFAULT_SETTINGS),
       listRecords()
     ]);
+    const record = records.find((item) => item.slug === requestedSlug) || null;
     const preview = query(req, "preview") === "1";
     if (!record || (record.status !== "published" && !(preview && isAdmin(req)))) {
       res.statusCode = 404;

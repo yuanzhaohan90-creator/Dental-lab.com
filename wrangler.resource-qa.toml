@@ -1,0 +1,23 @@
+name = "yzh-dental-lab-resource-qa"
+main = "scripts/resource-qa-worker.js"
+compatibility_date = "2026-09-03"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[[rules]]
+type = "Text"
+globs = ["**/*.tpl", "**/cloudflare-public/assets/*.js", "**/*.css", "**/*.svg"]
+fallthrough = true
+
+[vars]
+STORAGE_BACKEND = "r2"
+R2_BUCKET_NAME = "yzh-dental-lab-resource-qa"
+SITE_URL = "https://yzh-dental-lab-resource-qa.yzh-dental-lab-site.workers.dev"
+
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "yzh-dental-lab-resource-qa"
+
+[observability]
+enabled = true
+head_sampling_rate = 1

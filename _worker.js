@@ -10,6 +10,7 @@ import seoStatic from "./api/seo-static.js";
 import submitCase from "./api/submit-case.js";
 import { Readable, Writable } from "node:stream";
 import assetVersions from "./lib/asset-versions.js";
+import cloudflareCaseImage from "./lib/cloudflare-case-image.js";
 
 const handlers = { "/api/admin-auth": adminAuth, "/api/admin": admin, "/api/admin-cases": adminCases, "/api/case-image": caseImage, "/api/case-page": casePage, "/api/cases": cases, "/api/download-case-file": downloadCaseFile, "/api/public-page": publicPage, "/api/submit-case": submitCase, "/robots.txt": seoStatic, "/sitemap.xml": seoStatic };
 
@@ -50,6 +51,7 @@ async function invoke(request, env, handler) {
   for (const name of ["STORAGE_BACKEND", "R2_ENDPOINT", "R2_BUCKET_NAME", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_SESSION_TOKEN", "CASE_ADMIN_PASSWORD_HASH", "CASE_SESSION_SECRET", "CASE_DOWNLOAD_SECRET", "CASE_NOTIFICATION_EMAIL", "CASE_FROM_EMAIL", "RESEND_API_KEY", "SITE_URL"]) {
     if (env[name] !== undefined) process.env[name] = String(env[name]);
   }
+  if (handler === caseImage && env.MEDIA_BUCKET) return cloudflareCaseImage(request, env);
   const nodeRequest = makeNodeRequest(request);
   const nodeResponse = makeNodeResponse();
   await handler(nodeRequest, nodeResponse);

@@ -12,6 +12,7 @@
     "test:case-publication": "node scripts/test-case-publication-policy.js",
     "test:cases:browser": "node scripts/test-cases-browser.js",
     "test:case-navigation": "node scripts/test-case-navigation.js",
+    "test:cloudflare-image": "node scripts/test-cloudflare-case-image.js",
     "test:public-render": "node scripts/test-public-render.js",
     "test:featured-cases": "node scripts/test-featured-cases-responsive.js",
     "test:admin": "node scripts/test-admin-v1.js",
