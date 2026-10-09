@@ -73,7 +73,7 @@ const cases = renderPublicPage("cases", {
 });
 assert.match(cases, /Anterior Zirconia Esthetic Restorations/);
 assert.match(cases, /data-category="Crown &amp; Bridge"/);
-assert.doesNotMatch(cases, /id="featuredCaseSection"/);
+assert.match(cases, /id="featuredCaseSection" hidden/);
 assert.doesNotMatch(cases, /Crown &amp; Bridge · Crown &amp; Bridge/);
 assert.match(cases, /Zirconia · A3/);
 
@@ -108,6 +108,12 @@ console.log("public SSR render tests passed");
 const { load } = require("cheerio");
 const portfolio = load(renderPublicPage("cases", { ...data, publishedCases: [featuredRecord] }));
 assert.equal(portfolio(`a[href='/cases/${featuredRecord.slug}']`).length, 1, "featured cases must not repeat in all cases");
+assert.equal(portfolio("#recentWorkSection[hidden] #recentWorkList").length, 1, "hidden lists must remain available to filters");
+const { select: selectPortfolio } = require("../assets/case-portfolio");
+const partition = selectPortfolio([featuredRecord, featuredRecord, { ...featuredRecord, id: "CASE-DRAFT", slug: "private-draft", status: "draft" }]);
+assert.equal(partition.published.length, 1, "duplicate IDs and drafts must be excluded by the shared portfolio model");
+assert.equal(selectPortfolio([featuredRecord], "No Matching Category").filtered.length, 0);
+assert.equal(portfolio("script[src*='case-portfolio.js']").length, 1, "browser must load the same partition policy before cases.js");
 const about = load(renderPublicPage("about", {
   ...data,
   pages: { ...data.pages, about: { ...data.pages.about,
