@@ -1,0 +1,4 @@
+cloudflare-public/assets/*.js text eol=lf
+cloudflare-public/assets/*.css text eol=lf
+cloudflare-public/assets/legacy/*.js text eol=lf
+cloudflare-public/assets/legacy/*.css text eol=lf

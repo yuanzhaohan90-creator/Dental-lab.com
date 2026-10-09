@@ -71,6 +71,6 @@
   </section>
 </main>
 <footer class="site-footer"></footer>
-<script src="/assets/site.js?v=e4e41b894695" defer></script>
+<script src="/assets/site.js?v=ad9ca969cf31" defer></script>
 </body>
 </html>
