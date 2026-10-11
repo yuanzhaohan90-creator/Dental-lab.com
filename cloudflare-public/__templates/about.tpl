@@ -11,8 +11,12 @@
 <meta property="og:description" content="A digital dental lab built for overseas partners.">
 <meta property="og:image" content="https://yzhdentallab.com/assets/real/hero-production-floor-03.jpg">
 <link rel="stylesheet" href="/assets/site.css?v=953efb4c79c7">
+<style>
+.about-page main video[src]{display:block;width:100%;height:auto;min-width:0;aspect-ratio:16/9;object-fit:contain!important;object-position:center!important;background:#0b1724}
+.about-page main [data-manager-media]:has(video){width:100%;min-width:0;aspect-ratio:16/9}
+</style>
 </head>
-<body>
+<body class="about-page">
 <header class="site-header"><div class="wrap nav"><a class="brand" href="/"><span class="brand-mark">Y</span><span>YZH Dental Lab</span></a><button class="menu-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button><nav class="navlinks" id="primaryNav"><a href="/">Home</a><a href="/services/implant">Implant</a><a href="/services/full-arch">Full Arch</a><a href="/cases">Cases</a><a href="/about">About</a><a href="/submit-case">Submit Case</a></nav><a class="btn btn-primary nav-cta" href="/submit-case">Send a Trial Case</a></div></header>
 <main>
   <section class="page-hero">
