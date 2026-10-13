@@ -14,6 +14,11 @@
 <meta property="og:image" content="https://yzhdentallab.com/assets/real/hero-full-arch-premium-01.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/assets/site.css?v=953efb4c79c7">
+<style>
+.home-v3-capability-row a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;box-sizing:border-box;padding:7px 12px;border:1px solid #c7d7e6;border-radius:999px;background:rgba(255,255,255,.72);color:#304c65;font-size:13px;font-weight:850;text-decoration:none;transition:border-color .18s ease,color .18s ease,background .18s ease,transform .18s ease}
+.home-v3-capability-row a:hover,.home-v3-capability-row a:focus-visible{border-color:#2d6f9f;color:#123d5a;background:#fff;transform:translateY(-1px)}
+.home-v3-capability-row a:focus-visible{outline:3px solid rgba(45,111,159,.22);outline-offset:2px}
+</style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Organization","name":"YZH Dental Lab","url":"https://yzhdentallab.com/","email":"yzhdentallab@gmail.com","contactPoint":{"@type":"ContactPoint","contactType":"sales","email":"yzhdentallab@gmail.com","telephone":"+86-137-1473-0109","availableLanguage":["English","Chinese"]},"knowsAbout":["Digital dental lab China","Dental lab outsourcing China","Implant restorations","Full arch dental lab","All-on-X dental lab","Custom abutment dental lab","CAD/CAM dental laboratory"]}
 </script>
@@ -47,9 +52,9 @@
           <a class="btn btn-outline" href="/cases" data-manager-text="hero.secondaryLabel" data-manager-href="hero.secondaryDestination">View Case Portfolio</a>
         </div>
         <div class="home-v3-capability-row" aria-label="YZH specialization">
-          <span>Implant Restorations</span>
-          <span>Full-Arch / All-on-X</span>
-          <span>CAD/CAM Design</span>
+          <a href="/services/implant">Implant Restorations</a>
+          <a href="/services/full-arch">Full-Arch / All-on-X</a>
+          <a href="/services/design-only">CAD/CAM Design Support</a>
         </div>
       </div>
       <figure class="hero-visual" data-manager-media="hero.media">

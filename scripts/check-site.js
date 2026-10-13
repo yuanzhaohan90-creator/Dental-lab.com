@@ -49,11 +49,17 @@ const forbidden = [
 const routeTargets = {
   "/": "templates/index.tpl",
   "/implant-restorations": "templates/implant-restorations.tpl",
+  "/services/implant": "templates/implant-restorations.tpl",
   "/full-arch-all-on-x": "templates/full-arch-all-on-x.tpl",
+  "/services/full-arch": "templates/full-arch-all-on-x.tpl",
   "/cases": "templates/cases.tpl",
   "/crown-bridge": "templates/crown-bridge.tpl",
+  "/services/crown-bridge": "templates/crown-bridge.tpl",
   "/digital-dentistry": "templates/digital-dentistry.tpl",
+  "/services/digital-workflow": "templates/digital-dentistry.tpl",
+  "/services/design-only": "templates/design-only.tpl",
   "/surgical-guides": "templates/surgical-guides.tpl",
+  "/services/surgical-guide": "templates/surgical-guides.tpl",
   "/about": "templates/about.tpl",
   "/submit-case": "templates/submit-case.tpl",
   "/privacy-policy": "templates/privacy-policy.tpl"
