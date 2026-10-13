@@ -13,6 +13,16 @@
 <meta property="og:description" content="Custom abutments, screw-retained restorations, scanbody and platform review, CAD design and QC support.">
 <meta property="og:image" content="https://yzhdentallab.com/assets/real/screw-retained-implant-bridge-01.png">
 <link rel="stylesheet" href="/assets/site.css?v=953efb4c79c7">
+<style>
+  .implant-reference-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;min-width:0}
+  .implant-reference-card{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .implant-reference-image{aspect-ratio:4/3;background:#f3f6f8}
+  .implant-reference-image img{display:block;width:100%;height:100%;object-fit:contain}
+  .implant-reference-copy{padding:16px 18px 18px}
+  .implant-reference-copy h3{margin:0 0 8px;color:var(--ink);font-size:1rem;line-height:1.3}
+  .implant-reference-copy p{margin:0;color:var(--muted);font-size:.93rem;line-height:1.5}
+  @media (max-width:760px){.implant-reference-grid{grid-template-columns:minmax(0,1fr)}.implant-reference-copy{padding:16px}}
+</style>
 </head>
 <body>
 <header class="site-header"><div class="wrap nav"><a class="brand" href="/"><span class="brand-mark">Y</span><span>YZH Dental Lab</span></a><button class="menu-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button><nav class="navlinks" id="primaryNav"><a href="/">Home</a><a href="/implant-restorations">Implant</a><a href="/full-arch-all-on-x">Full Arch</a><a href="/cases">Cases</a><a href="/about">About</a><a href="/submit-case">Submit Case</a></nav><a class="btn btn-primary nav-cta" href="/submit-case">Send a Trial Case</a></div></header>
@@ -66,7 +76,12 @@
         <p class="copy">A clear prescription reduces delays and helps the technical team identify risk points before production. If a detail is missing, we ask for confirmation instead of guessing.</p>
         <ul class="check-list"><li>IOS / model scan</li><li>Scanbody information</li><li>Implant brand / system</li><li>Platform</li><li>MUA / Ti-base information</li><li>Restoration type</li><li>Shade</li><li>Due date</li><li>Photos when needed</li></ul>
       </div>
-      <div class="image-mosaic"><a href="#implant-case-information" aria-label="View implant system and component matching details"><img src="/assets/real/implant-component-digital-library-01.png" alt="Implant system and component matching workflow"></a><a href="/digital-dentistry" aria-label="View CAD/CAM workflow details"><img src="/assets/real/full-arch-cad-design-05.jpg" alt="Exocad full-arch and implant design view"></a><a href="#implant-case-information" aria-label="View custom abutment case requirements"><img src="/assets/real/custom-abutment-crown-assembly-03.jpg" alt="Custom implant abutment and crown assembly"></a><a href="/full-arch-all-on-x" aria-label="View YZH titanium bar and full-arch support"><img src="/assets/real/titanium-bar-all-on-x-01.png" alt="Precision titanium bar for All-on-X restoration"></a></div>
+      <div class="implant-reference-grid" aria-label="Implant technical references">
+        <article class="implant-reference-card"><div class="implant-reference-image"><img src="/assets/implant-reference/01_scan_body_information.webp" alt="Implant scan bodies in multiple sizes for digital implant restoration workflows." loading="lazy" decoding="async" width="1600" height="1200"></div><div class="implant-reference-copy"><h3>Scan Body Information</h3><p>Please provide the scan body model, implant platform, and matching CAD library.</p></div></article>
+        <article class="implant-reference-card"><div class="implant-reference-image"><img src="/assets/implant-reference/02_implant_system_connection.webp" alt="Implant prosthetic connection components for digital implant restoration workflows." loading="lazy" decoding="async" width="1600" height="1200"></div><div class="implant-reference-copy"><h3>Implant System &amp; Connection</h3><p>Please provide the implant system, platform, connection type, and MUA or Ti-base information.</p></div></article>
+        <article class="implant-reference-card"><div class="implant-reference-image"><img src="/assets/implant-reference/03_full_arch_implant_design.webp" alt="Full-arch implant restoration CAD design showing the prosthetic framework and tooth setup." loading="lazy" decoding="async" width="1600" height="1200"></div><div class="implant-reference-copy"><h3>Full-Arch Implant Design</h3><p>Full-arch CAD design reference showing prosthetic contours and implant-supported restoration planning.</p></div></article>
+        <article class="implant-reference-card"><div class="implant-reference-image"><img src="/assets/implant-reference/04_titanium_bar_framework.webp" alt="Two milled full-arch titanium bar frameworks on dental models." loading="lazy" decoding="async" width="1600" height="1200"></div><div class="implant-reference-copy"><h3>Titanium Bar Framework</h3><p>Milled implant bar frameworks showing connection geometry and full-arch support design.</p></div></article>
+      </div>
     </div>
   </section>
 
