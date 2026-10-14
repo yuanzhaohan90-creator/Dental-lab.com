@@ -28,6 +28,17 @@ async function main() {
     assert.equal(response.status(), 200, 'Read failed: ' + route);
     return response.json();
   };
+  const readCases = async () => {
+    const snapshot = path.join(output, 'before.json');
+    if (!fs.existsSync(snapshot)) return read('/api/admin-cases');
+    const ids = Object.keys(JSON.parse(fs.readFileSync(snapshot, 'utf8')).caseHashes);
+    const cases = [];
+    for (let index = 0; index < ids.length; index += 2) {
+      const batch = await Promise.all(ids.slice(index, index + 2).map(id => read('/api/admin-cases?id=' + encodeURIComponent(id))));
+      cases.push(...batch.map(item => item.case));
+    }
+    return { cases };
+  };
   try {
     const login = await context.request.post(base + '/api/admin-auth', {
       data: { password: process.env.YZH_ADMIN_PASSWORD }, headers: { origin: base }, timeout: 45000
@@ -36,7 +47,8 @@ async function main() {
     assert.equal(login.status(), 200, 'Existing production admin login failed');
     record('Admin login', { status: login.status() });
     const before = await read('/api/admin?module=page-editor&page=home');
-    const original = await read('/api/admin-cases');
+    const original = await readCases();
+    assert.equal(before.publishedCases.length, 14);
     assert.equal(original.cases.filter(item => item.status === 'published').length, 14);
     assert.deepEqual(before.config.published.selectedWork.caseIds, []);
     assert.deepEqual(before.config.draft.selectedWork.caseIds, ['CASE-MUXMID60-04B3BF']);
@@ -100,7 +112,7 @@ async function main() {
     await page.getByText('发布成功。', { exact: true }).waitFor({ timeout: 45000 });
     record('Confirmed migration publish', { added: [], removed: [], reordered: false });
     const after = await read('/api/admin?module=page-editor&page=home');
-    const cases = await read('/api/admin-cases');
+    const cases = await readCases();
     assert.deepEqual(after.config.published.selectedWork.caseIds, expected);
     assert.deepEqual(after.config.draft.selectedWork.caseIds, expected);
     assert.deepEqual(after.frontendFeaturedCases.map(item => item.id), expected);
@@ -129,10 +141,10 @@ async function main() {
     await grid.screenshot({ path: path.join(output, 'public-seven.png') });
     record('Public seven/order/covers', { ids: publicIds, coversLoaded: 7 });
     report.phase1Complete = true;
-  } catch (error) { report.failure = error.message; throw error; }
+  } catch (error) { report.failure = error.message.split('\n')[0]; throw error; }
   finally {
     fs.writeFileSync(path.join(output, 'report.json'), JSON.stringify(report, null, 2));
     await browser.close();
   }
 }
-main().catch(error => { console.error(error.message); process.exitCode = 1; });
+main().catch(error => { console.error(error.message.split('\n')[0]); process.exitCode = 1; });
