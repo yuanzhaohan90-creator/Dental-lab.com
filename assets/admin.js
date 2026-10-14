@@ -853,11 +853,74 @@ function textFields(path, value, section) {
 }
 
 function selectedWorkEditor(value) {
-  const frontendIds = (pageData.frontendFeaturedCases || []).map((item) => item.id);
-  const ids = [...new Set(value.caseIds || [])]; while (ids.length < 9) ids.push("");
-  return `<p class="admin-helper">当前公开首页精选：${frontendIds.length} 个。这里直接管理原始 Case 和首页排序，不会创建副本。</p><div class="selected-work-editor">${ids.slice(0, 9).map((id, index) => { const item = pageData.publishedCases.find((entry) => entry.id === id); return `<div class="selected-work-slot" data-case-index="${index}">${item?.coverImage ? `<img src="${item.coverImage.url}" alt="${escapeHtml(item.title)}">` : '<div class="case-slot-empty">空位置</div>'}<label class="field">位置 ${index + 1}<select data-case-slot="${index}">${caseOptions(id)}</select></label>${item ? `<div class="featured-case-meta"><strong>${escapeHtml(item.title)}</strong><small>Case ID: ${escapeHtml(item.id)}</small><small>${item.status === "published" ? "已发布" : "草稿"} · Featured: ${item.featured ? "ON" : "OFF"}</small><small>更新：${escapeHtml(formatDate(item.updatedAt))}</small></div>` : ""}<div class="slot-actions">${item ? `<a class="btn btn-secondary" href="/admin/cases?case=${encodeURIComponent(item.id)}">编辑案例</a><a class="btn btn-secondary" href="/cases/${encodeURIComponent(item.slug)}" target="_blank" rel="noopener">查看案例</a><button type="button" class="btn btn-secondary" data-case-remove>移除精选</button>` : ""}<button type="button" class="btn btn-secondary" data-case-move="up" ${index === 0 ? "disabled" : ""}>上移</button><button type="button" class="btn btn-secondary" data-case-move="down" ${index === 8 ? "disabled" : ""}>下移</button></div></div>`; }).join("")}</div>`;
+  const state = pageData.featured || {};
+  const configuredIds = Array.isArray(value.caseIds) ? [...new Set(value.caseIds.filter(Boolean))] : [];
+  const ids = [...configuredIds]; while (ids.length < 9) ids.push("");
+  const warning = state.migrationRequired || (state.draftMismatch && !value.migrationApproval);
+  return `<div class="featured-summary"><strong>草稿精选：${configuredIds.length} 个 · 已发布精选：${state.publishedIds?.length || 0} 个</strong>${state.draftDiffers ? '<span class="admin-helper">Unpublished changes · 有未发布修改</span>' : ""}</div>
+  ${warning ? `<div class="featured-migration-notice" role="status"><strong>Featured configuration needs migration.</strong><p>历史公开精选 ${state.legacyPublicIds?.length || 0} 个，当前草稿 ${configuredIds.length} 个。导入前请核对差异；导入只更新草稿，不会发布首页。</p><button type="button" class="btn btn-secondary" data-featured-import>Import Current Public Featured Cases</button>${state.publishBlocked ? '<p>旧草稿发布已被保护性阻止。</p>' : ""}</div>` : ""}
+  <div class="selected-work-editor">${ids.map((id, index) => {
+    const item = pageData.publishedCases.find(entry => entry.id === id);
+    let preview = '<div class="case-slot-empty">尚未选择案例</div>';
+    if (id && !item) preview = `<div class="case-slot-empty case-slot-warning">案例关联异常：${escapeHtml(id)}，请重新选择已发布案例。</div>`;
+    else if (item && !item.coverImage?.url) preview = '<div class="case-slot-empty case-slot-warning">案例缺少封面，请进入案例管理选择封面。</div>';
+    else if (item) preview = `<img src="${escapeHtml(item.coverImage.url)}" alt="${escapeHtml(item.title)}" draggable="false">`;
+    return `<div class="selected-work-slot" draggable="${Boolean(id)}" data-case-index="${index}" data-featured-drag="${index}">
+      ${id ? '<span class="featured-drag-handle" draggable="true" style="display:block;min-height:44px;padding:12px;cursor:grab">拖拽排序</span>' : ""}
+      ${preview}<label class="field">位置 ${index + 1}<select data-case-slot="${index}">${caseOptions(id)}</select></label>
+      ${item ? `<div class="featured-case-meta"><strong>${escapeHtml(item.title)}</strong><small>Case ID: ${escapeHtml(item.id)}</small><small>已发布</small></div><div class="slot-actions"><a class="btn btn-secondary" href="/admin/cases?case=${encodeURIComponent(item.id)}">编辑案例</a><button type="button" class="btn btn-secondary" data-case-remove>移除精选</button><button type="button" class="btn btn-secondary" data-case-move="up" ${index === 0 ? "disabled" : ""}>上移</button><button type="button" class="btn btn-secondary" data-case-move="down" ${index >= configuredIds.length - 1 ? "disabled" : ""}>下移</button></div>` : ""}
+    </div>`;
+  }).join("")}</div>`;
 }
 
+function featuredNames(ids) {
+  return (ids || []).map(id => pageData.publishedCases.find(item => item.id === id)?.title || id);
+}
+
+function confirmFeatured(title, groups) {
+  return new Promise(resolve => {
+    const modal = document.createElement("div");
+    modal.className = "admin-modal-backdrop";
+    modal.innerHTML = `<section class="admin-modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}" style="max-height:85vh;overflow:auto;padding:24px"><h2>${escapeHtml(title)}</h2>${groups.map(([label, ids]) => `<h3>${escapeHtml(label)}: ${ids.length} cases</h3><ol>${featuredNames(ids).map(name => `<li>${escapeHtml(name)}</li>`).join("")}</ol>`).join("")}<div class="modal-actions"><button type="button" class="btn btn-secondary" data-featured-cancel>取消</button><button type="button" class="btn btn-primary" data-featured-confirm>确认</button></div></section>`;
+    const finish = value => { modal.remove(); resolve(value); };
+    modal.querySelector("[data-featured-cancel]").onclick = () => finish(false);
+    modal.querySelector("[data-featured-confirm]").onclick = () => finish(true);
+    modal.addEventListener("click", event => { if (event.target === modal) finish(false); });
+    modal.addEventListener("keydown", event => { if (event.key === "Escape") finish(false); });
+    document.body.append(modal);
+    modal.querySelector("[data-featured-cancel]").focus({ preventScroll: true });
+  });
+}
+
+async function importFeatured() {
+  const latest = await api("/api/admin?module=page-editor&page=home");
+  const state = latest.featured;
+  if (!await confirmFeatured("Import Current Public Featured Cases", [
+    ["Current public (legacy)", state.legacyPublicIds], ["Current draft", state.draftIds || []], ["After import", state.legacyPublicIds]
+  ])) return;
+  const result = await api("/api/admin?module=page-editor&page=home&action=featured-import", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ confirmed: true, confirmationToken: state.migrationToken })
+  });
+  pageData = result;
+  renderPageEditor();
+  showMessage(document.getElementById("pageEditorMessage"), "已导入并保存草稿，公开首页未改变。", "success");
+}
+
+async function publishFeatured(operation) {
+  const result = await api(`/api/admin?module=page-editor&page=home&action=featured-preflight&operation=${operation}`);
+  const plan = result.featured;
+  if (plan.publishBlocked || !Array.isArray(plan.targetIds)) throw new Error("Featured configuration needs migration. 请先导入当前公开精选。");
+  const groups = [["Current Published Featured", plan.publishedIds], ["Draft Featured to publish", plan.targetIds],
+    ["新增", plan.added], ["移除", plan.removed]];
+  groups.push([plan.reordered ? "排序变化：是" : "排序变化：否", []]);
+  if (!await confirmFeatured(operation === "restore" ? "恢复首页精选前确认" : "发布首页精选前确认", groups)) return false;
+  await api(`/api/admin?module=page-editor&page=home&action=${operation}`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ confirmationToken: plan.confirmationToken })
+  });
+  return true;
+}
 function workflowEditor(value, section) {
   return `${textFields("workflow", value, section)}<div class="workflow-media-grid">${(value.items || []).map((item, index) => `<div><label class="field">流程阶段<input data-path="workflow.items.${index}.label" value="${escapeHtml(item.label)}"></label>${linkDestinationEditor(`workflow.items.${index}.destination`, item.destination)}${renderMediaEditor(`workflow.items.${index}.media`, item.media, false, `${item.label} 阶段可选图片。`, { ratio: "4:3", mobileRatio: "4:3" })}</div>`).join("")}</div>`;
 }
@@ -1048,6 +1111,12 @@ document.getElementById("pageSections").addEventListener("change", (event) => {
     renderPageEditor();
   }
   if (event.target.matches("[data-case-slot]")) {
+    const duplicates = [...document.querySelectorAll("[data-case-slot]")].filter(field => field !== event.target && field.value && field.value === event.target.value);
+    if (duplicates.length) {
+      event.target.value = pageData.config.draft.selectedWork.caseIds?.[Number(event.target.dataset.caseSlot)] || "";
+      showMessage(document.getElementById("pageEditorMessage"), "该案例已在精选列表中，不能重复添加。", "error");
+      return;
+    }
     pageData.config.draft = collectPageDraft();
     renderPageEditor();
   }
@@ -1058,6 +1127,13 @@ document.getElementById("pageSections").addEventListener("change", (event) => {
 });
 
 document.getElementById("pageSections").addEventListener("click", (event) => {
+  const importButton = event.target.closest("[data-featured-import]");
+  if (importButton && !importButton.disabled) {
+    importButton.disabled = true;
+    importFeatured().catch(error => showMessage(document.getElementById("pageEditorMessage"), error.message, "error"))
+      .finally(() => { importButton.disabled = false; });
+    return;
+  }
   const choose = event.target.closest("[data-choose-upload]");
   if (choose) {
     const input = document.querySelector(`[data-media-upload="${choose.dataset.mediaPath}"]`);
@@ -1132,14 +1208,39 @@ async function savePageDraft() {
   const draft = collectPageDraft();
   const data = await api(`/api/admin?module=page-editor&page=${encodeURIComponent(pageKey)}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) });
   pageData.config = data.config;
+  if (data.featured) pageData.featured = data.featured;
+  renderPageEditor();
   showMessage(document.getElementById("pageEditorMessage"), "草稿已保存，正式网站尚未改变。", "success");
   return data;
 }
 
 document.getElementById("pageEditorForm").addEventListener("submit", async (event) => { event.preventDefault(); if (PAGE_META[pageKey]?.readonly) return showMessage(document.getElementById("pageEditorMessage"), "这个系统页面不需要保存草稿。"); try { await savePageDraft(); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
 document.getElementById("previewPage").addEventListener("click", async () => { try { if (PAGE_META[pageKey]?.readonly) return window.open(PAGE_META[pageKey].publicPath, "_blank", "noopener"); await savePageDraft(); window.open(`${PAGE_META[pageKey].publicPath}?adminPreview=${encodeURIComponent(pageKey)}`, "_blank", "noopener"); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
-document.getElementById("publishPage").addEventListener("click", async () => { if (PAGE_META[pageKey]?.readonly) return showMessage(document.getElementById("pageEditorMessage"), "这个系统页面不需要发布。"); if (!confirm(`确定把“${PAGE_META[pageKey].title}”草稿发布到正式网站吗？`)) return; try { await savePageDraft(); await api(`/api/admin?module=page-editor&page=${encodeURIComponent(pageKey)}&action=publish`, { method: "POST" }); showMessage(document.getElementById("pageEditorMessage"), "发布成功。", "success"); await loadPageEditor(pageKey); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
-document.getElementById("restorePage").addEventListener("click", async () => { if (PAGE_META[pageKey]?.readonly) return showMessage(document.getElementById("pageEditorMessage"), "这个系统页面没有可恢复版本。"); if (!confirm("确定恢复上一个已发布版本吗？")) return; try { await api(`/api/admin?module=page-editor&page=${encodeURIComponent(pageKey)}&action=restore`, { method: "POST" }); showMessage(document.getElementById("pageEditorMessage"), "已恢复上一版本。", "success"); await loadPageEditor(pageKey); } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); } });
+document.getElementById("publishPage").addEventListener("click", async () => {
+  if (PAGE_META[pageKey]?.readonly) return showMessage(document.getElementById("pageEditorMessage"), "这个系统页面不需要发布。");
+  const button = document.getElementById("publishPage");
+  if (button.disabled) return;
+  button.disabled = true;
+  try {
+    if (pageKey === "home" && pageData.featured?.publishBlocked) throw new Error("Featured configuration needs migration. 请先导入当前公开精选。");
+    if (pageKey !== "home" && !confirm(`确定把“${PAGE_META[pageKey].title}”草稿发布到正式网站吗？`)) return;
+    await savePageDraft();
+    if (pageKey === "home") { if (!await publishFeatured("publish")) return; }
+    else await api(`/api/admin?module=page-editor&page=${encodeURIComponent(pageKey)}&action=publish`, { method: "POST" });
+    showMessage(document.getElementById("pageEditorMessage"), "发布成功。", "success");
+    await loadPageEditor(pageKey);
+  } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); }
+  finally { button.disabled = false; }
+});
+document.getElementById("restorePage").addEventListener("click", async () => {
+  if (PAGE_META[pageKey]?.readonly) return;
+  try {
+    if (pageKey === "home") { if (!await publishFeatured("restore")) return; }
+    else { if (!confirm("确定恢复上一个已发布版本吗？")) return; await api(`/api/admin?module=page-editor&page=${encodeURIComponent(pageKey)}&action=restore`, { method: "POST" }); }
+    showMessage(document.getElementById("pageEditorMessage"), "已恢复上一版本。", "success");
+    await loadPageEditor(pageKey);
+  } catch (error) { showMessage(document.getElementById("pageEditorMessage"), error.message, "error"); }
+});
 
 function openCollectionMediaPicker(key) {
   pageData.config.draft = collectPageDraft();
@@ -1249,6 +1350,13 @@ document.getElementById("brandingFields").addEventListener("change", async (even
 });
 
 document.getElementById("pageSections").addEventListener("dragstart", (event) => {
+  const featured = event.target.closest("[data-featured-drag]");
+  if (featured && event.target.tagName !== "SELECT") {
+    pageData.config.draft = collectPageDraft();
+    event.dataTransfer.setData("text/plain", `featured:${featured.dataset.featuredDrag}`);
+    event.dataTransfer.effectAllowed = "move";
+    return;
+  }
   const row = event.target.closest("[data-collection-item]");
   if (!row) return;
   event.dataTransfer.setData("text/plain", `${row.dataset.collectionItem}:${row.dataset.index}`);
@@ -1256,10 +1364,23 @@ document.getElementById("pageSections").addEventListener("dragstart", (event) =>
 });
 
 document.getElementById("pageSections").addEventListener("dragover", (event) => {
+  if (event.target.closest("[data-featured-drag]")) event.preventDefault();
   if (event.target.closest("[data-collection-item]")) event.preventDefault();
 });
 
 document.getElementById("pageSections").addEventListener("drop", (event) => {
+  const featured = event.target.closest("[data-featured-drag]");
+  const drag = event.dataTransfer.getData("text/plain");
+  if (featured && drag.startsWith("featured:")) {
+    event.preventDefault();
+    const from = Number(drag.split(":")[1]), to = Number(featured.dataset.featuredDrag);
+    const ids = pageData.config.draft.selectedWork.caseIds || [];
+    if (from < 0 || from >= ids.length || to < 0 || to >= ids.length) return;
+    const [id] = ids.splice(from, 1);
+    ids.splice(to, 0, id);
+    renderPageEditor();
+    return;
+  }
   const target = event.target.closest("[data-collection-item]");
   if (!target) return;
   const [key, from] = event.dataTransfer.getData("text/plain").split(":");
@@ -1612,6 +1733,8 @@ function openCaseCenterEditor(item = null) {
     form.elements[name].value = name === "contentType" ? (item?.contentType || "quick_work") : name === "status" ? (["published", "hidden", "archived"].includes(item?.status) ? item.status : "draft") : Array.isArray(item?.[name]) ? item[name].join(", ") : (item?.[name] || "");
   });
   form.elements.featured.checked = Boolean(item?.featured);
+  form.elements.featured.disabled = true;
+  form.elements.featured.title = "请在网站内容 → 首页 → 精选作品中统一管理";
   [...form.elements.relatedCaseIds.options].forEach((option) => { option.selected = (item?.relatedCaseIds || []).includes(option.value); });
   form.elements.coverImage.required = !item?.images?.some((image) => image.isCover);
   document.getElementById("casePreviewButton").disabled = !item;

@@ -182,7 +182,7 @@
   </div>
 </footer>
 <a class="floating btn btn-green" href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp Technical Team</a>
-<script src="/assets/site.js?v=ad9ca969cf31" defer></script>
+<script src="/assets/site.js?v=1776428ff9e8" defer></script>
 </body>
 </html>
 

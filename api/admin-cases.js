@@ -107,6 +107,7 @@ async function writeCase(req, isUpdate) {
     id,
     slug: requestedSlug ? await uniqueSlug(requestedSlug, id) : await uniqueSlug(fieldsNormalized.title, id),
     ...fieldsNormalized,
+    featured: Boolean(current?.featured),
     images: [],
     createdAt: current ? current.createdAt : now,
     updatedAt: now,

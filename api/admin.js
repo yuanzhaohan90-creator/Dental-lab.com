@@ -46,6 +46,7 @@ const {
 } = require("../lib/admin-store");
 const { listRecords, publicRecord, saveRecord } = require("../lib/case-store");
 const { submitIndexNowSoon } = require("../lib/indexnow");
+const featuredSelection = require("../lib/featured-selection");
 
 function route(req) {
   return query(req, "module") || "";
@@ -170,16 +171,9 @@ async function syncFeaturedCases(ids) {
 async function homepageData(config) {
   const cases = await listRecords();
   const publishedCases = cases.filter((item) => item.status === "published").map((item) => publicRecord(item));
-  const publishedIds = config?.published?.selectedWork?.caseIds || [];
-  const frontendFeaturedCases = cases
-    .filter((item) => item.status === "published" && item.featured)
-    .sort((left, right) => {
-      const leftIndex = publishedIds.indexOf(left.id);
-      const rightIndex = publishedIds.indexOf(right.id);
-      return (leftIndex === -1 ? 999 : leftIndex) - (rightIndex === -1 ? 999 : rightIndex);
-    })
-    .map((item) => publicRecord(item));
-  return { config, publishedCases, frontendFeaturedCases };
+  const featured = featuredSelection.state(config, cases);
+  const frontendFeaturedCases = featured.publishedIds.map(id => publicRecord(cases.find(item => item.id === id)));
+  return { config, publishedCases, frontendFeaturedCases, featured };
 }
 
 async function mediaUrl(id, fallback) {
@@ -625,11 +619,16 @@ async function handleMediaImage(req, res) {
 async function handleHomepage(req, res) {
   if (req.method === "GET") {
     const current = await getConfig("homepage", DEFAULT_HOMEPAGE);
+    if (query(req, "action") === "featured-preflight") {
+      return reply(res, 200, { ok: true, featured: featuredSelection.preflight(current, await listRecords(), query(req, "operation") || "publish") });
+    }
     const config = { ...current, draft: normalizeHomepage(current.draft), published: normalizeHomepage(current.published), previous: current.previous ? normalizeHomepage(current.previous) : null };
     return reply(res, 200, { ok: true, ...(await homepageData(config)), preview: await resolvePageMedia(config.draft) });
   }
   if (req.method === "PUT") {
     const body = await readJson(req);
+    const current = await getConfig("homepage", DEFAULT_HOMEPAGE);
+    body.selectedWork = { ...(body.selectedWork || {}), migrationApproval: current.draft?.selectedWork?.migrationApproval || "" };
     await validateSelection(body);
     const incomingIds = body?.selectedWork?.caseIds;
     if (Array.isArray(incomingIds) && incomingIds.filter(Boolean).length > 9) {
@@ -641,13 +640,34 @@ async function handleHomepage(req, res) {
   if (req.method === "POST") {
     const action = query(req, "action");
     const current = await getConfig("homepage", DEFAULT_HOMEPAGE);
+    const records = await listRecords();
+    const body = await readJson(req);
+    if (action === "featured-import") {
+      const selection = featuredSelection.state(current, records);
+      if (!body.confirmed || body.confirmationToken !== selection.migrationToken) {
+        return reply(res, 409, { ok: false, error: "精选数据已变化，请重新查看导入差异并确认。" });
+      }
+      const target = { ...current.draft, selectedWork: { ...current.draft?.selectedWork,
+        caseIds: selection.legacyPublicIds, migrationApproval: selection.migrationToken } };
+      await validateSelection(target);
+      const saved = await saveConfigDraft("homepage", DEFAULT_HOMEPAGE, target, normalizeHomepage);
+      return reply(res, 200, { ok: true, ...(await homepageData(saved)) });
+    }
+    if (!["publish", "restore"].includes(action)) return reply(res, 400, { ok: false, error: "Unknown homepage action." });
+    const selection = featuredSelection.preflight(current, records, action);
+    if (selection.publishBlocked || selection.targetIds === null) {
+      return reply(res, 409, { ok: false, error: "Featured configuration needs migration. 请先导入并确认当前公开精选，禁止直接发布旧草稿。" });
+    }
+    if (body.confirmationToken !== selection.confirmationToken) {
+      return reply(res, 409, { ok: false, error: "请查看精选发布差异并确认；数据变化后需要重新确认。" });
+    }
     const target = action === "restore" ? current.previous : current.draft;
     if (!target) throw Object.assign(new Error("No previous published version is available."), { statusCode: 400 });
     await validateSelection(target);
     await assertPublishableMedia(target);
-    await syncFeaturedCases(target.selectedWork.caseIds);
     const saved = action === "restore" ? await restoreConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage) : await publishConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage);
-    await submitIndexNowSoon("https://yzhdentallab.com/");
+    await syncFeaturedCases(saved.published.selectedWork.caseIds);
+    if (process.env.SITE_URL === "https://yzhdentallab.com") await submitIndexNowSoon("https://yzhdentallab.com/");
     return reply(res, 200, { ok: true, ...(await homepageData(saved)) });
   }
   return reply(res, 405, { ok: false, error: "Method not allowed." });

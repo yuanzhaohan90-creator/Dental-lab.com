@@ -15,6 +15,8 @@
     "test:cloudflare-image": "node scripts/test-cloudflare-case-image.js",
     "test:public-render": "node scripts/test-public-render.js",
     "test:featured-cases": "node scripts/test-featured-cases-responsive.js",
+    "test:featured-selection": "node scripts/test-featured-selection.js",
+    "test:featured:worker": "node scripts/test-featured-worker.js",
     "test:admin": "node scripts/test-admin-v1.js",
     "test:admin:e2e": "node scripts/test-admin-e2e.js",
     "test:indexnow": "node scripts/test-indexnow.js",
