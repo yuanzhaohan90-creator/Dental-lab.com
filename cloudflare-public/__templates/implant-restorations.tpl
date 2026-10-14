@@ -166,6 +166,6 @@
   </section>
 </main>
 <footer class="site-footer"><div class="wrap footer-grid"><div><h3>YZH Dental Lab</h3><p>Digital dental laboratory in China for implant, full-arch and CAD/CAM restorative workflows.</p></div><div><h3>Services</h3><a href="/services/implant">Implant Restorations</a><a href="/services/full-arch">Full Arch / All-on-X</a><a href="/services/crown-bridge">Crown & Bridge</a><a href="/services/digital-workflow">Digital Dentistry</a><a href="/services/surgical-guide">Surgical Guides</a></div><div><h3>Company</h3><a href="/about">About</a><a href="/submit-case">Submit a Case</a><a href="/privacy-policy">Privacy Policy</a></div><div><h3>Contact</h3><a href="mailto:yzhdentallab@gmail.com">yzhdentallab@gmail.com</a><a href="https://wa.me/8613714730109" target="_blank" rel="noreferrer">WhatsApp: +86 137 1473 0109</a></div></div></footer>
-<script src="/assets/site.js?v=ad9ca969cf31" defer></script>
+<script src="/assets/site.js?v=1776428ff9e8" defer></script>
 </body>
 </html>

@@ -174,9 +174,9 @@ async function homepageData(config) {
   const cases = await listRecords();
   const publishedCases = cases.filter((item) => item.status === "published").map((item) => publicRecord(item));
   const featured = featuredSelection.state(config, cases);
-  const publicVisibleIds = featuredSelection.legacyIds(cases, config.published);
+  const publicVisibleIds = featured.publishedIds;
   featured.publicVisibleIds = publicVisibleIds;
-  featured.frontendMode = "legacy-migration-only";
+  featured.frontendMode = "canonical";
   const frontendFeaturedCases = publicVisibleIds.map(id => publicRecord(cases.find(item => item.id === id)));
   return { config, publishedCases, frontendFeaturedCases, featured };
 }
@@ -627,7 +627,7 @@ async function handleHomepage(req, res) {
     if (query(req, "action") === "featured-preflight") {
       const records = await listRecords();
       const plan = featuredSelection.preflight(current, records, query(req, "operation") || "publish");
-      plan.publicVisibleIds = featuredSelection.legacyIds(records, current.published);
+      plan.publicVisibleIds = plan.publishedIds;
       Object.assign(plan, featuredSelection.changes(plan.publicVisibleIds, plan.targetIds || []));
       return reply(res, 200, { ok: true, featured: plan });
     }

@@ -47,4 +47,10 @@ assert.notEqual(policy.preflight(changed, emptyMirrors).confirmationToken, polic
 const unpublished = records.map(record => ({ ...record, status: record.id === seven[0] ? 'draft' : record.status }));
 assert(!policy.publicIds({ selectedWork: { caseIds: seven } }, unpublished).includes(seven[0]));
 assert.deepEqual(policy.publicIds(DEFAULT_HOMEPAGE, records), []);
+const subset = [seven[3], seven[0]];
+const extraMirrors = records.map(record => ({ ...record, featured: true }));
+assert.deepEqual(policy.publicIds({ selectedWork: { caseIds: subset } }, extraMirrors), subset,
+  'explicit membership and order must ignore every extra featured mirror');
+assert.deepEqual(policy.publicIds({ selectedWork: { caseIds: [] } }, extraMirrors), [],
+  'explicit empty membership must ignore stale mirrors');
 console.log('Featured selection: 14-case fixture, stale guard, import, persistence, edit/order, mirror, [], missing/null, draft isolation and confirmation freshness passed.');

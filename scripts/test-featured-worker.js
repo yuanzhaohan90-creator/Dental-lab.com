@@ -187,6 +187,20 @@ async function main() {
       assert((await (await harness.fetch('/')).text()).includes('class="priority-case"'), 'only missing/null enables legacy read fallback');
     }
     recordStep('Real Worker [] ignores stale mirror; missing/null permit legacy fallback');
+    const subset = [sorted[2], sorted[0]];
+    const subsetConfig = structuredClone(emptyConfig);
+    subsetConfig.published.selectedWork.caseIds = subset;
+    await bucket.put('admin/config/homepage.json', JSON.stringify(subsetConfig));
+    for (const source of fixture.cases) {
+      const key = 'case-library/records/' + source.id + '.json';
+      const record = await (await bucket.get(key)).json();
+      await bucket.put(key, JSON.stringify({ ...record, featured: true }));
+    }
+    await page.goto(base + '/');
+    const subsetCards = await page.locator('#featured-cases .priority-case-grid > a img').evaluateAll(elements =>
+      elements.map(el => new URL(el.src).searchParams.get('caseId')));
+    assert.deepEqual(subsetCards, subset, 'real public frontend must exclude extra mirrors and preserve explicit order');
+    recordStep('Real Worker explicit subset/order ignores every additional featured mirror');
     }
     const expectedMissingImages = network.filter(entry => entry.status === 404 && entry.url.includes('/api/case-image?') && sourceImageWarnings.includes(new URL(entry.url).searchParams.get('caseId')));
     const unexpected = network.filter(entry => !expectedMissingImages.includes(entry));
