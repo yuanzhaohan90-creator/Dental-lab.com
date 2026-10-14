@@ -46,14 +46,16 @@ async function main() {
     return { cases };
   };
   try {
-    const login = await context.request.post(base + '/api/admin-auth', {
-      data: { password: process.env.YZH_ADMIN_PASSWORD }, headers: { origin: base }, timeout: 45000
-    });
+    auditPage = await context.newPage();
+    await auditPage.goto(base + '/admin/website/home?migrationAudit=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await auditPage.locator('#ownerLoginForm input[name=password]').fill(process.env.YZH_ADMIN_PASSWORD);
     delete process.env.YZH_ADMIN_PASSWORD;
+    const responsePromise = auditPage.waitForResponse(response => response.url().includes('/api/admin-auth') && response.request().method() === 'POST', { timeout: 45000 });
+    await auditPage.locator('#ownerLoginForm button[type=submit]').click();
+    const login = await responsePromise;
     assert.equal(login.status(), 200, 'Existing production admin login failed');
     record('Admin login', { status: login.status() });
-    auditPage = await context.newPage();
-    await auditPage.goto(base + '/robots.txt?migrationAudit=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await auditPage.locator('[data-case-slot]').first().waitFor({ timeout: 45000 });
     const before = await read('/api/admin?module=page-editor&page=home');
     const original = await readCases();
     assert.equal(before.publishedCases.length, 14);
@@ -72,7 +74,7 @@ async function main() {
     if (!process.argv.includes('--execute')) return;
     assert.equal(before.featured?.frontendMode, 'legacy-migration-only', 'Canonical frontend must not be deployed in phase 1');
     assert.equal(before.featured.publishBlocked, true);
-    const page = await context.newPage();
+    const page = auditPage;
     page.on('pageerror', error => report.runtimeErrors.push(error.message));
     page.on('response', response => { if (response.status() >= 500) report.serverErrors.push({ url: response.url(), status: response.status() }); });
     await page.goto(base + '/admin/website/home?stage1=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 45000 });
