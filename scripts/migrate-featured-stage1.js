@@ -22,8 +22,14 @@ async function main() {
   const report = { phase: 1, productionWorkerOnly: true, stage2Executed: false, steps: [], runtimeErrors: [], serverErrors: [] };
   const browser = await chromium.launch({ channel: 'chrome', headless: true });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  let auditPage;
   const record = (step, data = {}) => { report.steps.push({ step, ...data }); console.log(JSON.stringify({ step, ...data })); };
   const read = async route => {
+    if (auditPage) return auditPage.evaluate(async route => {
+      const response = await fetch(route, { cache: 'no-store', signal: AbortSignal.timeout(45000) });
+      if (response.status !== 200) throw new Error('Read HTTP ' + response.status + ': ' + route);
+      return response.json();
+    }, route);
     const response = await context.request.get(base + route, { timeout: 45000 });
     assert.equal(response.status(), 200, 'Read failed: ' + route);
     return response.json();
@@ -46,6 +52,8 @@ async function main() {
     delete process.env.YZH_ADMIN_PASSWORD;
     assert.equal(login.status(), 200, 'Existing production admin login failed');
     record('Admin login', { status: login.status() });
+    auditPage = await context.newPage();
+    await auditPage.goto(base + '/robots.txt?migrationAudit=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 45000 });
     const before = await read('/api/admin?module=page-editor&page=home');
     const original = await readCases();
     assert.equal(before.publishedCases.length, 14);
