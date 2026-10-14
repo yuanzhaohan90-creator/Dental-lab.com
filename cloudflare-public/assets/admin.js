@@ -874,7 +874,7 @@ function selectedWorkEditor(value) {
 }
 
 function featuredNames(ids) {
-  return (ids || []).map(id => pageData.publishedCases.find(item => item.id === id)?.title || id);
+  return (ids || []).map(id => `${pageData.publishedCases.find(item => item.id === id)?.title || "案例"} · ${id}`);
 }
 
 function confirmFeatured(title, groups) {
@@ -911,7 +911,7 @@ async function publishFeatured(operation) {
   const result = await api(`/api/admin?module=page-editor&page=home&action=featured-preflight&operation=${operation}`);
   const plan = result.featured;
   if (plan.publishBlocked || !Array.isArray(plan.targetIds)) throw new Error("Featured configuration needs migration. 请先导入当前公开精选。");
-  const groups = [["Current Published Featured", plan.publishedIds], ["Draft Featured to publish", plan.targetIds],
+  const groups = [["Current Public Featured", plan.publicVisibleIds || plan.publishedIds], ["Stored Published Featured", plan.publishedIds], ["Draft Featured to publish", plan.targetIds],
     ["新增", plan.added], ["移除", plan.removed]];
   groups.push([plan.reordered ? "排序变化：是" : "排序变化：否", []]);
   if (!await confirmFeatured(operation === "restore" ? "恢复首页精选前确认" : "发布首页精选前确认", groups)) return false;
@@ -1206,7 +1206,8 @@ document.getElementById("pageSections").addEventListener("change", async (event)
 
 async function savePageDraft() {
   const draft = collectPageDraft();
-  const data = await api(`/api/admin?module=page-editor&page=${encodeURIComponent(pageKey)}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) });
+  const featuredOnly = pageKey === "home" && pageData.featured?.migrationRequired && pageData.featured?.imported;
+  const data = await api(`/api/admin?module=page-editor&page=${encodeURIComponent(pageKey)}${featuredOnly ? "&action=featured-save" : ""}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) });
   pageData.config = data.config;
   if (data.featured) pageData.featured = data.featured;
   renderPageEditor();

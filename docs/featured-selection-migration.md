@@ -29,6 +29,16 @@ Do not automatically merge draft and mirror selections. Do not treat an intentio
 
 ## Verification
 
+## Stage 1 candidate
+
+The migration-only branch retains `lib/public-site-data.js`, `lib/public-page-renderer.js`, and both public `site.js` files from the stable Implant release. The public site continues legacy selection during this stage.
+
+The migration import/save helpers change only draft selection IDs and the approval marker. The first migration publish changes only published selection IDs and the approval marker, preserving unrelated draft and published homepage sections. The publish difference shows the currently visible public IDs separately from stored published IDs.
+
+`scripts/migrate-featured-stage1.js` is read-only by default. `--execute` is restricted to the expressly approved seven production IDs and requires a pre-existing admin password in process memory. It verifies before/after case hashes and unrelated homepage content. It performs no stage 2 deployment.
+
+After the approved stage 1 migration, stage 2 requires separate authorization and a release carrying only the canonical public renderer changes while retaining the scoped migration protections.
+
 `npm run test:featured-selection` checks selection semantics against the read-only public production 14-case fixture.
 
 `npm run test:featured:worker` uses Wrangler's real local Worker test harness and isolated R2 emulator, with real browser controls. Authentication credentials are generated only in memory for the isolated test runtime. Production API use is limited to public GETs for original cover copies.

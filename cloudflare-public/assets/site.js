@@ -414,10 +414,7 @@ async function applyPublicSiteData() {
       applyText("#featured-cases .section-head h2", homepage.selectedWork.heading);
       applyText("#featured-cases .section-head .copy", homepage.selectedWork.description);
       const grid = document.querySelector("#featured-cases .priority-case-grid");
-      if (grid) {
-        grid.innerHTML = (selectedCases || []).slice(0, 9).map(makeCaseCard).join("");
-        grid.closest("#featured-cases").hidden = !selectedCases?.length;
-      }
+      if (grid && selectedCases?.length) grid.innerHTML = selectedCases.slice(0, 9).map(makeCaseCard).join("");
     }
     if (location.pathname === "/services/implant") {
       applyManagedPage(pages?.implant);

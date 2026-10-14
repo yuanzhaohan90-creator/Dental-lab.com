@@ -35,6 +35,8 @@ const {
   restoreSeoDefaults,
   restoreSubmission,
   saveConfigDraft,
+  saveFeaturedDraft,
+  publishFeaturedDraft,
   saveMedia,
   saveSeoConfig,
   saveSubmissionStatus,
@@ -172,7 +174,10 @@ async function homepageData(config) {
   const cases = await listRecords();
   const publishedCases = cases.filter((item) => item.status === "published").map((item) => publicRecord(item));
   const featured = featuredSelection.state(config, cases);
-  const frontendFeaturedCases = featured.publishedIds.map(id => publicRecord(cases.find(item => item.id === id)));
+  const publicVisibleIds = featuredSelection.legacyIds(cases, config.published);
+  featured.publicVisibleIds = publicVisibleIds;
+  featured.frontendMode = "legacy-migration-only";
+  const frontendFeaturedCases = publicVisibleIds.map(id => publicRecord(cases.find(item => item.id === id)));
   return { config, publishedCases, frontendFeaturedCases, featured };
 }
 
@@ -620,7 +625,11 @@ async function handleHomepage(req, res) {
   if (req.method === "GET") {
     const current = await getConfig("homepage", DEFAULT_HOMEPAGE);
     if (query(req, "action") === "featured-preflight") {
-      return reply(res, 200, { ok: true, featured: featuredSelection.preflight(current, await listRecords(), query(req, "operation") || "publish") });
+      const records = await listRecords();
+      const plan = featuredSelection.preflight(current, records, query(req, "operation") || "publish");
+      plan.publicVisibleIds = featuredSelection.legacyIds(records, current.published);
+      Object.assign(plan, featuredSelection.changes(plan.publicVisibleIds, plan.targetIds || []));
+      return reply(res, 200, { ok: true, featured: plan });
     }
     const config = { ...current, draft: normalizeHomepage(current.draft), published: normalizeHomepage(current.published), previous: current.previous ? normalizeHomepage(current.previous) : null };
     return reply(res, 200, { ok: true, ...(await homepageData(config)), preview: await resolvePageMedia(config.draft) });
@@ -630,6 +639,10 @@ async function handleHomepage(req, res) {
     const current = await getConfig("homepage", DEFAULT_HOMEPAGE);
     body.selectedWork = { ...(body.selectedWork || {}), migrationApproval: current.draft?.selectedWork?.migrationApproval || "" };
     await validateSelection(body);
+    if (query(req, "action") === "featured-save") {
+      const saved = await saveFeaturedDraft(body.selectedWork.caseIds || [], current.draft?.selectedWork?.migrationApproval || "", current);
+      return reply(res, 200, { ok: true, ...(await homepageData(saved)) });
+    }
     const incomingIds = body?.selectedWork?.caseIds;
     if (Array.isArray(incomingIds) && incomingIds.filter(Boolean).length > 9) {
       throw Object.assign(new Error("Select no more than nine homepage cases."), { statusCode: 400 });
@@ -650,7 +663,7 @@ async function handleHomepage(req, res) {
       const target = { ...current.draft, selectedWork: { ...current.draft?.selectedWork,
         caseIds: selection.legacyPublicIds, migrationApproval: selection.migrationToken } };
       await validateSelection(target);
-      const saved = await saveConfigDraft("homepage", DEFAULT_HOMEPAGE, target, normalizeHomepage);
+      const saved = await saveFeaturedDraft(selection.legacyPublicIds, selection.migrationToken, current);
       return reply(res, 200, { ok: true, ...(await homepageData(saved)) });
     }
     if (!["publish", "restore"].includes(action)) return reply(res, 400, { ok: false, error: "Unknown homepage action." });
@@ -664,8 +677,10 @@ async function handleHomepage(req, res) {
     const target = action === "restore" ? current.previous : current.draft;
     if (!target) throw Object.assign(new Error("No previous published version is available."), { statusCode: 400 });
     await validateSelection(target);
-    await assertPublishableMedia(target);
-    const saved = action === "restore" ? await restoreConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage) : await publishConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage);
+    const migrationPublish = action === "publish" && selection.migrationRequired;
+    if (!migrationPublish) await assertPublishableMedia(target);
+    const saved = migrationPublish ? await publishFeaturedDraft(current)
+      : action === "restore" ? await restoreConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage) : await publishConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage);
     await syncFeaturedCases(saved.published.selectedWork.caseIds);
     if (process.env.SITE_URL === "https://yzhdentallab.com") await submitIndexNowSoon("https://yzhdentallab.com/");
     return reply(res, 200, { ok: true, ...(await homepageData(saved)) });

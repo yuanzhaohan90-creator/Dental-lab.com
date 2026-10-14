@@ -18,6 +18,7 @@ async function main() {
   const cache = path.join(output, 'source-images');
   fs.mkdirSync(cache, { recursive: true });
   const seven = policy.legacyIds(fixture.cases, {});
+  const migrationOnly = process.argv.includes('--migration-only');
   const addedId = 'CASE-MV6D8PS7-24BD6E';
   const requiredImages = new Set([...seven, addedId]);
   const sourceImageWarnings = [];
@@ -64,6 +65,7 @@ async function main() {
     }
     const initial = { draft: normalizeHomepage({ ...DEFAULT_HOMEPAGE, selectedWork: { caseIds: ['CASE-MUXMID60-04B3BF'] } }),
       published: normalizeHomepage({ ...DEFAULT_HOMEPAGE, selectedWork: { caseIds: [] } }), previous: null };
+    if (migrationOnly) initial.draft.hero.heading = 'Unrelated pending hero draft';
     await bucket.put('admin/config/homepage.json', JSON.stringify(initial));
     const login = await harness.fetch('/api/admin-auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password }) });
     assert.equal(login.status, 200);
@@ -73,6 +75,11 @@ async function main() {
     assert.equal(blocked.status, 409);
     assert.deepEqual((await (await bucket.get('admin/config/homepage.json')).json()).published.selectedWork.caseIds, []);
     recordStep('API refuses stale draft publish without storage mutation');
+    if (migrationOnly) {
+      const html = await (await harness.fetch('/')).text();
+      assert.equal((html.match(/class="priority-case"/g) || []).length, 7);
+      recordStep('Migration-only legacy frontend keeps seven before import');
+    }
     browser = await chromium.launch({ channel: 'chrome', headless: true });
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     page.on('pageerror', error => errors.push(error.message));
@@ -126,6 +133,11 @@ async function main() {
     await page.getByText('发布成功。', { exact: true }).waitFor();
     const stored = await (await bucket.get('admin/config/homepage.json')).json();
     assert.deepEqual(stored.published.selectedWork.caseIds, sorted);
+    if (migrationOnly) {
+      assert.equal(stored.published.hero.heading, initial.published.hero.heading);
+      assert.equal(stored.draft.hero.heading, initial.draft.hero.heading);
+      recordStep('Migration publish preserves unrelated published and draft homepage content');
+    }
     for (const source of fixture.cases) {
       const record = await (await bucket.get('case-library/records/' + source.id + '.json')).json();
       assert.equal(record.featured, sorted.includes(source.id));
@@ -152,6 +164,7 @@ async function main() {
       await page.locator('#selectedWork').screenshot({ path: path.join(output, 'editor-' + width + '.png') });
       recordStep('Mobile ' + width + ' move/save/refresh without overflow');
     }
+    if (!migrationOnly) {
     // Clear through the actual UI; intentional [] must never resurrect mirrors.
     await page.setViewportSize({ width: 1440, height: 1000 });
     while (await page.locator('[data-case-remove]').count()) await page.locator('[data-case-remove]').first().click();
@@ -174,6 +187,7 @@ async function main() {
       assert((await (await harness.fetch('/')).text()).includes('class="priority-case"'), 'only missing/null enables legacy read fallback');
     }
     recordStep('Real Worker [] ignores stale mirror; missing/null permit legacy fallback');
+    }
     const expectedMissingImages = network.filter(entry => entry.status === 404 && entry.url.includes('/api/case-image?') && sourceImageWarnings.includes(new URL(entry.url).searchParams.get('caseId')));
     const unexpected = network.filter(entry => !expectedMissingImages.includes(entry));
     assert.deepEqual(unexpected, []);
