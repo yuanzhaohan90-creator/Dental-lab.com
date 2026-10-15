@@ -47,7 +47,7 @@ const {
   updateMediaReferences
 } = require("../lib/admin-store");
 const { listRecords, publicRecord, saveRecord } = require("../lib/case-store");
-const { submitIndexNowSoon } = require("../lib/indexnow");
+const { submitIndexNowSoon, hasIndexableChange } = require("../lib/indexnow");
 const featuredSelection = require("../lib/featured-selection");
 
 function route(req) {
@@ -682,7 +682,7 @@ async function handleHomepage(req, res) {
     const saved = migrationPublish ? await publishFeaturedDraft(current)
       : action === "restore" ? await restoreConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage) : await publishConfig("homepage", DEFAULT_HOMEPAGE, normalizeHomepage);
     await syncFeaturedCases(saved.published.selectedWork.caseIds);
-    if (process.env.SITE_URL === "https://yzhdentallab.com") await submitIndexNowSoon("https://yzhdentallab.com/");
+    if (process.env.SITE_URL === "https://yzhdentallab.com" && hasIndexableChange(normalizeHomepage(current.published), saved.published)) await submitIndexNowSoon("https://yzhdentallab.com/");
     return reply(res, 200, { ok: true, ...(await homepageData(saved)) });
   }
   return reply(res, 405, { ok: false, error: "Method not allowed." });
@@ -713,11 +713,11 @@ async function handlePageEditor(req, res) {
     await assertPublishableMedia(target);
     const saved = action === "restore" ? await restoreConfig(name, defaults, normalize) : await publishConfig(name, defaults, normalize);
     const publicUrl = {
-      implant: "https://yzhdentallab.com/implant-restorations",
-      fullArch: "https://yzhdentallab.com/full-arch-all-on-x",
+      implant: "https://yzhdentallab.com/services/implant",
+      fullArch: "https://yzhdentallab.com/services/full-arch",
       about: "https://yzhdentallab.com/about"
     }[page];
-    if (publicUrl) await submitIndexNowSoon(publicUrl);
+    if (publicUrl && process.env.SITE_URL === "https://yzhdentallab.com" && hasIndexableChange(normalize(current.published), saved.published)) await submitIndexNowSoon(publicUrl);
     return reply(res, 200, { ok: true, page, config: saved });
   }
   return reply(res, 405, { ok: false, error: "Method not allowed." });
