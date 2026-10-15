@@ -131,5 +131,7 @@ const detail = load(renderCasePage({ ...featuredRecord, images: [
 ] }, false, {}, []));
 assert.equal(detail("#case-design img").length, 1);
 assert.equal(detail("#case-gallery img").length, 0, "stage images must not repeat in gallery");
-assert.equal(JSON.parse(detail('script[type="application/ld+json"]').text())["@type"], "Article");
+const detailSchemas = detail('script[type="application/ld+json"]').toArray().map(element => JSON.parse(detail(element).text()));
+assert.equal(detailSchemas.filter(schema => schema['@type'] === 'Article').length, 1);
+assert.equal(detailSchemas.filter(schema => schema['@type'] === 'BreadcrumbList').length, 1);
 console.log("public audit regression tests passed");

@@ -4,6 +4,8 @@ const { DEFAULT_SETTINGS, getConfig, normalizeSettings } = require("../lib/admin
 const { canonicalPublicRecords, canonicalSlugFor, isDuplicateCaseSlug, normalizePublicCase } = require("../lib/public-cases");
 const { footerMarkup, headerMarkup } = require("../lib/public-page-renderer");
 const { versionedAsset } = require("../lib/asset-versions");
+const { relatedServices } = require("../lib/service-case-links");
+const { breadcrumb, schemaScript } = require("../lib/public-schema");
 
 function query(req, key) {
   if (req.query && req.query[key]) return String(req.query[key]);
@@ -99,8 +101,8 @@ function render(record, preview, settings, allRecords = []) {
   const cover = item.coverImage;
   const canonical = `https://yzhdentallab.com/cases/${encodeURIComponent(item.slug)}`;
   const isCaseStudy = item.contentType === "case_study";
-  const { completeText, caseSeoTitle } = require("../lib/seo-presentation");
-  const description = completeText(record.metaDescription || item.technicalSummary || item.summary || item.title, 160);
+  const { caseDescription, caseSeoTitle } = require("../lib/seo-presentation");
+  const description = caseDescription(record, item);
   const gallery = item.images.filter((image) => !image.isCover);
   const mediaByStage = (stage) => gallery.filter((image) => String(image.imageType || "").toLowerCase() === stage.toLowerCase());
   const titleBase = record.seoTitle || item.title;
@@ -124,9 +126,8 @@ function render(record, preview, settings, allRecords = []) {
   ].filter((section) => section.html);
   const detailedSections = sections.map((section) => section.html).join("");
   const related = relatedCaseCards(item, allRecords);
-  const serviceLinks = [];
-  if (/exocad|cad|design/i.test([item.software, item.title, item.cadDesign].join(" "))) serviceLinks.push('<a href="/exocad-design-outsourcing">Exocad design outsourcing support</a>');
-  if (/bar|framework|titanium/i.test([item.title, item.restorationType, item.material].join(" "))) serviceLinks.push('<a href="/implant-bar-design">Implant bar design support</a>');
+  const serviceLinks = relatedServices(item).map(([route, label]) => `<a href="${escapeHtml(route)}">${escapeHtml(label)}</a>`);
+  const trail = breadcrumb([['/', 'Home'], ['/cases', 'Cases'], ['/cases/' + encodeURIComponent(item.slug), item.title]]);
   const contextLinks = serviceLinks.length ? `<section class="section"><div class="wrap"><h2>Related Laboratory Support</h2><p>For a similar workflow, review ${serviceLinks.join(" or ")} before sending your files.</p></div></section>` : "";
   return `<!DOCTYPE html>
 <html lang="en" data-server-rendered="true"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -134,9 +135,10 @@ function render(record, preview, settings, allRecords = []) {
 ${preview ? '<meta name="robots" content="noindex,nofollow">' : ""}<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="${escapeHtml(item.title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:type" content="article"><meta property="og:url" content="${canonical}">${cover ? `<meta property="og:image" content="https://yzhdentallab.com${escapeHtml(cover.url)}">` : ""}
 <script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@type": "Article", headline: item.title, description, url: canonical, image: item.images.map((image) => new URL(image.url, "https://yzhdentallab.com").href), ...(record.publishedAt ? { datePublished: record.publishedAt } : {}), ...(record.updatedAt ? { dateModified: record.updatedAt } : {}), author: { "@type": "Organization", name: "YZH Dental Lab" } }).replace(/</g, "\\u003c")}</script>
+${schemaScript(trail.schema)}
 <link rel="preload" as="image" href="${cover ? escapeHtml(cover.url) : ""}" fetchpriority="high"><link rel="stylesheet" href="${versionedAsset("/assets/site.css")}"></head><body>${previewBanner}
 ${headerMarkup("cases", settings)}
-<main><section class="case-library-hero"><div class="wrap case-library-hero-grid"><div><p class="eyebrow">${isCaseStudy ? "Featured Case Study" : "Recent Work"} · ${escapeHtml(item.category)}</p><h1>${escapeHtml(item.title)}</h1>${item.summary ? `<p class="lead">${escapeHtml(item.summary)}</p>` : ""}${heroProofItems(item)}</div>${cover ? `<figure><a class="case-media-zoom" href="${escapeHtml(cover.url)}" target="_blank" rel="noopener" aria-label="Open larger image"><img src="${escapeHtml(cover.url)}" alt="${escapeHtml(cover.altText || cover.caption || item.title)}" width="1200" height="900" loading="eager" fetchpriority="high" decoding="async"></a><figcaption>${escapeHtml(cover.caption || "Final restoration")}</figcaption></figure>` : ""}</div></section>
+<main>${trail.html}<section class="case-library-hero"><div class="wrap case-library-hero-grid"><div><p class="eyebrow">${isCaseStudy ? "Featured Case Study" : "Recent Work"} · ${escapeHtml(item.category)}</p><h1>${escapeHtml(item.title)}</h1>${item.summary ? `<p class="lead">${escapeHtml(item.summary)}</p>` : ""}${heroProofItems(item)}</div>${cover ? `<figure><a class="case-media-zoom" href="${escapeHtml(cover.url)}" target="_blank" rel="noopener" aria-label="Open larger image"><img src="${escapeHtml(cover.url)}" alt="${escapeHtml(cover.altText || cover.caption || item.title)}" width="1200" height="900" loading="eager" fetchpriority="high" decoding="async"></a><figcaption>${escapeHtml(cover.caption || "Final restoration")}</figcaption></figure>` : ""}</div></section>
 ${journeyNav(sections)}
 ${detailedSections}
 ${related}
