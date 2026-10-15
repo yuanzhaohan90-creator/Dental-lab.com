@@ -21,7 +21,7 @@ const {
   uniqueSlug
 } = require("../lib/case-store");
 const { getMedia } = require("../lib/admin-store");
-const { caseUrl, submitIndexNowSoon } = require("../lib/indexnow");
+const { caseUrl, submitIndexNowSoon, shouldSubmitCase } = require("../lib/indexnow");
 const { hasPublicationHistory, publicationErrors } = require("../assets/case-publication-policy");
 
 const MAX_TOTAL_BYTES = 140 * 1024 * 1024;
@@ -144,7 +144,7 @@ async function writeCase(req, isUpdate) {
     const missing = publicationErrors(record, current);
     if (missing.length) throw Object.assign(new Error(`发布前请补齐：${missing.join("、")}`), { statusCode: 400 });
     await saveRecord(record);
-    if (record.status === "published" && new URL(process.env.SITE_URL || "https://yzhdentallab.com").hostname === "yzhdentallab.com") {
+    if (shouldSubmitCase(current, record) && new URL(process.env.SITE_URL || "https://yzhdentallab.com").hostname === "yzhdentallab.com") {
       await submitIndexNowSoon(caseUrl(record));
     }
   } catch (error) {

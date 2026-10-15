@@ -42,6 +42,8 @@ function robots() {
     "Allow: /",
     "Disallow: /admin/",
     "Disallow: /api/",
+    "Allow: /api/case-image?caseId=CASE-*&imageId=IMG-*$",
+    "Allow: /api/admin?module=media-image&id=MEDIA-*$",
     "",
     "Sitemap: https://yzhdentallab.com/sitemap.xml",
     ""
