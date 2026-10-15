@@ -79,7 +79,7 @@ async function main() {
           assert(await page.locator('h1').innerText());await page.goBack();await page.waitForURL('**'+definition.path+'?*');
           report.links.push({page:key,width,href,result:'PASS'});
         }
-        await page.evaluate(()=>scrollTo(0,0));
+        await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
         await page.screenshot({path:path.join(output,key+'-'+width+'.png'),fullPage:true});
         layoutCases.push({page:key,width,result:'PASS',relatedCases:cards.length});
         console.log('Browser '+key+' '+width+': PASS');

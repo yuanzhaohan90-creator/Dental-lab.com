@@ -60,6 +60,7 @@ for (const [page, definition] of Object.entries(SERVICES)) {
   assert(!schemas.some(s => s['@type'] === 'VideoObject'));
   assert.equal(new Set($('main h2').toArray().map(el => $(el).text())).size, $('main h2').length, page + ' duplicate headings');
   if (page === 'implant') assert.equal($('.implant-reference-card').length, 4);
+  if (page === 'exocadOutsourcing') assert.equal($('h2').filter((_, el) => $(el).text() === 'Design Scope').closest('.wrap').length, 1);
   const empty = load(renderPublicPage(page, { ...data, publishedCases: [{ ...fixture.cases[0], status: 'draft' }] }));
   assert.equal(empty('[data-service-cases]').length, 0);
 }
