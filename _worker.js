@@ -11,6 +11,7 @@ import submitCase from "./api/submit-case.js";
 import { Readable, Writable } from "node:stream";
 import assetVersions from "./lib/asset-versions.js";
 import cloudflareCaseImage from "./lib/cloudflare-case-image.js";
+import cloudflareAdminMedia from "./lib/cloudflare-admin-media.js";
 
 const handlers = { "/api/admin-auth": adminAuth, "/api/admin": admin, "/api/admin-cases": adminCases, "/api/case-image": caseImage, "/api/case-page": casePage, "/api/cases": cases, "/api/download-case-file": downloadCaseFile, "/api/public-page": publicPage, "/api/submit-case": submitCase, "/robots.txt": seoStatic, "/sitemap.xml": seoStatic };
 
@@ -52,6 +53,7 @@ async function invoke(request, env, handler) {
     if (env[name] !== undefined) process.env[name] = String(env[name]);
   }
   if (handler === caseImage && env.MEDIA_BUCKET) return cloudflareCaseImage(request, env);
+  if (handler === admin && env.MEDIA_BUCKET && new URL(request.url).searchParams.get("module") === "media-image") return cloudflareAdminMedia(request, env);
   const nodeRequest = makeNodeRequest(request);
   const nodeResponse = makeNodeResponse();
   await handler(nodeRequest, nodeResponse);

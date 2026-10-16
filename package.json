@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "test:cloudflare-media": "node scripts/test-cloudflare-admin-media.js",
     "test:seo-phase2a": "node scripts/test-seo-phase2a.js",
     "test:seo-phase2a:browser": "node scripts/test-seo-phase2a-browser.js",
     "postinstall": "node scripts/test-video-transcode.js",
