@@ -18,6 +18,8 @@ jobs:
   deploy-preview:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    environment:
+      name: preview
     steps:
       - name: Checkout fixed candidate
         uses: actions/checkout@v4
