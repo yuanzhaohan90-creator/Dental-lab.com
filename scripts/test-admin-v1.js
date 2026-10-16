@@ -35,7 +35,7 @@ assert.equal(homepage.workflow.items.length, 6);
 
 const fallbackHomepage = normalizeHomepage({});
 assert.equal(fallbackHomepage.hero.heading, DEFAULT_HOMEPAGE.hero.heading);
-assert.equal(fallbackHomepage.selectedWork.caseIds.length, 0);
+assert.equal(fallbackHomepage.selectedWork.caseIds, null);
 assert.equal(fallbackHomepage.hero.media.fallbackPath, DEFAULT_HOMEPAGE.hero.media.fallbackPath);
 assert.equal(fallbackHomepage.hero.media.fit, "cover");
 assert.equal(fallbackHomepage.technicalProof.media.fit, "contain");
@@ -69,6 +69,9 @@ assert.equal(about.laboratoryGallery.length >= 1, true);
 assert.equal(about.equipmentGallery.length >= 1, true);
 assert.equal(about.workflowSteps.length >= 5, true);
 assert.equal(about.qualityCollection.length >= 1, true);
+
+const emptyMedia = normalizePageConfig("about", { hero: { media: { mediaId: "" } } });
+assert.equal(emptyMedia.hero.media.mediaId, "");
 
 const safeMedia = normalizePageConfig("implant", { hero: { media: { fit: "stretch", focalPosition: "random" } } });
 assert.equal(safeMedia.hero.media.fit, "cover");

@@ -31,6 +31,8 @@ const blobClient = {
 };
 
 store._setBlobClientForTests(blobClient);
+const previousCfEnv = globalThis.__YZH_CF_ENV;
+globalThis.__YZH_CF_ENV = { MEDIA_BUCKET: { async list() { return { blobs: [], hasMore: false }; } } };
 
 const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xdb, 0, 1, 2, 3]);
 const isoVideo = (codec) => Buffer.concat([Buffer.from([0, 0, 0, 24]), Buffer.from("ftypisom0000"), Buffer.from(codec)]);
@@ -63,6 +65,13 @@ async function seedConfig(name, config) {
   assert.equal((await store.listMedia({ trash: true })).some((item) => item.id === oldMedia.id), true);
   await store.restoreMedia(await store.getMedia(oldMedia.id));
   assert.equal((await store.listMedia()).some((item) => item.id === oldMedia.id), true);
+
+  const legacyReference = await media("legacy-reference.jpg", "image/jpeg", jpeg);
+  const legacyHomepage = structuredClone(store.DEFAULT_HOMEPAGE);
+  legacyHomepage.hero.legacyMediaUrl = `/api/admin?module=media-image&id=${encodeURIComponent(legacyReference.id)}`;
+  await seedConfig("homepage", { draft: structuredClone(legacyHomepage), published: structuredClone(legacyHomepage), previous: null });
+  const legacyUsage = await store.mediaUsage(legacyReference.id);
+  assert(legacyUsage.some((item) => item.path.includes("legacyMediaUrl")));
 
   const removable = await media("removable.jpg", "image/jpeg", jpeg);
   const draft = structuredClone(store.DEFAULT_HOMEPAGE);
@@ -123,7 +132,10 @@ async function seedConfig(name, config) {
   assert.equal(await store.getSubmission(caseId), null);
 
   console.log("admin deletion and trash tests passed");
-})().catch((error) => {
+})().then(() => {
+  globalThis.__YZH_CF_ENV = previousCfEnv;
+}).catch((error) => {
+  globalThis.__YZH_CF_ENV = previousCfEnv;
   console.error(error);
   process.exitCode = 1;
 });
