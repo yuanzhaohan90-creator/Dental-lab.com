@@ -3,16 +3,54 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "test:us-seo": "node scripts/test-us-seo.js",
+    "test:privacy:browser": "node scripts/test-privacy-consent-browser.js",
+    "test:ga4-adapter": "node scripts/test-ga4-event-adapter.js",
+    "test:inquiry-consent:browser": "node scripts/test-inquiry-consent-browser.js",
+    "test:inquiry-tracking": "node scripts/test-inquiry-tracking.js",
+    "test:seo-phase2a": "node scripts/test-seo-phase2a.js",
+    "test:seo-phase2a:browser": "node scripts/test-seo-phase2a-browser.js",
+    "postinstall": "node scripts/test-video-transcode.js",
     "start": "vercel dev",
     "check": "node scripts/check-site.js",
+    "test:asset-cache": "node scripts/test-asset-cache.js",
     "test:submit-case": "node scripts/test-submit-case.js",
     "test:case-library": "node scripts/test-case-library.js",
+    "test:case-publication": "node scripts/test-case-publication-policy.js",
+    "test:cases:browser": "node scripts/test-cases-browser.js",
+    "test:case-navigation": "node scripts/test-case-navigation.js",
+    "test:cloudflare-image": "node scripts/test-cloudflare-case-image.js",
+    "test:public-render": "node scripts/test-public-render.js",
+    "test:featured-cases": "node scripts/test-featured-cases-responsive.js",
+    "test:featured-selection": "node scripts/test-featured-selection.js",
+    "test:featured:worker": "node scripts/test-featured-worker.js",
     "test:admin": "node scripts/test-admin-v1.js",
+    "test:admin:e2e": "node scripts/test-admin-e2e.js",
+    "test:service-cms-media": "node scripts/test-service-cms-media.js",
+    "test:service-cms-public-media": "node scripts/test-service-cms-public-media.js",
+    "test:preview-public-services": "node scripts/test-preview-public-services.js",
+    "test:service-cms-rendering": "node scripts/test-service-cms-rendering.js",
+    "test:service-cms-withdraw": "node scripts/test-service-cms-withdraw.js",
+    "test:indexnow": "node scripts/test-indexnow.js",
     "test:media-upload": "node scripts/test-media-upload.js",
-    "test:admin-deletion": "node scripts/test-admin-deletion.js"
+    "qa:r2-direct-upload": "node scripts/qa-r2-direct-upload.js",
+    "qa:r2-admin-flow": "node scripts/qa-r2-admin-flow.js",
+    "qa:local-api": "node scripts/qa-local-api-server.js",
+    "test:video-transcode": "node scripts/test-video-transcode.js",
+    "test:admin-deletion": "node scripts/test-admin-deletion.js",
+    "test:trust-cms": "node scripts/test-trust-cms.js",
+    "test:editorial-trust": "node scripts/test-editorial-trust.js",
+    "test:materials-cms": "node scripts/test-materials-cms.js"
   },
   "dependencies": {
-    "@vercel/blob": "^2.8.0",
-    "busboy": "^1.6.0"
+    "@aws-sdk/client-s3": "^3.1123.0",
+    "@aws-sdk/s3-request-presigner": "^3.1123.0",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@vercel/functions": "^3.11.2",
+    "busboy": "^1.6.0",
+    "cheerio": "^1.2.0"
+  },
+  "overrides": {
+    "undici": "7.30.2"
   }
 }
